@@ -1,0 +1,43 @@
+{
+  "name": "sk-wallet",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seakh-masum/sk-wallet.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/seakh-masum/sk-wallet/issues"
+  },
+  "homepage": "https://github.com/seakh-masum/sk-wallet#readme",
+  "description": "",
+  "devDependencies": {
+    "@nx/js": "23.1.0",
+    "@nx/next": "^23.1.0",
+    "@nx/workspace": "^23.1.0",
+    "@swc-node/register": "~1.11.1",
+    "@swc/cli": "~0.8.1",
+    "@swc/core": "~1.15.5",
+    "@swc/helpers": "~0.5.18",
+    "@tailwindcss/postcss": "^4.3.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "nx": "^23.1.0",
+    "prettier": "~3.6.2",
+    "tailwindcss": "^4.3.2",
+    "tslib": "^2.3.0",
+    "typescript": "~6.0.3"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.6",
+    "next": "~16.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}
