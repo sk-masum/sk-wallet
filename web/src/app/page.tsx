@@ -1,46 +1,28 @@
-import { createSupabaseBrowserClient } from '../lib/supabase/client';
+import Link from 'next/link'
 
-export default function Index() {
-  const isSupabaseReady =
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (isSupabaseReady) {
-    // Ensures the helper is imported and wired correctly at runtime.
-    createSupabaseBrowserClient();
-  }
+export default function Page() {
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
-      <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-24">
-        <p className="w-fit rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-cyan-300">
-          Nx Workspace Ready
-        </p>
-        <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">
-          Next.js app with Tailwind and Supabase client setup
-        </h1>
-        <p className="max-w-2xl text-base text-slate-300 sm:text-lg">
-          This project uses Nx for monorepo orchestration, Tailwind CSS for
-          styling, and a preconfigured Supabase browser client.
-        </p>
+    <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col justify-center gap-6 px-6 py-16">
+      <h1 className="text-3xl font-semibold">SK Wallet</h1>
+      <p className="text-muted-foreground">
+        Use the pages below to view cards and API documentation.
+      </p>
 
-        <div className="grid gap-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 sm:grid-cols-2">
-          <div>
-            <p className="text-xs uppercase tracking-widest text-slate-400">
-              Application
-            </p>
-            <p className="mt-2 text-lg font-medium">web</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-widest text-slate-400">
-              Supabase Env
-            </p>
-            <p className="mt-2 text-lg font-medium">
-              {isSupabaseReady ? 'Configured' : 'Not configured yet'}
-            </p>
-          </div>
-        </div>
-      </section>
+      <div className="flex gap-3">
+        <Link
+          href="/card"
+          className="inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        >
+          Card Page
+        </Link>
+        <Link
+          href="/doc"
+          className="inline-flex rounded-md border border-input bg-background px-4 py-2 text-sm font-medium"
+        >
+          Doc Page
+        </Link>
+      </div>
     </main>
-  );
+  )
 }

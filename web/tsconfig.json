@@ -3,6 +3,13 @@
   "compilerOptions": {
     "jsx": "preserve",
     "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "ignoreDeprecations": "6.0",
     "noEmit": true,
     "emitDeclarationOnly": false,
     "esModuleInterop": true,
@@ -10,24 +17,36 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
-    "plugins": [{ "name": "next" }]
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     "**/*.js",
     "**/*.jsx",
-    
-      "../web/.next/types/**/*.ts",
-      "../dist/web/.next/types/**/*.ts",
-    
+    "../web/.next/types/**/*.ts",
+    "../dist/web/.next/types/**/*.ts",
     "index.d.ts",
     "next-env.d.ts"
   ],
-  "exclude": ["node_modules", "jest.config.ts", "jest.config.cts", "**/*.spec.ts", "**/*.test.ts"]
+  "exclude": [
+    "node_modules",
+    "jest.config.ts",
+    "jest.config.cts",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
 }
