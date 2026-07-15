@@ -1,13 +1,19 @@
 import Link from 'next/link'
 
+import { BottomTabBar } from '@/components/ui/bottom-tab-bar'
+import { ModeToggle } from '@/components/ui/mode-toggle'
+
 export default function DocPage() {
   return (
-    <main className="mx-auto min-h-screen w-full max-w-3xl px-6 py-12">
+    <main className="mx-auto min-h-screen w-full max-w-3xl px-6 pb-28 pt-12">
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">API Docs</h1>
-        <Link href="/" className="text-sm text-muted-foreground underline">
-          Home
-        </Link>
+        <div className="flex items-center gap-2">
+          <ModeToggle />
+          <Link href="/" className="text-sm text-muted-foreground underline">
+            Home
+          </Link>
+        </div>
       </div>
 
       <section className="space-y-6">
@@ -35,6 +41,8 @@ export default function DocPage() {
           </pre>
         </article>
       </section>
+
+      <BottomTabBar />
     </main>
   )
 }
