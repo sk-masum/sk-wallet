@@ -243,7 +243,7 @@ export default async function CardPage({ searchParams }: CardPageProps) {
           ) : null}
         </CardHeader>
       </Card>
-      
+
       <form action="/card" method="get" className="mb-3 w-full">
         <div className="relative w-full sm:max-w-md">
           <Input
@@ -317,7 +317,7 @@ export default async function CardPage({ searchParams }: CardPageProps) {
           </CardHeader>
         </Card>
       ) : (
-        <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {filteredCards.map((card) => {
             const id = String(card.id ?? 'N/A')
             const name = card.card_name?.trim() || `Card #${id}`
@@ -332,7 +332,7 @@ export default async function CardPage({ searchParams }: CardPageProps) {
               <div
                 key={id}
                 className={cn(
-                  'relative flex min-h-56 flex-col justify-between rounded-xl p-5 text-slate-100 shadow-lg',
+                  'relative flex min-h-56 flex-col justify-between rounded-xl p-5 text-slate-100 shadow-lg w-full',
                   theme.surface
                 )}
               >
