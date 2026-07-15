@@ -3,6 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "dev": "nx dev web",
+    "build": "nx build web",
+    "start": "nx start web",
+    "vercel-dev": "next dev web",
+    "vercel-build": "next build web",
+    "vercel-start": "next start web",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
