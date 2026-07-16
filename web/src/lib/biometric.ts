@@ -1,5 +1,6 @@
 export const BIOMETRIC_STORAGE_KEY = 'sk-wallet:biometric-enabled'
 export const BIOMETRIC_CREDENTIAL_STORAGE_KEY = 'sk-wallet:biometric-credential-id'
+export const BIOMETRIC_SESSION_UNLOCK_KEY = 'sk-wallet:biometric-unlocked-session'
 
 export function isWebAuthnSupported() {
   return typeof window !== 'undefined' && typeof PublicKeyCredential !== 'undefined'

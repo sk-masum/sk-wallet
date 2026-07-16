@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   BIOMETRIC_STORAGE_KEY,
+  BIOMETRIC_SESSION_UNLOCK_KEY,
   isPlatformAuthenticatorAvailable,
   verifyBiometricCredential,
 } from '@/lib/biometric'
@@ -36,9 +37,16 @@ export function BiometricGuard({ children }: BiometricGuardProps) {
         return
       }
 
+      const alreadyUnlockedInSession = sessionStorage.getItem(BIOMETRIC_SESSION_UNLOCK_KEY) === 'true'
+      if (alreadyUnlockedInSession) {
+        setIsLocked(false)
+        return
+      }
+
       const supported = await isPlatformAuthenticatorAvailable()
       if (!supported) {
         localStorage.setItem(BIOMETRIC_STORAGE_KEY, 'false')
+        sessionStorage.removeItem(BIOMETRIC_SESSION_UNLOCK_KEY)
         setIsLocked(false)
         return
       }
@@ -55,6 +63,7 @@ export function BiometricGuard({ children }: BiometricGuardProps) {
     try {
       const ok = await verifyBiometricCredential()
       if (ok) {
+        sessionStorage.setItem(BIOMETRIC_SESSION_UNLOCK_KEY, 'true')
         setIsLocked(false)
       } else {
         setMessage('Biometric verification failed.')

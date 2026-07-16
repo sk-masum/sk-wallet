@@ -12,6 +12,7 @@ import { ModeToggle } from '@/components/ui/mode-toggle'
 import { PageHeader } from '@/components/ui/page-header'
 import {
   BIOMETRIC_CREDENTIAL_STORAGE_KEY,
+  BIOMETRIC_SESSION_UNLOCK_KEY,
   BIOMETRIC_STORAGE_KEY,
   isPlatformAuthenticatorAvailable,
   registerBiometricCredential,
@@ -108,12 +109,14 @@ export default function SettingsPage() {
       setBiometricEnabled(false)
       localStorage.setItem(BIOMETRIC_STORAGE_KEY, 'false')
       localStorage.removeItem(BIOMETRIC_CREDENTIAL_STORAGE_KEY)
+      sessionStorage.removeItem(BIOMETRIC_SESSION_UNLOCK_KEY)
       setBiometricMessage('Biometric unlock disabled for this device.')
     }
 
     setIsBiometricBusy(false)
   }
   const onSignOut = async () => {
+    sessionStorage.removeItem(BIOMETRIC_SESSION_UNLOCK_KEY)
     const supabase = createSupabaseBrowserClient()
     await supabase.auth.signOut()
     router.push('/auth')
