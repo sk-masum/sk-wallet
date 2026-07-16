@@ -52,6 +52,7 @@ export async function PUT(request: Request, { params }: Params) {
   }
 
   let payload: {
+    color_name?: string;
     card_name?: string;
     provider?: string | null;
     number?: string;
@@ -72,6 +73,7 @@ export async function PUT(request: Request, { params }: Params) {
   const { error } = await supabase
     .from('card')
     .update({
+      color_name: payload.color_name?.trim() || null,
       card_name: payload.card_name?.trim() || null,
       provider: payload.provider?.trim() || null,
       number: String(payload.number ?? '').replace(/\D/g, ''),

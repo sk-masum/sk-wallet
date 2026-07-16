@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import type { WalletCard } from '@/models/card'
 import { formatExpiry, maskCardNumber } from '@/utils/card/format'
 import { resolveNetworkCode } from '@/utils/card/network'
-import { getCardTheme } from '@/utils/card/theme'
+import { getCardTheme, getCardThemeByColorName } from '@/utils/card/theme'
 
 export type CardFaceProps = {
   card: WalletCard
@@ -41,15 +41,17 @@ export function CardFace({
   const expiry = formatExpiry(card.expiry_month, card.expiry_year)
   const cvv = String(card.cvv ?? '').trim() || 'N/A'
   const networkCode = resolveNetworkCode(card.network)
-  const theme = getCardTheme(id)
+  const colorName = card.color_name?.trim() ?? ''
+  const theme = colorName ? getCardThemeByColorName(colorName) : getCardTheme(id)
 
   return (
     <div
       className={cn(
-        'relative flex min-h-56 flex-col justify-between rounded-xl p-3 sm:p-5 pt-2 text-slate-100 shadow-lg w-full',
+        'relative flex min-h-56 flex-col justify-between rounded-xl border p-3 pt-1 text-slate-100 shadow-lg sm:p-5 sm:pt-2 w-full',
         theme.surface,
         className
       )}
+      style={{ borderColor: theme.border }}
     >
       <div className="flex items-center justify-between gap-3">
         <div className={cn('truncate text-md font-medium tracking-wide', theme.mutedText)}>{name}</div>

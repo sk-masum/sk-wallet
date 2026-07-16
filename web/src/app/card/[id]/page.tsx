@@ -16,6 +16,7 @@ async function updateCard(formData: FormData) {
 
   const {
     id,
+    colorName,
     cardName,
     provider,
     normalizedNumber,
@@ -71,6 +72,7 @@ async function updateCard(formData: FormData) {
   }
 
   const { response, data: result } = await serverApiPut<{ error?: string }>(`/api/card/${id}`, {
+      color_name: colorName,
       card_name: cardName,
       provider: provider || null,
       number: normalizedNumber.replace(/\D/g, ''),
@@ -130,6 +132,7 @@ export default withCardFormPage<EditCardPageProps>(async function EditCardPage({
         cardId={String(card.id)}
         initialValues={{
           cardType: isCredit ? 'credit' : 'debit',
+          colorName: String(card.color_name ?? ''),
           cardName: String(card.card_name ?? ''),
           provider: String(card.provider ?? ''),
           network: String(card.network ?? ''),

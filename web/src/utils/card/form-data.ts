@@ -1,4 +1,7 @@
+import { getCardThemeByColorName } from '@/utils/card/theme'
+
 export type ParsedCardFormData = {
+  colorName: string
   cardName: string
   provider: string
   number: string
@@ -16,6 +19,8 @@ export type ParsedCardFormDataWithId = ParsedCardFormData & {
 }
 
 export function parseCardFormData(formData: FormData): ParsedCardFormData {
+  const colorName = String(formData.get('color_name') ?? '').trim()
+  const theme = getCardThemeByColorName(colorName)
   const cardName = String(formData.get('card_name') ?? '').trim()
   const provider = String(formData.get('provider') ?? '').trim()
   const number = String(formData.get('number') ?? '').trim()
@@ -28,6 +33,7 @@ export function parseCardFormData(formData: FormData): ParsedCardFormData {
   const cvv = String(formData.get('cvv') ?? '').trim()
 
   return {
+    colorName: theme.colorName,
     cardName,
     provider,
     number,

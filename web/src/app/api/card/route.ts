@@ -52,6 +52,7 @@ export async function POST(request: Request) {
   }
 
   let payload: {
+    color_name?: string;
     card_name?: string;
     provider?: string | null;
     number?: string;
@@ -71,6 +72,7 @@ export async function POST(request: Request) {
 
   const { error } = await supabase.from('card').insert({
     owner_id: user.id,
+    color_name: payload.color_name?.trim() || null,
     card_name: payload.card_name?.trim() || null,
     provider: payload.provider?.trim() || null,
     number: String(payload.number ?? '').replace(/\D/g, ''),

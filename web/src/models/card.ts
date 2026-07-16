@@ -5,6 +5,7 @@ export interface WalletCard {
   expiry_month: string | number | null
   expiry_year: string | number | null
   card_name: string | null
+  color_name: string | null
   provider: string | null
   number: string | number | null
   cvv: string | null
@@ -14,8 +15,9 @@ export interface WalletCard {
 }
 
 export type CardTheme = {
+  colorName: string
   surface: string
-  chip: string
+  border: string
   mutedText: string
 }
 

@@ -1,10 +1,17 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import { useFormStatus } from 'react-dom'
+
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CardNumberInput } from '@/components/card/card-number-input'
 import { cn } from '@/lib/utils'
+import { getCardThemes } from '@/utils/card/theme'
 
 type CardFormValues = {
   cardType: 'credit' | 'debit' | ''
+  colorName: string
   cardName: string
   provider: string
   network: string
@@ -21,6 +28,50 @@ type CardFormProps = {
   showReset?: boolean
   cardId?: string
   initialValues?: Partial<CardFormValues>
+}
+
+function FormPendingOverlay() {
+  const { pending } = useFormStatus()
+
+  if (!pending) return null
+
+  return (
+    <div className="absolute inset-0 z-20 flex items-center justify-center rounded-lg bg-background/70 backdrop-blur-[1px]">
+      <div className="flex flex-col items-center gap-3">
+        <div className="relative h-24 w-40">
+          <div className="absolute left-2 top-3 h-20 w-32 rounded-xl border border-border/50 bg-muted/50" />
+          <div className="absolute left-4 top-1 h-20 w-32 rounded-xl border border-cyan-300/70 bg-linear-to-br from-cyan-600 via-blue-700 to-indigo-800 shadow-lg animate-bounce" />
+          <div className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-40 animate-ping" />
+            <span className="relative text-sm font-bold">+</span>
+          </div>
+        </div>
+        <p className="text-sm font-medium text-foreground">Saving card...</p>
+      </div>
+    </div>
+  )
+}
+
+type FormActionsProps = {
+  submitLabel: string
+  showReset: boolean
+}
+
+function FormActions({ submitLabel, showReset }: FormActionsProps) {
+  const { pending } = useFormStatus()
+
+  return (
+    <div className="sm:col-span-2 flex flex-col gap-2 sm:flex-row">
+      <Button type="submit" className="w-full sm:w-auto" disabled={pending}>
+        {pending ? 'Saving...' : submitLabel}
+      </Button>
+      {showReset ? (
+        <Button type="reset" variant="outline" className="w-full sm:w-auto" disabled={pending}>
+          Reset
+        </Button>
+      ) : null}
+    </div>
+  )
 }
 
 const MONTH_OPTIONS = [
@@ -53,7 +104,8 @@ export function CardForm({
   initialValues,
 }: CardFormProps) {
   const values: CardFormValues = {
-    cardType: initialValues?.cardType ?? '',
+    cardType: initialValues?.cardType ?? 'credit',
+    colorName: initialValues?.colorName ?? '',
     cardName: initialValues?.cardName ?? '',
     provider: initialValues?.provider ?? '',
     network: initialValues?.network ?? '',
@@ -64,9 +116,15 @@ export function CardForm({
     cvv: initialValues?.cvv ?? '',
   }
 
+  const themes = useMemo(() => getCardThemes(), [])
+  const initialColorName = values.colorName || themes[0]?.colorName || ''
+  const [selectedColorName, setSelectedColorName] = useState(initialColorName)
+
   return (
-    <form action={action} className="grid gap-4 sm:grid-cols-2">
+    <form action={action} className="relative grid gap-4 sm:grid-cols-2">
       {cardId ? <input type="hidden" name="id" value={cardId} /> : null}
+      <input type="hidden" name="color_name" value={selectedColorName} />
+      <FormPendingOverlay />
 
       <fieldset className="sm:col-span-2">
         <legend className="mb-2 text-sm font-medium">Card type</legend>
@@ -127,6 +185,32 @@ export function CardForm({
         maxLength={50}
         defaultValue={values.provider}
       />
+
+      <fieldset className="min-w-0 sm:col-span-2">
+        <legend className="mb-2 text-sm font-medium">Card color</legend>
+        <div className="w-full max-w-full overflow-x-auto overscroll-x-contain py-2 pl-1">
+          <div className="flex min-w-max flex-nowrap items-center gap-2 pr-1">
+            {themes.map((theme) => {
+              const isSelected = selectedColorName === theme.colorName
+
+              return (
+                <button
+                  key={theme.colorName}
+                  type="button"
+                  onClick={() => setSelectedColorName(theme.colorName)}
+                  className={cn(
+                    'h-9 w-9 shrink-0 rounded-full border border-border transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                    theme.surface,
+                    isSelected && 'ring-2 ring-primary ring-offset-2'
+                  )}
+                  aria-label={`Select ${theme.colorName} color`}
+                  title={theme.colorName}
+                />
+              )
+            })}
+          </div>
+        </div>
+      </fieldset>
 
       <select
         name="network"
@@ -195,16 +279,7 @@ export function CardForm({
         required
       />
 
-      <div className="sm:col-span-2 flex flex-col gap-2 sm:flex-row">
-        <Button type="submit" className="w-full sm:w-auto">
-          {submitLabel}
-        </Button>
-        {showReset ? (
-          <Button type="reset" variant="outline" className="w-full sm:w-auto">
-            Reset
-          </Button>
-        ) : null}
-      </div>
+      <FormActions submitLabel={submitLabel} showReset={showReset} />
     </form>
   )
 }
