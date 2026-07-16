@@ -2,11 +2,20 @@ import './global.css';
 import { ThemeProvider } from '@/components/theme-provider'
 import type { Metadata, Viewport } from 'next'
 import { ServiceWorkerRegister } from '@/components/pwa/sw-register'
+import { BiometricGuard } from '@/components/security/biometric-guard'
 
 export const metadata: Metadata = {
   title: 'SK Wallet',
   description: 'A digital wallet for managing cards.',
   manifest: '/manifest.webmanifest',
+  icons: {
+    icon: [
+      { url: '/icons/icon-192.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    shortcut: ['/icons/icon-192.svg'],
+    apple: [{ url: '/icons/icon-192.svg', type: 'image/svg+xml' }],
+  },
   appleWebApp: {
     capable: true,
     title: 'SK Wallet',
@@ -28,7 +37,7 @@ export default function RootLayout({
       <body>
         <ServiceWorkerRegister />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
+          <BiometricGuard>{children}</BiometricGuard>
         </ThemeProvider>
       </body>
     </html>

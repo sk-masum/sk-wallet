@@ -10,24 +10,109 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { ModeToggle } from '@/components/ui/mode-toggle'
 import { PageHeader } from '@/components/ui/page-header'
+import {
+  BIOMETRIC_CREDENTIAL_STORAGE_KEY,
+  BIOMETRIC_STORAGE_KEY,
+  isPlatformAuthenticatorAvailable,
+  registerBiometricCredential,
+  verifyBiometricCredential,
+} from '@/lib/biometric'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
-
-const BIOMETRIC_STORAGE_KEY = 'sk-wallet:biometric-enabled'
 
 export default function SettingsPage() {
   const router = useRouter()
   const [biometricEnabled, setBiometricEnabled] = useState(false)
+  const [biometricSupported, setBiometricSupported] = useState(false)
+  const [isBiometricBusy, setIsBiometricBusy] = useState(false)
+  const [biometricMessage, setBiometricMessage] = useState<string>('')
 
   useEffect(() => {
     const stored = localStorage.getItem(BIOMETRIC_STORAGE_KEY)
     setBiometricEnabled(stored === 'true')
+
+    const checkSupport = async () => {
+      try {
+        const available = await isPlatformAuthenticatorAvailable()
+        setBiometricSupported(available)
+      } catch {
+        setBiometricSupported(false)
+      }
+    }
+
+    void checkSupport()
   }, [])
 
-  const onBiometricToggle = (checked: boolean) => {
-    setBiometricEnabled(checked)
-    localStorage.setItem(BIOMETRIC_STORAGE_KEY, checked ? 'true' : 'false')
+  const registerBiometric = async () => {
+    if (!biometricSupported) {
+      setBiometricMessage('Biometric authentication is not supported on this device.')
+      return false
+    }
+
+    try {
+      const credentialId = await registerBiometricCredential()
+      if (!credentialId) {
+        setBiometricMessage('Biometric setup was cancelled.')
+        return false
+      }
+      return true
+    } catch {
+      setBiometricMessage('Unable to set up biometrics on this device.')
+      return false
+    }
   }
 
+  const verifyBiometric = async () => {
+    if (!biometricSupported) {
+      setBiometricMessage('Biometric authentication is not supported on this device.')
+      return false
+    }
+
+    const credentialId = localStorage.getItem(BIOMETRIC_CREDENTIAL_STORAGE_KEY)
+    if (!credentialId) {
+      setBiometricMessage('No biometric credential is registered yet.')
+      return false
+    }
+
+    try {
+      const verified = await verifyBiometricCredential()
+      if (!verified) {
+        setBiometricMessage('Biometric verification was cancelled.')
+        return false
+      }
+
+      setBiometricMessage('Biometric verification successful.')
+      return true
+    } catch {
+      setBiometricMessage('Biometric verification failed.')
+      return false
+    }
+  }
+
+  const onBiometricToggle = async (checked: boolean) => {
+    setIsBiometricBusy(true)
+    setBiometricMessage('')
+
+    if (checked) {
+      const credentialId = localStorage.getItem(BIOMETRIC_CREDENTIAL_STORAGE_KEY)
+      const registered = credentialId ? true : await registerBiometric()
+
+      if (registered) {
+        setBiometricEnabled(true)
+        localStorage.setItem(BIOMETRIC_STORAGE_KEY, 'true')
+        setBiometricMessage('Biometric unlock enabled for this device.')
+      } else {
+        setBiometricEnabled(false)
+        localStorage.setItem(BIOMETRIC_STORAGE_KEY, 'false')
+      }
+    } else {
+      setBiometricEnabled(false)
+      localStorage.setItem(BIOMETRIC_STORAGE_KEY, 'false')
+      localStorage.removeItem(BIOMETRIC_CREDENTIAL_STORAGE_KEY)
+      setBiometricMessage('Biometric unlock disabled for this device.')
+    }
+
+    setIsBiometricBusy(false)
+  }
   const onSignOut = async () => {
     const supabase = createSupabaseBrowserClient()
     await supabase.auth.signOut()
@@ -93,9 +178,32 @@ export default function SettingsPage() {
                 type="checkbox"
                 className="h-4 w-4"
                 checked={biometricEnabled}
-                onChange={(event) => onBiometricToggle(event.target.checked)}
+                disabled={isBiometricBusy || !biometricSupported}
+                onChange={(event) => {
+                  void onBiometricToggle(event.target.checked)
+                }}
               />
             </label>
+            {!biometricSupported ? (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Biometrics are not available on this device/browser.
+              </p>
+            ) : null}
+            {biometricEnabled ? (
+              <div className="mt-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isBiometricBusy}
+                  onClick={() => {
+                    void verifyBiometric()
+                  }}
+                >
+                  Verify biometrics
+                </Button>
+              </div>
+            ) : null}
+            {biometricMessage ? <p className="mt-2 text-xs text-muted-foreground">{biometricMessage}</p> : null}
             <div className="mt-4">
               <Button type="button" variant="outline" onClick={onSignOut}>
                 Sign out
