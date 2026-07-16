@@ -6,8 +6,7 @@ const supabaseKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-export const createClient = (request: NextRequest) => {
-  // Create an unmodified response
+export const updateSession = async (request: NextRequest) => {
   let supabaseResponse = NextResponse.next({
     request: {
       headers: request.headers,
@@ -35,5 +34,9 @@ export const createClient = (request: NextRequest) => {
     },
   );
 
-  return supabaseResponse
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  return { response: supabaseResponse, user }
 };

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BookText, CreditCard } from 'lucide-react'
+import { BookText, CreditCard, Settings } from 'lucide-react'
 
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -20,6 +20,12 @@ const tabs = [
     icon: BookText,
     match: (pathname: string) => pathname.startsWith('/doc'),
   },
+  {
+    href: '/settings',
+    label: 'Settings',
+    icon: Settings,
+    match: (pathname: string) => pathname.startsWith('/settings'),
+  },
 ]
 
 export function BottomTabBar() {
@@ -28,10 +34,10 @@ export function BottomTabBar() {
   return (
     <nav
       aria-label="Primary"
-      className="pointer-events-none fixed inset-x-0 bottom-5 z-50 flex justify-center px-4"
+      className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4"
     >
-      <div className="pointer-events-auto relative flex items-center gap-2 rounded-full border border-white/35 bg-white/15 p-2 shadow-[0_20px_45px_-25px_rgba(0,0,0,0.7)] backdrop-blur-xl supports-backdrop-filter:bg-white/20 dark:border-white/20 dark:bg-slate-900/40">
-        <div className="pointer-events-none absolute inset-0 rounded-full bg-linear-to-b from-white/35 to-transparent opacity-70" />
+      <div className="pointer-events-auto relative flex items-center gap-1 rounded-full border border-white/30 bg-white/10 p-1 shadow-[0_18px_38px_-24px_rgba(0,0,0,0.65)] backdrop-blur-2xl supports-backdrop-filter:bg-white/12 dark:border-white/15 dark:bg-slate-900/30">
+        <div className="pointer-events-none absolute inset-0 rounded-full bg-linear-to-b from-white/35 via-white/8 to-transparent" />
 
         {tabs.map((tab) => {
           const active = tab.match(pathname)
@@ -45,8 +51,8 @@ export function BottomTabBar() {
                 buttonVariants({ variant: active ? 'secondary' : 'ghost', size: 'sm' }),
                 'relative h-10 rounded-full px-4 text-sm',
                 active
-                  ? 'bg-white/80 text-slate-900 shadow-sm hover:bg-white/90 dark:bg-slate-100 dark:text-slate-900'
-                  : 'text-slate-700 hover:bg-white/25 dark:text-slate-100 dark:hover:bg-white/15'
+                  ? 'bg-white/55 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] hover:bg-white/65 dark:bg-white/18 dark:text-white'
+                  : 'text-slate-700 hover:bg-white/20 dark:text-slate-100 dark:hover:bg-white/10'
               )}
               aria-current={active ? 'page' : undefined}
             >
