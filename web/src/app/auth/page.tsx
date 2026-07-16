@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,8 +9,12 @@ import { Input } from '@/components/ui/input'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 
 export default function AuthPage() {
-  const searchParams = useSearchParams()
-  const next = searchParams.get('next') || '/card'
+  const [nextPath, setNextPath] = useState('/card')
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setNextPath(params.get('next') || '/card')
+  }, [])
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -34,7 +37,7 @@ export default function AuthPage() {
         return
       }
 
-      window.location.assign(next)
+      window.location.assign(nextPath)
       return
     } finally {
       setLoading(false)
@@ -58,7 +61,7 @@ export default function AuthPage() {
       }
 
       if (data.session) {
-        window.location.assign(next)
+        window.location.assign(nextPath)
         return
       }
 
