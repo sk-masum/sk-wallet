@@ -9,6 +9,7 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { Eye, EyeOff, Pencil, Trash2, X } from 'lucide-react'
 import type { WalletCard } from '@/models/card'
 import { clientApiDelete } from '@/lib/api/client'
+import { showToast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 import { formatExpiry } from '@/utils/card/format'
 
@@ -70,9 +71,10 @@ export function CardGrid({ cards }: CardGridProps) {
       setConfirmDeleteOpen(false)
       setSelectedCardId(null)
       setShowCvv(false)
+      showToast({ message: 'Card deleted successfully.', variant: 'success' })
       router.refresh()
     } catch {
-      window.alert('Unable to delete card. Please try again.')
+      showToast({ message: 'Unable to delete card. Please try again.', variant: 'error' })
     } finally {
       setIsDeleting(false)
     }

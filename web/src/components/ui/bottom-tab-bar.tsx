@@ -2,31 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BookText, CreditCard, Settings } from 'lucide-react'
 
 import { buttonVariants } from '@/components/ui/button'
+import { BOTTOM_TABS } from '@/constants/ui/bottom-tabs'
 import { cn } from '@/lib/utils'
-
-const tabs = [
-  {
-    href: '/card',
-    label: 'Card',
-    icon: CreditCard,
-    match: (pathname: string) => pathname.startsWith('/card'),
-  },
-  {
-    href: '/doc',
-    label: 'Doc',
-    icon: BookText,
-    match: (pathname: string) => pathname.startsWith('/doc'),
-  },
-  {
-    href: '/settings',
-    label: 'Settings',
-    icon: Settings,
-    match: (pathname: string) => pathname.startsWith('/settings'),
-  },
-]
 
 export function BottomTabBar() {
   const pathname = usePathname()
@@ -37,9 +16,9 @@ export function BottomTabBar() {
       className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4"
     >
       <div className="pointer-events-auto relative flex items-center gap-1 rounded-full border border-white/30 bg-white/10 p-1 shadow-[0_18px_38px_-24px_rgba(0,0,0,0.65)] backdrop-blur-2xl supports-backdrop-filter:bg-white/12 dark:border-white/15 dark:bg-slate-900/30">
-        <div className="pointer-events-none absolute inset-0 rounded-full bg-linear-to-b from-white/35 via-white/8 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 rounded-full bg-linear-to-b from-white/35 via-white/8 to-transparent dark:from-slate-200/8 dark:via-slate-200/3 dark:to-transparent" />
 
-        {tabs.map((tab) => {
+        {BOTTOM_TABS.map((tab) => {
           const active = tab.match(pathname)
           const Icon = tab.icon
 
@@ -56,7 +35,7 @@ export function BottomTabBar() {
               )}
               aria-current={active ? 'page' : undefined}
             >
-              <Icon className="mr-2 h-4 w-4" />
+              <Icon className="mr-1 h-4 w-4" />
               {tab.label}
             </Link>
           )

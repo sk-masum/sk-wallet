@@ -1,35 +1,32 @@
 import { CardNetwork, type WalletCard } from '@/models/card'
+import {
+  CARD_NETWORK_FILTER_OPTIONS,
+  CARD_NETWORK_FORM_OPTIONS,
+  CARD_NETWORKS_BY_CODE,
+} from '@/constants/card/networks'
+
+export { CARD_NETWORK_FILTER_OPTIONS, CARD_NETWORK_FORM_OPTIONS }
 
 export function resolveNetworkLabel(network: WalletCard['network']) {
   const code = typeof network === 'number' ? network : Number(network)
 
-  switch (code) {
-    case CardNetwork.VISA:
-      return 'VISA'
-    case CardNetwork.RUPAY:
-      return 'RUPAY'
-    case CardNetwork.MASTERCARD:
-      return 'MASTERCARD'
-    case CardNetwork.AMEX:
-      return 'AMEX'
-    default:
-      if (typeof network === 'string' && network.trim()) {
-        return network.trim().toUpperCase()
-      }
-      return 'VISA'
+  if (CARD_NETWORKS_BY_CODE.has(code)) {
+    return CARD_NETWORKS_BY_CODE.get(code)?.label ?? 'VISA'
   }
+
+  if (typeof network === 'string' && network.trim()) {
+    return network.trim().toUpperCase()
+  }
+
+  return 'VISA'
 }
 
 export function resolveNetworkCode(network: WalletCard['network']) {
   const code = typeof network === 'number' ? network : Number(network)
 
-  switch (code) {
-    case CardNetwork.VISA:
-    case CardNetwork.RUPAY:
-    case CardNetwork.MASTERCARD:
-    case CardNetwork.AMEX:
-      return code
-    default:
-      return CardNetwork.VISA
+  if (CARD_NETWORKS_BY_CODE.has(code)) {
+    return code
   }
+
+  return CardNetwork.VISA
 }

@@ -7,7 +7,6 @@ type CardFormPageLayoutProps = {
   pageTitle: string
   cardTitle: string
   cardDescription: string
-  errorMessage?: string
   backHref?: string
   backButtonLabel?: string
   children: ReactNode
@@ -22,7 +21,6 @@ function CardFormPageLayout({
   pageTitle,
   cardTitle,
   cardDescription,
-  errorMessage = '',
   backHref = '/card',
   backButtonLabel = 'Back to cards',
   children,
@@ -35,7 +33,6 @@ function CardFormPageLayout({
         <CardHeader>
           <CardTitle>{cardTitle}</CardTitle>
           <CardDescription>{cardDescription}</CardDescription>
-          {errorMessage ? <p className="text-sm text-destructive">{errorMessage}</p> : null}
         </CardHeader>
         <CardContent>{children}</CardContent>
       </Card>

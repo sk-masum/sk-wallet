@@ -24,7 +24,7 @@ import {
 import { cn } from '@/lib/utils'
 import { serverApiGet } from '@/lib/api/server'
 import { buildCardFilterHref } from '@/utils/card/filter'
-import { resolveNetworkLabel } from '@/utils/card/network'
+import { CARD_NETWORK_FILTER_OPTIONS, resolveNetworkLabel } from '@/utils/card/network'
 
 export default async function CardPage({ searchParams }: CardPageProps) {
   const params = searchParams ? await searchParams : {}
@@ -46,7 +46,7 @@ export default async function CardPage({ searchParams }: CardPageProps) {
 
   const allCards = result?.data ?? []
   const error = response.ok ? null : { message: result?.error || 'Failed to load cards' }
-  const networkOptions = [...new Set(allCards.map((card) => resolveNetworkLabel(card.network)))].sort()
+  const networkOptions = CARD_NETWORK_FILTER_OPTIONS
   const hasTextQuery = query.length > 0
   const hasNetworkFilter = selectedNetwork.length > 0
   const hasTypeFilter = selectedType !== 'all'
@@ -87,24 +87,6 @@ export default async function CardPage({ searchParams }: CardPageProps) {
   return (
     <main className="mx-auto min-h-screen w-full max-w-212.5 px-4 pb-28 pt-12 sm:px-6 lg:px-8">
       <PageHeader title="Cards" showAddButton addHref="/card/new" addButtonLabel="Add card" />
-
-      {/* <Card className="mb-6 max-w-sm">
-        <CardHeader className="pb-3">
-          <CardDescription>
-            {hasFilters
-              ? `Showing results${hasTextQuery ? ` for "${query}"` : ''}${
-                  hasNetworkFilter ? ` in ${selectedNetwork}` : ''
-                }${
-                  hasTypeFilter ? ` (${selectedType === 'credit' ? 'Credit' : 'Debit'})` : ''
-                }`
-              : 'Total records'}
-          </CardDescription>
-          <CardTitle className="text-4xl">{filteredCards.length}</CardTitle>
-          {hasFilters ? (
-            <CardDescription>{`Matched ${filteredCards.length} of ${allCards.length}`}</CardDescription>
-          ) : null}
-        </CardHeader>
-      </Card> */}
 
       <form action="/card" method="get" className="mb-3 w-full">
         <div className="relative w-full sm:max-w-md">

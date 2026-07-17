@@ -3,54 +3,94 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
+import { CardNetwork } from '@/models/card'
 
 type CardNumberInputProps = {
+  id?: string
+  className?: string
   defaultValue?: string
+  network?: number | string
   required?: boolean
+  onChange?: (value: string) => void
 }
 
-function normalizeDigits(value: string) {
-  return value.replace(/\D/g, '').slice(0, 19)
+function getMaxDigits(network?: number | string) {
+  return Number(network) === CardNetwork.AMEX ? 15 : 19
 }
 
-function formatCardNumber(value: string) {
-  return normalizeDigits(value).replace(/(.{4})/g, '$1 ').trim()
+function normalizeDigits(value: string, network?: number | string) {
+  return value.replace(/\D/g, '').slice(0, getMaxDigits(network))
 }
 
-export function CardNumberInput({ defaultValue = '', required = false }: CardNumberInputProps) {
-  const defaultDigits = useMemo(() => normalizeDigits(defaultValue), [defaultValue])
-  const [displayValue, setDisplayValue] = useState(formatCardNumber(defaultDigits))
+function formatAmexCardNumber(digits: string) {
+  const part1 = digits.slice(0, 4)
+  const part2 = digits.slice(4, 10)
+  const part3 = digits.slice(10, 15)
+
+  return [part1, part2, part3].filter(Boolean).join(' - ')
+}
+
+function formatCardNumber(value: string, network?: number | string) {
+  const digits = normalizeDigits(value, network)
+
+  if (Number(network) === CardNetwork.AMEX) {
+    return formatAmexCardNumber(digits)
+  }
+
+  return digits.replace(/(.{4})/g, '$1 - ').replace(/\s-\s$/, '').trim()
+}
+
+export function CardNumberInput({
+  id,
+  className,
+  defaultValue = '',
+  network,
+  required = false,
+  onChange,
+}: CardNumberInputProps) {
+  const defaultDigits = useMemo(() => normalizeDigits(defaultValue, network), [defaultValue, network])
+  const [displayValue, setDisplayValue] = useState(formatCardNumber(defaultDigits, network))
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
-    setDisplayValue(formatCardNumber(defaultDigits))
-  }, [defaultDigits])
+    setDisplayValue(formatCardNumber(defaultDigits, network))
+  }, [defaultDigits, network])
 
   useEffect(() => {
     const form = inputRef.current?.form
     if (!form) return
 
     const handleReset = () => {
-      setDisplayValue(formatCardNumber(defaultDigits))
+      setDisplayValue(formatCardNumber(defaultDigits, network))
     }
 
     form.addEventListener('reset', handleReset)
     return () => form.removeEventListener('reset', handleReset)
-  }, [defaultDigits])
+  }, [defaultDigits, network])
+
+  const isAmex = Number(network) === CardNetwork.AMEX
+  const maxLength = isAmex ? 21 : 39
+  const placeholder = isAmex ? '1234 - 567890 - 12345' : '1234 - 5678 - 9012 - 3456'
 
   return (
     <>
       <Input
+        id={id}
         ref={inputRef}
         name="number"
-        placeholder="Card number"
+        placeholder={placeholder}
+        className={className}
         inputMode="numeric"
         autoComplete="cc-number"
         minLength={13}
-        maxLength={23}
-        pattern="[0-9\\s-]{13,23}"
+        maxLength={maxLength}
+        pattern="[0-9\\s-]{13,39}"
         value={displayValue}
-        onChange={(event) => setDisplayValue(formatCardNumber(event.target.value))}
+        onChange={(event) => {
+          const formattedValue = formatCardNumber(event.target.value, network)
+          setDisplayValue(formattedValue)
+          onChange?.(formattedValue)
+        }}
         required={required}
       />
     </>

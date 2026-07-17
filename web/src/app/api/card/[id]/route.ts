@@ -2,6 +2,15 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
 import { createClient } from '@/lib/supabase/server';
+import { detokenizeCardCvv, detokenizeCardNumber, tokenizeCardCvv, tokenizeCardNumber } from '@/lib/security/card-token';
+
+function getCardWriteErrorMessage(error: { code?: string; message: string }) {
+  if (error.code === '22P02' && error.message.includes('invalid input syntax for type bigint')) {
+    return 'Database schema mismatch: change public.card.number and public.card.cvv column types to text before saving tokenized values.';
+  }
+
+  return error.message;
+}
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -28,14 +37,24 @@ export async function GET(_request: Request, { params }: Params) {
     .maybeSingle();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: getCardWriteErrorMessage(error) }, { status: 500 });
   }
 
   if (!data) {
     return NextResponse.json({ error: 'Card not found' }, { status: 404 });
   }
 
-  return NextResponse.json({ data });
+  try {
+    return NextResponse.json({
+      data: {
+        ...data,
+        number: detokenizeCardNumber(data.number),
+        cvv: detokenizeCardCvv(data.cvv),
+      },
+    });
+  } catch {
+    return NextResponse.json({ error: 'Failed to decode stored card token' }, { status: 500 });
+  }
 }
 
 export async function PUT(request: Request, { params }: Params) {
@@ -70,17 +89,27 @@ export async function PUT(request: Request, { params }: Params) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
+  let tokenizedNumber = '';
+  let tokenizedCvv = '';
+
+  try {
+    tokenizedNumber = tokenizeCardNumber(String(payload.number ?? ''));
+    tokenizedCvv = tokenizeCardCvv(String(payload.cvv ?? ''));
+  } catch {
+    return NextResponse.json({ error: 'Card tokenization is not configured correctly' }, { status: 500 });
+  }
+
   const { error } = await supabase
     .from('card')
     .update({
       color_name: payload.color_name?.trim() || null,
       card_name: payload.card_name?.trim() || null,
       provider: payload.provider?.trim() || null,
-      number: String(payload.number ?? '').replace(/\D/g, ''),
+      number: tokenizedNumber,
       holder_name: payload.holder_name?.trim() || null,
       expiry_month: payload.expiry_month ?? null,
       expiry_year: payload.expiry_year ?? null,
-      cvv: String(payload.cvv ?? '').replace(/\D/g, ''),
+      cvv: tokenizedCvv,
       network: payload.network ?? null,
       isCredit: Boolean(payload.isCredit),
     })

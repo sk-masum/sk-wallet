@@ -8,7 +8,7 @@ import { validateCardForm } from '@/utils/card/validation'
 
 type EditCardPageProps = {
   params: Promise<{ id: string }>
-  searchParams?: Promise<{ error?: string }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
 async function updateCard(formData: FormData) {
@@ -92,13 +92,11 @@ async function updateCard(formData: FormData) {
     redirect(`/card/${id}?error=${encodeURIComponent(result?.error || 'Failed to update card')}`)
   }
 
-  redirect('/card')
+  redirect(`/card?success=${encodeURIComponent('Card updated successfully.')}`)
 }
 
-export default withCardFormPage<EditCardPageProps>(async function EditCardPage({ params, searchParams }) {
+export default withCardFormPage<EditCardPageProps>(async function EditCardPage({ params }) {
   const { id } = await params
-  const sp = searchParams ? await searchParams : {}
-  const errorMessage = sp.error ? decodeURIComponent(sp.error) : ''
 
   const { response, data: result } = await serverApiGet<{ data?: any }>(`/api/card/${id}`)
 
@@ -124,7 +122,6 @@ export default withCardFormPage<EditCardPageProps>(async function EditCardPage({
     cardDescription: 'Edit your card details.',
     backHref: '/card',
     backButtonLabel: 'Back to cards',
-    errorMessage,
     children: (
       <CardForm
         action={updateCard}

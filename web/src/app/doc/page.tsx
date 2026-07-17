@@ -1,56 +1,9 @@
 import Link from 'next/link'
-import { BookOpenText, CreditCard, Lock, Settings2, UserRound } from 'lucide-react'
+import { BookOpenText } from 'lucide-react'
 
 import { BottomTabBar } from '@/components/ui/bottom-tab-bar'
 import { ModeToggle } from '@/components/ui/mode-toggle'
-
-const featureItems = [
-  {
-    title: 'Card Management',
-    description: 'Create, edit, delete, search, and filter saved cards.',
-    href: '/card',
-    icon: CreditCard,
-  },
-  {
-    title: 'Biometric Security',
-    description: 'Session-based biometric lock with Face ID / Touch ID support.',
-    href: '/settings',
-    icon: Lock,
-  },
-  {
-    title: 'Profile Settings',
-    description: 'View profile details and update name, email, and avatar.',
-    href: '/settings/profile-update',
-    icon: UserRound,
-  },
-  {
-    title: 'Appearance Controls',
-    description: 'Switch between light and dark themes from settings.',
-    href: '/settings',
-    icon: Settings2,
-  },
-]
-
-const apiItems = [
-  {
-    title: 'List cards',
-    method: 'GET',
-    endpoint: '/api/card',
-    curl: 'curl http://localhost:4200/api/card',
-  },
-  {
-    title: 'Filter by ids',
-    method: 'GET',
-    endpoint: '/api/card?ids=1,2,3',
-    curl: 'curl "http://localhost:4200/api/card?ids=1,2,3"',
-  },
-  {
-    title: 'Single card by id',
-    method: 'GET',
-    endpoint: '/api/card/:id',
-    curl: 'curl http://localhost:4200/api/card/1',
-  },
-]
+import { DOC_API_ITEMS, DOC_FEATURE_ITEMS } from '@/constants/doc/items'
 
 export default function DocPage() {
   return (
@@ -71,7 +24,7 @@ export default function DocPage() {
           <h2 className="text-xl font-semibold">Feature Listing</h2>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          {featureItems.map((feature) => {
+          {DOC_FEATURE_ITEMS.map((feature) => {
             const Icon = feature.icon
             return (
               <article key={feature.title} className="rounded-md border border-border p-4">
@@ -91,7 +44,7 @@ export default function DocPage() {
 
       <section className="space-y-6">
         <h2 className="text-xl font-semibold">API Docs</h2>
-        {apiItems.map((api) => (
+        {DOC_API_ITEMS.map((api) => (
           <article key={api.title} className="rounded-md border border-border p-4">
             <h3 className="mb-2 text-lg font-medium">{api.title}</h3>
             <p className="mb-2 text-sm text-muted-foreground">

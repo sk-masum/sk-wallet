@@ -7,9 +7,7 @@ import { parseCardFormData } from '@/utils/card/form-data'
 import { validateCardForm } from '@/utils/card/validation'
 
 type NewCardPageProps = {
-  searchParams?: Promise<{
-    error?: string
-  }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
 async function createCard(formData: FormData) {
@@ -64,20 +62,16 @@ async function createCard(formData: FormData) {
     redirect(`/card/new?error=${encodeURIComponent(result?.error || 'Failed to create card')}`)
   }
 
-  redirect('/card')
+  redirect(`/card?success=${encodeURIComponent('Card created successfully.')}`)
 }
 
-export default withCardFormPage<NewCardPageProps>(async function NewCardPage({ searchParams }) {
-  const params = searchParams ? await searchParams : {}
-  const errorMessage = params.error ? decodeURIComponent(params.error) : ''
-
+export default withCardFormPage<NewCardPageProps>(async function NewCardPage() {
   return {
     pageTitle: 'Add Card',
     cardTitle: 'Card Details',
     cardDescription: 'Fill the form below to create a new card.',
     backHref: '/card',
     backButtonLabel: 'Back to cards',
-    errorMessage,
     children: <CardForm action={createCard} submitLabel="Submit" showReset />,
   }
 })

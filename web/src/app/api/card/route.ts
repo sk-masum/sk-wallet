@@ -2,6 +2,15 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
 import { createClient } from '@/lib/supabase/server';
+import { detokenizeCardCvv, detokenizeCardNumber, tokenizeCardCvv, tokenizeCardNumber } from '@/lib/security/card-token';
+
+function getCardWriteErrorMessage(error: { code?: string; message: string }) {
+  if (error.code === '22P02' && error.message.includes('invalid input syntax for type bigint')) {
+    return 'Database schema mismatch: change public.card.number and public.card.cvv column types to text before saving tokenized values.';
+  }
+
+  return error.message;
+}
 
 export async function GET(request: Request) {
   const cookieStore = await cookies();
@@ -33,10 +42,22 @@ export async function GET(request: Request) {
   const { data, error } = await query;
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: getCardWriteErrorMessage(error) }, { status: 500 });
   }
 
-  return NextResponse.json({ data });
+  let detokenizedData: typeof data;
+
+  try {
+    detokenizedData = (data ?? []).map((card) => ({
+      ...card,
+      number: detokenizeCardNumber(card.number),
+      cvv: detokenizeCardCvv(card.cvv),
+    }));
+  } catch {
+    return NextResponse.json({ error: 'Failed to decode stored card token' }, { status: 500 });
+  }
+
+  return NextResponse.json({ data: detokenizedData });
 }
 
 export async function POST(request: Request) {
@@ -70,16 +91,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
+  let tokenizedNumber = '';
+  let tokenizedCvv = '';
+
+  try {
+    tokenizedNumber = tokenizeCardNumber(String(payload.number ?? ''));
+    tokenizedCvv = tokenizeCardCvv(String(payload.cvv ?? ''));
+  } catch {
+    return NextResponse.json({ error: 'Card tokenization is not configured correctly' }, { status: 500 });
+  }
+
   const { error } = await supabase.from('card').insert({
     owner_id: user.id,
     color_name: payload.color_name?.trim() || null,
     card_name: payload.card_name?.trim() || null,
     provider: payload.provider?.trim() || null,
-    number: String(payload.number ?? '').replace(/\D/g, ''),
+    number: tokenizedNumber,
     holder_name: payload.holder_name?.trim() || null,
     expiry_month: payload.expiry_month ?? null,
     expiry_year: payload.expiry_year ?? null,
-    cvv: String(payload.cvv ?? '').replace(/\D/g, ''),
+    cvv: tokenizedCvv,
     network: payload.network ?? null,
     isCredit: Boolean(payload.isCredit),
   });

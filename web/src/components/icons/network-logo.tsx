@@ -7,21 +7,23 @@ import RupayIcon from './rupay.icon';
 import { CardNetwork } from '@/models/card';
 
 export function NetworkLogo({ brand, className }: NetworkLogoProps) {
+  const tonedClassName = cn('text-slate-100/95', className)
+
   switch (brand) {
     case CardNetwork.VISA:
-      return <VisaIcon className={className} />
+      return <VisaIcon className={tonedClassName} />
     case CardNetwork.RUPAY:
-      return <RupayIcon className={className} />
+      return <RupayIcon className={tonedClassName} />
     case CardNetwork.MASTERCARD:
-      return <MastercardIcon className={className} />
+      return <MastercardIcon className={tonedClassName} />
     case CardNetwork.AMEX:
-      return <AmexIcon className={className} />
+      return <AmexIcon className={tonedClassName} />
     default:
       return (
         <span
           className={cn(
-            'inline-flex items-center justify-center rounded-md font-semibold text-white',
-            className
+            'inline-flex items-center justify-center rounded-md font-semibold text-slate-100/95',
+            tonedClassName
           )}
         >
           {brand}

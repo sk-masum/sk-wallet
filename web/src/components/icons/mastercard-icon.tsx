@@ -9,8 +9,8 @@ const MastercardIcon = (props: SvgIconProps) => (
     {...props}
   >
     <g fill="none" fillRule="evenodd">
-      <circle cx={7} cy={12} r={7} fill="#EA001B" />
-      <circle cx={17} cy={12} r={7} fill="#FFA200" fillOpacity={0.8} />
+      <circle cx={7} cy={12} r={7} fill="currentColor" fillOpacity={0.9} />
+      <circle cx={17} cy={12} r={7} fill="currentColor" fillOpacity={0.55} />
     </g>
   </svg>
 )

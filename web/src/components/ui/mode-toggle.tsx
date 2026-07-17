@@ -1,10 +1,10 @@
 'use client'
 
-import { LaptopMinimal, Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { THEME_MODE_OPTIONS } from '@/constants/ui/theme-options'
 import { cn } from '@/lib/utils'
 
 export function ModeToggle({ className }: { className?: string }) {
@@ -17,12 +17,6 @@ export function ModeToggle({ className }: { className?: string }) {
 
   const activeTheme = mounted ? (theme ?? 'system') : 'system'
 
-  const options = [
-    { value: 'light', label: 'Light', icon: Sun },
-    { value: 'dark', label: 'Dark', icon: Moon },
-    { value: 'system', label: 'System', icon: LaptopMinimal },
-  ] as const
-
   return (
     <div
       className={cn(
@@ -32,7 +26,7 @@ export function ModeToggle({ className }: { className?: string }) {
       role="group"
       aria-label="Theme mode"
     >
-      {options.map((option) => {
+      {THEME_MODE_OPTIONS.map((option) => {
         const Icon = option.icon
         const isActive = activeTheme === option.value
 

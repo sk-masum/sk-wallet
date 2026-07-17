@@ -24,7 +24,7 @@ export function parseCardFormData(formData: FormData): ParsedCardFormData {
   const cardName = String(formData.get('card_name') ?? '').trim()
   const provider = String(formData.get('provider') ?? '').trim()
   const number = String(formData.get('number') ?? '').trim()
-  const normalizedNumber = number.replace(/\s+/g, '')
+  const normalizedNumber = number.replace(/\D/g, '')
   const holderName = String(formData.get('holder_name') ?? '').trim()
   const cardType = String(formData.get('card_type') ?? '').trim().toLowerCase()
   const network = Number(formData.get('network'))

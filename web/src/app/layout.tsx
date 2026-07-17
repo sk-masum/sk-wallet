@@ -1,8 +1,11 @@
 import './global.css';
 import { ThemeProvider } from '@/components/theme-provider'
 import type { Metadata, Viewport } from 'next'
+import { Suspense } from 'react'
 import { ServiceWorkerRegister } from '@/components/pwa/sw-register'
 import { BiometricGuard } from '@/components/security/biometric-guard'
+import { AppToaster } from '@/components/ui/app-toaster'
+import { QueryToastBridge } from '@/components/ui/query-toast-bridge'
 
 export const metadata: Metadata = {
   title: 'SK Wallet',
@@ -37,6 +40,10 @@ export default function RootLayout({
       <body>
         <ServiceWorkerRegister />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Suspense fallback={null}>
+            <QueryToastBridge />
+          </Suspense>
+          <AppToaster />
           <BiometricGuard>{children}</BiometricGuard>
         </ThemeProvider>
       </body>
