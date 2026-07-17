@@ -25,6 +25,12 @@ export const DOC_FEATURE_ITEMS = [
     href: '/settings',
     icon: Settings2,
   },
+  {
+    title: 'Document Vault',
+    description: 'Store masked national document IDs with tokenized backend storage.',
+    href: '/doc',
+    icon: Lock,
+  },
 ]
 
 export const DOC_API_ITEMS = [
@@ -45,5 +51,17 @@ export const DOC_API_ITEMS = [
     method: 'GET',
     endpoint: '/api/card/:id',
     curl: 'curl http://localhost:4200/api/card/1',
+  },
+  {
+    title: 'List documents',
+    method: 'GET',
+    endpoint: '/api/document',
+    curl: 'curl http://localhost:4200/api/document',
+  },
+  {
+    title: 'Create or upsert document',
+    method: 'POST',
+    endpoint: '/api/document',
+    curl: 'curl -X POST http://localhost:4200/api/document -H "content-type: application/json" -d "{\"type\":\"PAN\",\"number\":\"ABCDE1234F\",\"nameOnDocument\":\"USER NAME\"}"',
   },
 ]

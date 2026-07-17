@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/network-filter-dropdown'
 import { PageHeader } from '@/components/ui/page-header'
 import { CardGrid } from '@/components/card/card-grid'
+import { CardLoadErrorToast } from '@/components/card/card-load-error-toast'
 import {
   type CardPageProps,
   type WalletCard,
@@ -136,12 +137,15 @@ export default async function CardPage({ searchParams }: CardPageProps) {
       </div>
 
       {error ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-destructive">Failed to load cards</CardTitle>
-            <CardDescription>{error.message}</CardDescription>
-          </CardHeader>
-        </Card>
+        <>
+          <CardLoadErrorToast message={error.message} />
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-destructive">Failed to load cards</CardTitle>
+              <CardDescription>{error.message}</CardDescription>
+            </CardHeader>
+          </Card>
+        </>
       ) : !allCards.length ? (
         <Card>
           <CardHeader>

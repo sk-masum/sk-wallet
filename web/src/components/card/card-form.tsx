@@ -4,6 +4,8 @@ import { useMemo, useRef, useState, type FormEvent } from 'react'
 import { useFormStatus } from 'react-dom'
 
 import { Button, buttonVariants } from '@/components/ui/button'
+import { FormActions } from '@/components/ui/form-actions'
+import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
 import { CardNumberInput } from '@/components/card/card-number-input'
 import { CvvOtpInput } from '@/components/card/cvv-otp-input'
@@ -56,25 +58,16 @@ function FormPendingOverlay() {
   )
 }
 
-type FormActionsProps = {
+type CardFormActionsProps = {
   submitLabel: string
   showReset: boolean
 }
 
-function FormActions({ submitLabel, showReset }: FormActionsProps) {
+function CardFormActions({ submitLabel, showReset }: CardFormActionsProps) {
   const { pending } = useFormStatus()
 
   return (
-    <div className="sm:col-span-2 flex flex-col gap-2 sm:flex-row">
-      <Button type="submit" className="px-6 w-full text-md uppercase tracking-wider sm:w-auto" disabled={pending}>
-        {pending ? 'Saving...' : submitLabel}
-      </Button>
-      {showReset ? (
-        <Button type="reset" variant="outline" className="px-6 w-full text-md uppercase tracking-wider sm:w-auto" disabled={pending}>
-          Reset
-        </Button>
-      ) : null}
-    </div>
+    <FormActions submitLabel={submitLabel} isSubmitting={pending} showReset={showReset} />
   )
 }
 
@@ -160,8 +153,7 @@ export function CardForm({
       <input type="hidden" name="color_name" value={selectedColorName} />
       <FormPendingOverlay />
 
-      <fieldset className="sm:col-span-2">
-        <legend className="mb-2 text-sm font-medium">Card type</legend>
+      <FormField id="color_name" label="Card Type" error={fieldErrors.card_type} className="sm:col-span-2">
         <div className="flex flex-wrap gap-2">
           <label className="relative cursor-pointer">
             <input
@@ -205,13 +197,9 @@ export function CardForm({
             </span>
           </label>
         </div>
-        {fieldErrors.card_type ? <p className="mt-1 text-xs text-destructive">{fieldErrors.card_type}</p> : null}
-      </fieldset>
+      </FormField>
 
-      <div className="space-y-2">
-        <label htmlFor="card_name" className="text-xs font-medium text-muted-foreground uppercase">
-          CARD NAME
-        </label>
+      <FormField id="card_name" label="CARD NAME" error={fieldErrors.card_name}>
         <Input
           id="card_name"
           name="card_name"
@@ -224,27 +212,20 @@ export function CardForm({
           defaultValue={values.cardName}
           required
         />
-        {fieldErrors.card_name ? <p className="text-xs text-destructive">{fieldErrors.card_name}</p> : null}
-      </div>
-      <div className="space-y-2">
-        <label htmlFor="provider" className="text-xs font-medium text-muted-foreground uppercase">
-          PROVIDER
-        </label>
-        <Input
-          id="provider"
-          name="provider"
-          placeholder="e.g. HBL"
-          onChange={() => validateFields(['provider'])}
-          className={fieldErrors.provider ? 'border-destructive focus-visible:ring-destructive' : ''}
-          aria-invalid={Boolean(fieldErrors.provider)}
-          maxLength={50}
-          defaultValue={values.provider}
+      </FormField>
+      <FormField id="number" label="CARD NUMBER" error={fieldErrors.number}>
+        <CardNumberInput
+          id="number"
+          defaultValue={values.number}
+          network={selectedNetwork}
+          required
+          onChange={() => validateFields(['number'])}
+          className={fieldErrors.number ? 'border-destructive focus-visible:ring-destructive' : ''}
         />
-        {fieldErrors.provider ? <p className="text-xs text-destructive">{fieldErrors.provider}</p> : null}
-      </div>
+      </FormField>
 
-      <fieldset className="min-w-0 sm:col-span-2">
-        <legend className="mb-2 text-sm font-medium">Card color</legend>
+
+      <FormField id="color" label="Color" className="min-w-0 sm:col-span-2">
         <div className="w-full max-w-full overflow-x-auto overscroll-x-contain py-2 pl-1">
           <div className="flex min-w-max flex-nowrap items-center gap-2 pr-1">
             {themes.map((theme) => {
@@ -267,12 +248,80 @@ export function CardForm({
             })}
           </div>
         </div>
-      </fieldset>
+      </FormField>
 
-      <div className="space-y-1">
-        <label htmlFor="network" className="text-xs font-medium text-muted-foreground uppercase">
-          NETWORK
-        </label>
+      <FormField id="provider" label="PROVIDER" error={fieldErrors.provider}>
+        <Input
+          id="provider"
+          name="provider"
+          placeholder="e.g. HBL"
+          onChange={() => validateFields(['provider'])}
+          className={fieldErrors.provider ? 'border-destructive focus-visible:ring-destructive' : ''}
+          aria-invalid={Boolean(fieldErrors.provider)}
+          maxLength={50}
+          defaultValue={values.provider}
+        />
+      </FormField>
+
+      <FormField id="holder_name" label="HOLDER NAME" error={fieldErrors.holder_name}>
+        <Input
+          id="holder_name"
+          name="holder_name"
+          placeholder="As printed on card"
+          onChange={() => validateFields(['holder_name'])}
+          className={fieldErrors.holder_name ? 'border-destructive focus-visible:ring-destructive' : ''}
+          aria-invalid={Boolean(fieldErrors.holder_name)}
+          autoComplete="cc-name"
+          minLength={2}
+          maxLength={80}
+          defaultValue={values.holderName}
+          required
+        />
+      </FormField>
+
+      <FormField id="expiry_month" label="EXPIRY MONTH" error={fieldErrors.expiry_month}>
+        <select
+          id="expiry_month"
+          name="expiry_month"
+          defaultValue={values.expiryMonth}
+          onChange={() => validateFields(['expiry_month', 'expiry_year'])}
+          required
+          aria-invalid={Boolean(fieldErrors.expiry_month)}
+          className={cn(
+            'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+            fieldErrors.expiry_month && 'border-destructive focus-visible:ring-destructive'
+          )}
+        >
+          <option value="" disabled>
+            Select month
+          </option>
+          {MONTH_OPTIONS.map((month) => (
+            <option key={month.value} value={month.value}>
+              {month.label}
+            </option>
+          ))}
+        </select>
+      </FormField>
+
+      <FormField id="expiry_year" label="EXPIRY YEAR" error={fieldErrors.expiry_year}>
+        <Input
+          id="expiry_year"
+          name="expiry_year"
+          placeholder="YYYY"
+          onChange={() => validateFields(['expiry_year'])}
+          className={fieldErrors.expiry_year ? 'border-destructive focus-visible:ring-destructive' : ''}
+          aria-invalid={Boolean(fieldErrors.expiry_year)}
+          inputMode="numeric"
+          pattern="[0-9]{4}"
+          minLength={4}
+          maxLength={4}
+          defaultValue={values.expiryYear}
+          required
+        />
+      </FormField>
+
+
+      <FormField id="network" label="NETWORK" error={fieldErrors.network}>
         <select
           id="network"
           name="network"
@@ -297,97 +346,9 @@ export function CardForm({
             </option>
           ))}
         </select>
-        {fieldErrors.network ? <p className="text-xs text-destructive">{fieldErrors.network}</p> : null}
-      </div>
+      </FormField>
 
-      <div className="space-y-1">
-        <label htmlFor="number" className="text-xs font-medium text-muted-foreground uppercase">
-          CARD NUMBER
-        </label>
-        <CardNumberInput
-          id="number"
-          defaultValue={values.number}
-          network={selectedNetwork}
-          required
-          onChange={() => validateFields(['number'])}
-          className={fieldErrors.number ? 'border-destructive focus-visible:ring-destructive' : ''}
-        />
-        {fieldErrors.number ? <p className="text-xs text-destructive">{fieldErrors.number}</p> : null}
-      </div>
-
-      <div className="space-y-1">
-        <label htmlFor="holder_name" className="text-xs font-medium text-muted-foreground uppercase">
-          HOLDER NAME
-        </label>
-        <Input
-          id="holder_name"
-          name="holder_name"
-          placeholder="As printed on card"
-          onChange={() => validateFields(['holder_name'])}
-          className={fieldErrors.holder_name ? 'border-destructive focus-visible:ring-destructive' : ''}
-          aria-invalid={Boolean(fieldErrors.holder_name)}
-          autoComplete="cc-name"
-          minLength={2}
-          maxLength={80}
-          defaultValue={values.holderName}
-          required
-        />
-        {fieldErrors.holder_name ? <p className="text-xs text-destructive">{fieldErrors.holder_name}</p> : null}
-      </div>
-
-      <div className="space-y-1">
-        <label htmlFor="expiry_month" className="text-xs font-medium text-muted-foreground uppercase">
-          EXPIRY MONTH
-        </label>
-        <select
-          id="expiry_month"
-          name="expiry_month"
-          defaultValue={values.expiryMonth}
-          onChange={() => validateFields(['expiry_month', 'expiry_year'])}
-          required
-          aria-invalid={Boolean(fieldErrors.expiry_month)}
-          className={cn(
-            'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
-            fieldErrors.expiry_month && 'border-destructive focus-visible:ring-destructive'
-          )}
-        >
-          <option value="" disabled>
-            Select month
-          </option>
-          {MONTH_OPTIONS.map((month) => (
-            <option key={month.value} value={month.value}>
-              {month.label}
-            </option>
-          ))}
-        </select>
-        {fieldErrors.expiry_month ? <p className="text-xs text-destructive">{fieldErrors.expiry_month}</p> : null}
-      </div>
-
-      <div className="space-y-1">
-        <label htmlFor="expiry_year" className="text-xs font-medium text-muted-foreground uppercase">
-          EXPIRY YEAR
-        </label>
-        <Input
-          id="expiry_year"
-          name="expiry_year"
-          placeholder="YYYY"
-          onChange={() => validateFields(['expiry_year'])}
-          className={fieldErrors.expiry_year ? 'border-destructive focus-visible:ring-destructive' : ''}
-          aria-invalid={Boolean(fieldErrors.expiry_year)}
-          inputMode="numeric"
-          pattern="[0-9]{4}"
-          minLength={4}
-          maxLength={4}
-          defaultValue={values.expiryYear}
-          required
-        />
-        {fieldErrors.expiry_year ? <p className="text-xs text-destructive">{fieldErrors.expiry_year}</p> : null}
-      </div>
-
-      <div className="space-y-1">
-        <label htmlFor="cvv" className="text-xs font-medium text-muted-foreground uppercase">
-          CVV
-        </label>
+      <FormField id="cvv" label="CVV" error={fieldErrors.cvv}>
         <CvvOtpInput
           id="cvv"
           defaultValue={values.cvv}
@@ -396,10 +357,9 @@ export function CardForm({
           invalid={Boolean(fieldErrors.cvv)}
           onChange={() => validateFields(['cvv'])}
         />
-        {fieldErrors.cvv ? <p className="text-xs text-destructive">{fieldErrors.cvv}</p> : null}
-      </div>
+      </FormField>
 
-      <FormActions submitLabel={submitLabel} showReset={showReset} />
+      <CardFormActions submitLabel={submitLabel} showReset={showReset} />
     </form>
   )
 }
