@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { AlertTriangle, SearchX, WalletCards, X } from 'lucide-react'
+import { AlertTriangle, WalletCards, X } from 'lucide-react'
 
 import { buttonVariants } from '@/components/ui/button'
 import {
   Card,
+  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -218,33 +219,53 @@ export default async function CardPage({ searchParams }: CardPageProps) {
         </>
       ) : !allCards.length ? (
         <Card className="border-border/70 bg-card/90 shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <WalletCards className="h-4 w-4 text-muted-foreground" />
-              No cards found
-            </CardTitle>
+          <CardHeader className="pb-2 text-center">
+            <CardTitle className="justify-center">No cards found</CardTitle>
             <CardDescription>
               Add rows in Supabase and ensure your SELECT policy allows access.
             </CardDescription>
           </CardHeader>
+          <CardContent className="pb-6">
+            <div className="mx-auto flex w-full max-w-md flex-col items-center gap-4 rounded-2xl border border-border/70 bg-muted/15 p-5">
+              <div className="relative h-24 w-40">
+                <div className="absolute left-1 top-3 h-20 w-32 rounded-xl border border-border/60 bg-background/80" />
+                <div className="absolute right-1 top-0 h-20 w-32 rounded-xl border border-primary/35 bg-linear-to-br from-primary/25 via-primary/10 to-background/70 shadow-md" />
+                <div className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/90">
+                  <WalletCards className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
+              <p className="text-center text-xs text-muted-foreground">
+                Your wallet is empty. Tap Add card to create your first card.
+              </p>
+            </div>
+          </CardContent>
         </Card>
       ) : hasFilters && !filteredCards.length ? (
         <Card className="border-border/70 bg-card/90 shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <SearchX className="h-4 w-4 text-muted-foreground" />
-              No matching cards
-            </CardTitle>
+          <CardHeader className="pb-2 text-center">
+            <CardTitle className="justify-center">No matching cards</CardTitle>
             <CardDescription>
               Try a different card name, provider, number, network, or card type filter.
             </CardDescription>
-            <Link
-              href={buildFilterHref({ q: '', network: '', type: 'all' })}
-              className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'mt-2 w-fit')}
-            >
-              Clear filters
-            </Link>
           </CardHeader>
+          <CardContent className="pb-6">
+            <div className="mx-auto flex w-full max-w-md flex-col items-center gap-4 rounded-2xl border border-border/70 bg-muted/15 p-5">
+              <div className="relative h-24 w-40">
+                <div className="absolute left-1 top-3 h-20 w-32 rounded-xl border border-border/60 bg-background/80" />
+                <div className="absolute right-1 top-0 h-20 w-32 rounded-xl border border-primary/35 bg-linear-to-br from-primary/25 via-primary/10 to-background/70 shadow-md" />
+                <div className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/90">
+                  <WalletCards className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
+
+              <Link
+                href={buildFilterHref({ q: '', network: '', type: 'all' })}
+                className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'rounded-full px-4')}
+              >
+                Clear filters
+              </Link>
+            </div>
+          </CardContent>
         </Card>
       ) : (
         <CardGrid cards={filteredCards} />

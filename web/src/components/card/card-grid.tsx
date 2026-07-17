@@ -87,13 +87,13 @@ export function CardGrid({ cards }: CardGridProps) {
       <section className="mx-auto w-full max-w-5xl lg:grid lg:grid-cols-2 lg:gap-6">
         {cards.map((card, index) => {
           const id = String(card.id ?? 'N/A')
-          const networkLabel = getNetworkLabel(card.network)
+          const isSelected = selectedCardId === id
           return (
             <button
               key={id}
               type="button"
               className={cn(
-                'block w-full text-left transition-transform duration-300 ease-out hover:-translate-y-1',
+                'group relative block w-full text-left transition-all duration-300 ease-out hover:-translate-y-1 active:scale-[0.995] focus-visible:outline-none',
                 'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-6 motion-safe:duration-500',
                 index > 0 && '-mt-26 sm:-mt-42',
                 'lg:mt-0'
@@ -102,7 +102,21 @@ export function CardGrid({ cards }: CardGridProps) {
               onClick={() => setSelectedCardId(id)}
               aria-label={`Open card ${id}`}
             >
-              <CardFace card={card} />
+              <span
+                className={cn(
+                  'pointer-events-none absolute inset-x-4 -bottom-2 h-8 rounded-full bg-primary/20 blur-xl opacity-0 transition-opacity duration-300',
+                  'group-hover:opacity-100 group-focus-visible:opacity-100',
+                  isSelected && 'opacity-100'
+                )}
+              />
+              <div
+                className={cn(
+                  'relative transition-transform duration-300 ease-out group-hover:scale-[1.01] group-focus-visible:scale-[1.01]',
+                  isSelected && 'scale-[1.01]'
+                )}
+              >
+                <CardFace card={card} />
+              </div>
             </button>
           )
         })}
@@ -113,6 +127,7 @@ export function CardGrid({ cards }: CardGridProps) {
           <DetailDialogContent
             className={cn(
               'max-h-[90dvh] w-[calc(100vw-2rem)] max-w-120 overflow-visible border-0 bg-transparent p-0 shadow-none',
+              'motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-3 motion-safe:duration-300',
               isMobile &&
               'top-auto bottom-0 left-0 right-0 w-full max-w-none translate-x-0 translate-y-0 rounded-none'
             )}
@@ -130,12 +145,12 @@ export function CardGrid({ cards }: CardGridProps) {
               />
 
               <div className="-mt-px rounded-b-2xl border border-t-0 border-border/65 bg-linear-to-b from-background/94 to-muted/35 px-3 pb-3 pt-2.5 backdrop-blur-md sm:px-4 sm:pb-4 sm:pt-3">
-                <div className="grid grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-2 gap-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md"
+                    className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
                     onClick={() => setShowCvv((prev) => !prev)}
                   >
                     <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
@@ -147,7 +162,7 @@ export function CardGrid({ cards }: CardGridProps) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md"
+                    className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
                     onClick={() => router.push(`/card/${selectedCard.id}`)}
                   >
                     <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
@@ -157,12 +172,12 @@ export function CardGrid({ cards }: CardGridProps) {
                   </Button>
                 </div>
 
-                <div className="mt-2.5 border-t border-border/55 pt-2.5 sm:mt-3 sm:pt-3">
+                <div className="mt-2.5 border-t border-border/55 pt-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 sm:mt-3 sm:pt-3">
                   <Button
                     type="button"
                     variant="destructive"
                     size="sm"
-                    className="h-11 w-full justify-start rounded-xl border border-destructive/45 bg-linear-to-r from-rose-600 to-red-600 px-3 text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:from-rose-500 hover:to-red-500 hover:shadow-md"
+                    className="h-11 w-full justify-start rounded-xl border border-destructive/45 bg-linear-to-r from-rose-600 to-red-600 px-3 text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:from-rose-500 hover:to-red-500 hover:shadow-md active:scale-[0.98]"
                     onClick={() => setConfirmDeleteOpen(true)}
                     disabled={isDeleting}
                   >
