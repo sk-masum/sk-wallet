@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
 
 import { BottomTabBar } from '@/components/ui/bottom-tab-bar'
-import { PageHeader } from '@/components/ui/page-header'
 import { DocumentVault } from '@/components/doc/document-vault'
+import { ListingPageHeader } from '@/components/shared/listing-page-header'
+import { ListingPageLayout } from '@/components/shared/listing-page-layout'
 import { serverApiGet } from '@/lib/api/server'
 import type { UserDocument } from '@/models/document'
 
@@ -19,12 +20,12 @@ export default async function DocPage() {
   const documentFetchError = response.ok ? '' : result?.error || 'Failed to load document records.'
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-3xl px-6 pb-28 pt-12">
-      <PageHeader
+    <ListingPageLayout contentClassName="max-w-3xl">
+      <ListingPageHeader
         title="Documents"
-        showAddButton
+        description={`${documents.length} ${documents.length === 1 ? 'document' : 'documents'}`}
         addHref="/doc/new"
-        addButtonLabel="Add document"
+        addLabel="Add document"
       />
 
       <section className="mt-8">
@@ -32,6 +33,6 @@ export default async function DocPage() {
       </section>
 
       <BottomTabBar />
-    </main>
+    </ListingPageLayout>
   )
 }

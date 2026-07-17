@@ -1,6 +1,6 @@
 'use client'
 
-import { PencilLine, Settings2, ShieldCheck } from 'lucide-react'
+import { CheckCircle2, Fingerprint, LoaderCircle, LogOut, PencilLine, Settings2, ShieldCheck } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
@@ -20,7 +20,7 @@ import {
   registerBiometricCredential,
   verifyBiometricCredential,
 } from '@/lib/biometric'
-import { createSupabaseBrowserClient } from '@/lib/supabase/client'
+import { getBrowserUser, signOutBrowserSession } from '@/lib/supabase/browser-auth'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -30,13 +30,14 @@ export default function SettingsPage() {
   const [biometricSupported, setBiometricSupported] = useState(false)
   const [isBiometricBusy, setIsBiometricBusy] = useState(false)
   const [biometricMessage, setBiometricMessage] = useState<string>('')
+  const [isSigningOut, setIsSigningOut] = useState(false)
+  const [signOutError, setSignOutError] = useState<string>('')
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const supabase = createSupabaseBrowserClient()
-        const { data } = await supabase.auth.getUser()
-        setProfile(data.user ?? null)
+        const user = await getBrowserUser()
+        setProfile(user)
       } finally {
         setIsProfileLoading(false)
       }
@@ -149,136 +150,211 @@ export default function SettingsPage() {
     setIsBiometricBusy(false)
   }
   const onSignOut = async () => {
-    sessionStorage.removeItem(BIOMETRIC_SESSION_UNLOCK_KEY)
-    const supabase = createSupabaseBrowserClient()
-    await supabase.auth.signOut()
-    router.push('/auth')
-    router.refresh()
+    if (isSigningOut) return
+
+    setSignOutError('')
+    setIsSigningOut(true)
+
+    try {
+      sessionStorage.removeItem(BIOMETRIC_SESSION_UNLOCK_KEY)
+      const { error } = await signOutBrowserSession()
+
+      if (error) {
+        setSignOutError(error.message)
+        return
+      }
+
+      router.replace('/auth')
+      router.refresh()
+    } catch {
+      setSignOutError('Unable to sign out right now. Please try again.')
+    } finally {
+      setIsSigningOut(false)
+    }
   }
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-3xl px-4 pb-28 pt-12 sm:px-6 lg:px-8">
-      <PageHeader
-        title="Settings"
-        description="Manage your account preferences."
-        showBackButton
-        backHref="/card"
-        backButtonLabel="Back to cards"
-      />
+    <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_15%_10%,hsl(var(--primary)/0.12),transparent_32%),radial-gradient(circle_at_85%_20%,hsl(var(--ring)/0.14),transparent_30%),linear-gradient(180deg,hsl(var(--background)),hsl(var(--muted)/0.55))]">
+      <div className="mx-auto w-full max-w-3xl px-4 pb-28 pt-12 sm:px-6 lg:px-8">
+        <PageHeader
+          title="Settings"
+          description="Manage your account preferences."
+          showBackButton
+          backHref="/card"
+          backButtonLabel="Back to cards"
+          className="mb-6"
+        />
 
-      <div className="grid gap-6">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between gap-3">
-              <CardTitle>Profile</CardTitle>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="Update profile details"
-                onClick={() => {
-                  router.push('/settings/profile-update')
-                }}
-              >
-                <PencilLine className="h-4 w-4" />
-              </Button>
+        <div className="grid gap-6">
+          <Card className="overflow-hidden border-border/70 bg-card/90 shadow-xl backdrop-blur-sm">
+            <div className="bg-linear-to-r from-foreground via-foreground/85 to-primary px-6 py-4 text-primary-foreground">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground/75">Account</p>
+                  <h2 className="text-lg font-semibold leading-none">Profile</h2>
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  className="h-9 w-9 rounded-full border border-primary-foreground/20 bg-primary-foreground/15 text-primary-foreground hover:bg-primary-foreground/25"
+                  aria-label="Update profile details"
+                  onClick={() => {
+                    router.push('/settings/profile-update')
+                  }}
+                >
+                  <PencilLine className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <CardDescription>Your account profile information.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {isProfileLoading ? (
-              <div className="flex items-center gap-4">
-                <Skeleton className="h-14 w-14 rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-40" />
-                  <Skeleton className="h-4 w-56" />
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-4 rounded-lg border p-3">
-                {avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={avatarUrl}
-                    alt="Profile avatar"
-                    className="h-14 w-14 rounded-full border object-cover"
-                  />
-                ) : (
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full border bg-muted text-sm font-semibold text-muted-foreground">
-                    {initials}
+
+            <CardContent className="space-y-3 p-4 sm:p-5">
+              {isProfileLoading ? (
+                <div className="flex items-center gap-4 rounded-xl border border-border/70 bg-muted/20 p-3">
+                  <Skeleton className="h-14 w-14 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-4 w-56" />
                   </div>
-                )}
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold">{fullName ?? 'No name set'}</p>
-                  <p className="truncate text-sm text-muted-foreground">{email ?? 'No email available'}</p>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              ) : (
+                <div className="flex items-center gap-4 rounded-xl border border-border/70 bg-muted/25 p-3">
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={avatarUrl}
+                      alt="Profile avatar"
+                      className="h-14 w-14 rounded-full border border-border object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-background text-sm font-semibold text-muted-foreground">
+                      {initials}
+                    </div>
+                  )}
+                  <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold">{fullName ?? 'No name set'}</p>
+                      <p className="truncate text-sm text-muted-foreground">{email ?? 'No email available'}</p>
+                    </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings2 className="h-4 w-4" />
-              Appearance
-            </CardTitle>
-            <CardDescription>Choose your preferred theme mode.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ModeToggle />
-          </CardContent>
-        </Card>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="h-10 w-10 shrink-0 rounded-full shadow-lg"
+                      onClick={onSignOut}
+                      disabled={isSigningOut}
+                      aria-label="Sign out"
+                      title="Sign out"
+                    >
+                      {isSigningOut ? (
+                        <LoaderCircle className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <LogOut className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4" />
-              Security
-            </CardTitle>
-            <CardDescription>Control biometric sign-in for this device.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <label className="flex items-center justify-between rounded-lg border p-3">
-              <div>
-                <p className="text-sm font-medium">Enable biometric unlock</p>
-                <p className="text-xs text-muted-foreground">Use Face ID / Touch ID when available.</p>
+              {signOutError ? <p className="text-xs text-destructive">{signOutError}</p> : null}
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden border-border/70 bg-card/90 shadow-lg backdrop-blur-sm">
+            <div className="border-b border-border/60 bg-linear-to-r from-muted/55 via-background/80 to-muted/45 px-5 py-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Personalization</p>
+                  <h3 className="mt-0.5 flex items-center gap-2 text-base font-semibold">
+                    <Settings2 className="h-4 w-4" />
+                    Appearance
+                  </h3>
+                </div>
+                <span className="inline-flex items-center rounded-full border border-border/70 bg-background/80 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                  Theme
+                </span>
               </div>
-              <Switch
-                checked={biometricEnabled}
-                disabled={isBiometricBusy || !biometricSupported}
-                onCheckedChange={(checked) => {
-                  void onBiometricToggle(checked)
-                }}
-              />
-            </label>
-            {!biometricSupported ? (
-              <p className="mt-2 text-xs text-muted-foreground">
-                Biometrics are not available on this device/browser.
-              </p>
-            ) : null}
-            {biometricEnabled ? (
-              <div className="mt-3">
+            </div>
+
+            <CardContent className="space-y-3 p-4 sm:p-5">
+              <div className="rounded-xl border border-border/70 bg-muted/20 p-3">
+                <p className="mb-2 text-xs font-medium text-muted-foreground">Choose your preferred mode</p>
+                <ModeToggle className="w-full sm:w-fit" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden border-border/70 bg-card/90 shadow-lg backdrop-blur-sm">
+            <div className="border-b border-border/60 bg-linear-to-r from-muted/55 via-background/80 to-muted/45 px-5 py-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Security</p>
+                  <h3 className="mt-0.5 flex items-center gap-2 text-base font-semibold">
+                    <ShieldCheck className="h-4 w-4" />
+                    Biometric Unlock
+                  </h3>
+                </div>
+                <span
+                  className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${biometricSupported
+                      ? 'border-emerald-400/35 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                      : 'border-border/70 bg-background/80 text-muted-foreground'
+                    }`}
+                >
+                  {biometricSupported ? 'Supported' : 'Unsupported'}
+                </span>
+              </div>
+            </div>
+
+            <CardContent className="space-y-3 p-4 sm:p-5">
+              <label className="flex items-center justify-between rounded-xl border border-border/70 bg-muted/20 p-3">
+                <div className="flex min-w-0 items-start gap-2.5">
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border/70 bg-background/80">
+                    <Fingerprint className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Enable biometric unlock</p>
+                    <p className="text-xs text-muted-foreground">Use Face ID or Touch ID when available.</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={biometricEnabled}
+                  disabled={isBiometricBusy || !biometricSupported}
+                  onCheckedChange={(checked) => {
+                    void onBiometricToggle(checked)
+                  }}
+                />
+              </label>
+
+              {!biometricSupported ? (
+                <p className="rounded-lg border border-border/70 bg-muted/15 px-3 py-2 text-xs text-muted-foreground">
+                  Biometrics are not available on this device or browser.
+                </p>
+              ) : null}
+
+              {biometricEnabled ? (
                 <Button
                   type="button"
                   variant="outline"
+                  className="h-10 w-full justify-center rounded-xl border-border/70 bg-background/85 text-sm font-medium shadow-sm transition-all hover:-translate-y-0.5 hover:bg-background sm:w-auto"
                   disabled={isBiometricBusy}
                   onClick={() => {
                     void verifyBiometric()
                   }}
                 >
+                  {isBiometricBusy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
                   Verify biometrics
                 </Button>
-              </div>
-            ) : null}
-            {biometricMessage ? <p className="mt-2 text-xs text-muted-foreground">{biometricMessage}</p> : null}
-            <div className="mt-4">
-              <Button type="button" variant="outline" onClick={onSignOut}>
-                Sign out
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              ) : null}
+
+              {biometricMessage ? (
+                <p className="rounded-lg border border-border/70 bg-muted/15 px-3 py-2 text-xs text-muted-foreground">
+                  {biometricMessage}
+                </p>
+              ) : null}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <BottomTabBar />

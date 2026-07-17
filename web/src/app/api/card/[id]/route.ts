@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 
-import { createClient } from '@/lib/supabase/server';
+import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
 import { detokenizeCardCvv, detokenizeCardNumber, tokenizeCardCvv, tokenizeCardNumber } from '@/lib/security/card-token';
 
 function getCardWriteErrorMessage(error: { code?: string; message: string }) {
@@ -18,15 +17,10 @@ type Params = {
 
 export async function GET(_request: Request, { params }: Params) {
   const { id } = await params;
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (unauthorizedResponse || !user) {
+    return unauthorizedResponse;
   }
 
   const { data, error } = await supabase
@@ -59,15 +53,10 @@ export async function GET(_request: Request, { params }: Params) {
 
 export async function PUT(request: Request, { params }: Params) {
   const { id } = await params;
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (unauthorizedResponse || !user) {
+    return unauthorizedResponse;
   }
 
   let payload: {
@@ -125,15 +114,10 @@ export async function PUT(request: Request, { params }: Params) {
 
 export async function DELETE(_request: Request, { params }: Params) {
   const { id } = await params;
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (unauthorizedResponse || !user) {
+    return unauthorizedResponse;
   }
 
   const { error } = await supabase

@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
 
 import { BottomTabBar } from '@/components/ui/bottom-tab-bar'
-import { PageHeader } from '@/components/ui/page-header'
 import { CredentialEditForm } from '@/components/credential/credential-edit-form'
+import { EntityFormPageLayout } from '@/components/shared/entity-form-page-layout'
 import { serverApiGet } from '@/lib/api/server'
 import type { UserCredential } from '@/models/credential'
 
@@ -28,19 +28,19 @@ export default async function EditCredentialPage({ params }: EditCredentialPageP
     }
 
     return (
-        <main className="mx-auto min-h-screen w-full max-w-3xl px-6 pb-28 pt-12">
-            <PageHeader
-                title="Edit Credential"
-                showBackButton
+        <>
+            <EntityFormPageLayout
+                pageTitle="Edit Credential"
+                sectionTitle="Update Credential"
+                sectionDescription="Edit your credential details."
                 backHref="/credential"
                 backButtonLabel="Back to credentials"
-            />
-
-            <section className="space-y-4">
+                maxWidthClassName="max-w-4xl"
+            >
                 <CredentialEditForm credential={result.data} />
-            </section>
+            </EntityFormPageLayout>
 
             <BottomTabBar />
-        </main>
+        </>
     )
 }

@@ -67,7 +67,14 @@ function CardFormActions({ submitLabel, showReset }: CardFormActionsProps) {
   const { pending } = useFormStatus()
 
   return (
-    <FormActions submitLabel={submitLabel} isSubmitting={pending} showReset={showReset} />
+    <FormActions
+      submitLabel={submitLabel}
+      isSubmitting={pending}
+      showReset={showReset}
+      className="gap-2.5 sm:justify-end"
+      submitClassName="h-11 rounded-xl px-8 text-sm font-semibold uppercase tracking-wide"
+      resetClassName="h-11 rounded-xl px-8 text-sm font-semibold uppercase tracking-wide"
+    />
   )
 }
 
@@ -98,6 +105,7 @@ export function CardForm({
   const [fieldErrors, setFieldErrors] = useState<CardFormFieldErrors>({})
   const formRef = useRef<HTMLFormElement | null>(null)
   const cvvLength = getExpectedCvvLength(Number(selectedNetwork)) ?? 3
+  const fieldControlClass = 'h-10 rounded-xl border-border/70 bg-background/80 px-3 text-sm shadow-sm'
 
   const getFieldErrorsFromForm = () => {
     if (!formRef.current) return {}
@@ -148,12 +156,23 @@ export function CardForm({
   }
 
   return (
-    <form ref={formRef} action={action} onSubmit={handleSubmit} className="relative grid gap-4 sm:grid-cols-2">
+    <form
+      ref={formRef}
+      action={action}
+      onSubmit={handleSubmit}
+      className="relative grid gap-x-4 gap-y-5 sm:grid-cols-2"
+    >
       {cardId ? <input type="hidden" name="id" value={cardId} /> : null}
       <input type="hidden" name="color_name" value={selectedColorName} />
       <FormPendingOverlay />
 
-      <FormField id="color_name" label="Card Type" error={fieldErrors.card_type} className="sm:col-span-2">
+      <FormField
+        id="color_name"
+        label="Card Type"
+        error={fieldErrors.card_type}
+        className="rounded-2xl border border-border/60 bg-muted/35 p-3 sm:col-span-2"
+        labelClassName="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase"
+      >
         <div className="flex flex-wrap gap-2">
           <label className="relative cursor-pointer">
             <input
@@ -168,7 +187,7 @@ export function CardForm({
             <span
               className={cn(
                 buttonVariants({ variant: 'outline', size: 'sm' }),
-                'border-input',
+                'h-10 min-w-28 rounded-xl border-border/70 bg-background/85 text-sm shadow-sm',
                 'peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground'
               )}
             >
@@ -189,7 +208,7 @@ export function CardForm({
             <span
               className={cn(
                 buttonVariants({ variant: 'outline', size: 'sm' }),
-                'border-input',
+                'h-10 min-w-28 rounded-xl border-border/70 bg-background/85 text-sm shadow-sm',
                 'peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground'
               )}
             >
@@ -205,7 +224,7 @@ export function CardForm({
           name="card_name"
           placeholder="e.g. Personal Visa"
           onChange={() => validateFields(['card_name'])}
-          className={fieldErrors.card_name ? 'border-destructive focus-visible:ring-destructive' : ''}
+          className={cn(fieldControlClass, fieldErrors.card_name && 'border-destructive focus-visible:ring-destructive')}
           aria-invalid={Boolean(fieldErrors.card_name)}
           minLength={2}
           maxLength={80}
@@ -220,13 +239,18 @@ export function CardForm({
           network={selectedNetwork}
           required
           onChange={() => validateFields(['number'])}
-          className={fieldErrors.number ? 'border-destructive focus-visible:ring-destructive' : ''}
+          className={cn(fieldControlClass, fieldErrors.number && 'border-destructive focus-visible:ring-destructive')}
         />
       </FormField>
 
 
-      <FormField id="color" label="Color" className="min-w-0 sm:col-span-2">
-        <div className="w-full max-w-full overflow-x-auto overscroll-x-contain py-2 pl-1">
+      <FormField
+        id="color"
+        label="Color"
+        className="min-w-0 rounded-2xl border border-border/60 bg-muted/35 p-3 sm:col-span-2"
+        labelClassName="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase"
+      >
+        <div className="w-full max-w-full overflow-x-auto overscroll-x-contain py-1 pl-1">
           <div className="flex min-w-max flex-nowrap items-center gap-2 pr-1">
             {themes.map((theme) => {
               const isSelected = selectedColorName === theme.colorName
@@ -237,7 +261,7 @@ export function CardForm({
                   type="button"
                   onClick={() => setSelectedColorName(theme.colorName)}
                   className={cn(
-                    'h-9 w-9 shrink-0 rounded-full border border-border transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                    'h-10 w-10 shrink-0 rounded-full border border-border transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                     theme.surface,
                     isSelected && 'ring-2 ring-primary ring-offset-2'
                   )}
@@ -256,7 +280,7 @@ export function CardForm({
           name="provider"
           placeholder="e.g. HBL"
           onChange={() => validateFields(['provider'])}
-          className={fieldErrors.provider ? 'border-destructive focus-visible:ring-destructive' : ''}
+          className={cn(fieldControlClass, fieldErrors.provider && 'border-destructive focus-visible:ring-destructive')}
           aria-invalid={Boolean(fieldErrors.provider)}
           maxLength={50}
           defaultValue={values.provider}
@@ -269,7 +293,7 @@ export function CardForm({
           name="holder_name"
           placeholder="As printed on card"
           onChange={() => validateFields(['holder_name'])}
-          className={fieldErrors.holder_name ? 'border-destructive focus-visible:ring-destructive' : ''}
+          className={cn(fieldControlClass, fieldErrors.holder_name && 'border-destructive focus-visible:ring-destructive')}
           aria-invalid={Boolean(fieldErrors.holder_name)}
           autoComplete="cc-name"
           minLength={2}
@@ -288,7 +312,7 @@ export function CardForm({
           required
           aria-invalid={Boolean(fieldErrors.expiry_month)}
           className={cn(
-            'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+            'flex h-10 w-full rounded-xl border border-border/70 bg-background/80 px-3 py-1 text-sm shadow-sm transition-colors outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
             fieldErrors.expiry_month && 'border-destructive focus-visible:ring-destructive'
           )}
         >
@@ -309,7 +333,7 @@ export function CardForm({
           name="expiry_year"
           placeholder="YYYY"
           onChange={() => validateFields(['expiry_year'])}
-          className={fieldErrors.expiry_year ? 'border-destructive focus-visible:ring-destructive' : ''}
+          className={cn(fieldControlClass, fieldErrors.expiry_year && 'border-destructive focus-visible:ring-destructive')}
           aria-invalid={Boolean(fieldErrors.expiry_year)}
           inputMode="numeric"
           pattern="[0-9]{4}"
@@ -333,7 +357,7 @@ export function CardForm({
           required
           aria-invalid={Boolean(fieldErrors.network)}
           className={cn(
-            'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+            'flex h-10 w-full rounded-xl border border-border/70 bg-background/80 px-3 py-1 text-sm shadow-sm transition-colors outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
             fieldErrors.network && 'border-destructive focus-visible:ring-destructive'
           )}
         >
@@ -359,7 +383,9 @@ export function CardForm({
         />
       </FormField>
 
-      <CardFormActions submitLabel={submitLabel} showReset={showReset} />
+      <div className="sm:col-span-2 border-t border-border/60 pt-4">
+        <CardFormActions submitLabel={submitLabel} showReset={showReset} />
+      </div>
     </form>
   )
 }

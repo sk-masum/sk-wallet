@@ -1,15 +1,13 @@
 import { Skeleton } from '@/components/ui/skeleton'
+import { ListingPageLoading } from '@/components/shared/listing-page-loading'
 
 export default function Loading() {
     return (
-        <main className="mx-auto min-h-screen w-full max-w-3xl px-6 pb-28 pt-12">
-            <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Credentials</h1>
-                    <p className="text-sm text-muted-foreground">Loading your credentials...</p>
-                </div>
-            </div>
-
+        <ListingPageLoading
+            title="Credentials"
+            description="Loading your credentials..."
+            contentClassName="max-w-3xl"
+        >
             <section className="grid gap-3 sm:grid-cols-2" aria-live="polite" aria-busy>
                 {Array.from({ length: 6 }).map((_, index) => (
                     <div key={index}>
@@ -25,6 +23,6 @@ export default function Loading() {
             </section>
 
             <style>{`@keyframes shimmer{100%{transform:translateX(100%)}}`}</style>
-        </main>
+        </ListingPageLoading>
     )
 }

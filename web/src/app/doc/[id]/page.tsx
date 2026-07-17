@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
 
 import { BottomTabBar } from '@/components/ui/bottom-tab-bar'
-import { PageHeader } from '@/components/ui/page-header'
 import { DocumentEditForm } from '@/components/doc/document-edit-form'
+import { EntityFormPageLayout } from '@/components/shared/entity-form-page-layout'
 import { serverApiGet } from '@/lib/api/server'
 import type { UserDocument } from '@/models/document'
 
@@ -28,19 +28,19 @@ export default async function EditDocumentPage({ params }: EditDocumentPageProps
   }
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-3xl px-6 pb-28 pt-12">
-      <PageHeader
-        title="Edit Document"
-        showBackButton
+    <>
+      <EntityFormPageLayout
+        pageTitle="Edit Document"
+        sectionTitle="Update Document"
+        sectionDescription="Edit your document details."
         backHref="/doc"
         backButtonLabel="Back to documents"
-      />
-
-      <section className="space-y-4">
+        maxWidthClassName="max-w-4xl"
+      >
         <DocumentEditForm document={result.data} />
-      </section>
+      </EntityFormPageLayout>
 
       <BottomTabBar />
-    </main>
+    </>
   )
 }

@@ -44,7 +44,11 @@ export default function RootLayout({
             <QueryToastBridge />
           </Suspense>
           <AppToaster />
-          <BiometricGuard>{children}</BiometricGuard>
+          <BiometricGuard>
+            <div className="min-h-screen bg-[radial-gradient(circle_at_15%_8%,hsl(var(--primary)/0.12),transparent_35%),radial-gradient(circle_at_85%_22%,hsl(var(--ring)/0.14),transparent_30%),linear-gradient(180deg,hsl(var(--background)),hsl(var(--muted)/0.5))]">
+              {children}
+            </div>
+          </BiometricGuard>
         </ThemeProvider>
       </body>
     </html>

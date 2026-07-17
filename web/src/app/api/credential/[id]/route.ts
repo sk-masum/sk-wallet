@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
 
 import { isCredentialTypeCode } from '@/constants/credential/types'
-import { createClient } from '@/lib/supabase/server'
+import { getRouteSupabaseContext } from '@/lib/supabase/route-auth'
 import { hashCredentialSecret } from '@/lib/security/credential-hash'
 import { tokenizeCredentialSecret } from '@/lib/security/credential-token'
 import type { CredentialFormPayload, CredentialTypeCode } from '@/models/credential'
@@ -32,15 +31,10 @@ function normalizeText(value: unknown, maxLength: number) {
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore)
+  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (unauthorizedResponse || !user) {
+    return unauthorizedResponse
   }
 
   const { data, error } = await supabase
@@ -59,15 +53,10 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
 
 export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore)
+  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (unauthorizedResponse || !user) {
+    return unauthorizedResponse
   }
 
   let payload: CredentialFormPayload
@@ -155,15 +144,10 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
 
 export async function DELETE(_request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore)
+  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (unauthorizedResponse || !user) {
+    return unauthorizedResponse
   }
 
   const { error } = await supabase

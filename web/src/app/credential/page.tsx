@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
 
 import { BottomTabBar } from '@/components/ui/bottom-tab-bar'
-import { PageHeader } from '@/components/ui/page-header'
 import { CredentialVault } from '@/components/credential/credential-vault'
+import { ListingPageHeader } from '@/components/shared/listing-page-header'
+import { ListingPageLayout } from '@/components/shared/listing-page-layout'
 import { serverApiGet } from '@/lib/api/server'
 import type { UserCredential } from '@/models/credential'
 
@@ -19,12 +20,12 @@ export default async function CredentialPage() {
     const credentialFetchError = response.ok ? '' : result?.error || 'Failed to load credentials.'
 
     return (
-        <main className="mx-auto min-h-screen w-full max-w-3xl px-6 pb-28 pt-12">
-            <PageHeader
+        <ListingPageLayout contentClassName="max-w-3xl">
+            <ListingPageHeader
                 title="Credentials"
-                showAddButton
+                description={`${credentials.length} ${credentials.length === 1 ? 'credential' : 'credentials'}`}
                 addHref="/credential/new"
-                addButtonLabel="Add credential"
+                addLabel="Add credential"
             />
 
             <section className="mt-8">
@@ -32,6 +33,6 @@ export default async function CredentialPage() {
             </section>
 
             <BottomTabBar />
-        </main>
+        </ListingPageLayout>
     )
 }

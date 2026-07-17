@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { PageHeader } from '@/components/ui/page-header'
+import { EntityFormPageLayout } from '@/components/shared/entity-form-page-layout'
 
 type CardFormPageLayoutProps = {
   pageTitle: string
@@ -26,17 +25,16 @@ function CardFormPageLayout({
   children,
 }: CardFormPageLayoutProps) {
   return (
-    <main className="mx-auto min-h-screen w-full max-w-3xl px-4 pb-28 pt-12 sm:px-6 lg:px-8">
-      <PageHeader title={pageTitle} showBackButton backHref={backHref} backButtonLabel={backButtonLabel} />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{cardTitle}</CardTitle>
-          <CardDescription>{cardDescription}</CardDescription>
-        </CardHeader>
-        <CardContent>{children}</CardContent>
-      </Card>
-    </main>
+    <EntityFormPageLayout
+      pageTitle={pageTitle}
+      sectionTitle={cardTitle}
+      sectionDescription={cardDescription}
+      backHref={backHref}
+      backButtonLabel={backButtonLabel}
+      maxWidthClassName="max-w-4xl"
+    >
+      {children}
+    </EntityFormPageLayout>
   )
 }
 

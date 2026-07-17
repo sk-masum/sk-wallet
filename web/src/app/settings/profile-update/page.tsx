@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { PageHeader } from '@/components/ui/page-header'
-import { createSupabaseBrowserClient } from '@/lib/supabase/client'
+import { getBrowserUser, updateBrowserUser } from '@/lib/supabase/browser-auth'
 
 export default function ProfileUpdatePage() {
   const router = useRouter()
@@ -23,9 +23,7 @@ export default function ProfileUpdatePage() {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const supabase = createSupabaseBrowserClient()
-        const { data } = await supabase.auth.getUser()
-        const user = data.user
+        const user = await getBrowserUser()
         setFullName(typeof user?.user_metadata?.full_name === 'string' ? user.user_metadata.full_name : '')
         setEmail(user?.email ?? '')
         setAvatarUrl(typeof user?.user_metadata?.avatar_url === 'string' ? user.user_metadata.avatar_url : '')
@@ -52,9 +50,7 @@ export default function ProfileUpdatePage() {
     setMessage('')
 
     try {
-      const supabase = createSupabaseBrowserClient()
-
-      const { error: profileError } = await supabase.auth.updateUser({
+      const { error: profileError } = await updateBrowserUser({
         data: {
           full_name: fullName.trim(),
           avatar_url: avatarUrl.trim(),
@@ -66,12 +62,12 @@ export default function ProfileUpdatePage() {
         return
       }
 
-      const { data } = await supabase.auth.getUser()
-      const existingEmail = data.user?.email ?? ''
+      const existingUser = await getBrowserUser()
+      const existingEmail = existingUser?.email ?? ''
       const nextEmail = email.trim()
 
       if (nextEmail && nextEmail !== existingEmail) {
-        const { error: emailError } = await supabase.auth.updateUser({ email: nextEmail })
+        const { error: emailError } = await updateBrowserUser({ email: nextEmail })
         if (emailError) {
           setMessage(emailError.message)
           return

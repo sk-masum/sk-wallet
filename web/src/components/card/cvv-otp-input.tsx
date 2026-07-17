@@ -83,10 +83,10 @@ export function CvvOtpInput({
               <div
                 key={index}
                 className={cn(
-                  'flex h-9 w-9 items-center justify-center rounded-md border text-sm font-medium transition-colors',
+                  'flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-semibold transition-colors',
                   invalid
                     ? 'border-destructive ring-1 ring-destructive/70'
-                    : 'border-input bg-transparent'
+                    : 'border-border/70 bg-background/80'
                 )}
               >
                 {value}

@@ -20,7 +20,7 @@ export function ModeToggle({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'relative flex h-10 items-center gap-1 rounded-full border border-white/35 bg-white/20 p-1 dark:border-white/20 dark:bg-slate-900/40',
+        'relative inline-grid h-10 grid-cols-3 items-center gap-1 rounded-full border border-border bg-muted/60 p-1',
         className
       )}
       role="group"
@@ -38,12 +38,13 @@ export function ModeToggle({ className }: { className?: string }) {
             variant="ghost"
             onClick={() => setTheme(option.value)}
             className={cn(
-              'h-8 rounded-full px-2.5 text-[11px] font-medium',
+              'h-8 rounded-full px-2.5 text-[11px] font-medium transition-all',
               isActive
-                ? 'bg-white/90 text-slate-900 shadow-sm hover:bg-white dark:bg-slate-100 dark:text-slate-900'
-                : 'text-slate-700 hover:bg-white/30 dark:text-slate-100 dark:hover:bg-white/15'
+                ? 'bg-background text-foreground shadow-sm hover:bg-background'
+                : 'text-muted-foreground hover:bg-background/70 hover:text-foreground'
             )}
             aria-pressed={isActive}
+            disabled={!mounted}
             title={`Use ${option.label.toLowerCase()} mode`}
           >
             <Icon className="mr-1.5 h-3.5 w-3.5" />

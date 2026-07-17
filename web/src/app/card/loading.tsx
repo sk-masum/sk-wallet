@@ -1,30 +1,14 @@
 import { Skeleton } from '@/components/ui/skeleton'
+import { ListingPageLoading } from '@/components/shared/listing-page-loading'
 
 export default function Loading() {
   return (
-    <main className="mx-auto min-h-screen w-full max-w-212.5 px-4 pb-28 pt-12 sm:px-6 lg:px-8">
-      <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Cards</h1>
-          <p className="text-sm text-muted-foreground">Loading your cards...</p>
-        </div>
-      </div>
-
-      <div className="mb-3 w-full sm:max-w-md">
-        <div className="h-10 rounded-md border border-input bg-background px-3 text-sm text-muted-foreground/80 flex items-center">
-          Search by card name, provider, or number
-        </div>
-      </div>
-
-      <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
-        <div className="grid h-9 w-full max-w-sm grid-cols-3 rounded-md border border-border text-sm">
-          <div className="flex items-center justify-center border-r border-border text-muted-foreground">All</div>
-          <div className="flex items-center justify-center border-r border-border text-muted-foreground">Credit</div>
-          <div className="flex items-center justify-center text-muted-foreground">Debit</div>
-        </div>
-        <div className="h-9 w-full rounded-md border border-input bg-background sm:w-48" />
-      </div>
-
+    <ListingPageLoading
+      title="Cards"
+      description="Loading your cards..."
+      contentClassName="max-w-212.5"
+      showCardFilters
+    >
       <section className="mx-auto w-full max-w-5xl lg:grid lg:grid-cols-2 lg:gap-6" aria-live="polite" aria-busy>
         {Array.from({ length: 4 }).map((_, index) => (
           <div key={index} className={index > 0 ? '-mt-42 lg:mt-0' : ''}>
@@ -56,6 +40,6 @@ export default function Loading() {
       </section>
 
       <style>{`@keyframes shimmer{100%{transform:translateX(100%)}}`}</style>
-    </main>
+    </ListingPageLoading>
   )
 }

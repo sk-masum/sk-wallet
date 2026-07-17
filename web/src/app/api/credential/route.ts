@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
 
-import { createClient } from '@/lib/supabase/server'
+import { getRouteSupabaseContext } from '@/lib/supabase/route-auth'
 import { hashCredentialSecret } from '@/lib/security/credential-hash'
 import { tokenizeCredentialSecret } from '@/lib/security/credential-token'
 import { isCredentialTypeCode } from '@/constants/credential/types'
@@ -35,17 +34,12 @@ function getCredentialWriteErrorMessage(error: { code?: string; message: string 
 }
 
 export async function GET(request: Request) {
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore)
+  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext()
   const { searchParams } = new URL(request.url)
   const requestedType = searchParams.get('type')?.trim().toUpperCase() ?? ''
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (unauthorizedResponse || !user) {
+    return unauthorizedResponse
   }
 
   let query = supabase
@@ -68,15 +62,10 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore)
+  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (unauthorizedResponse || !user) {
+    return unauthorizedResponse
   }
 
   let payload: CredentialFormPayload

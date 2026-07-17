@@ -9,6 +9,7 @@ type PageHeaderProps = {
   title: ReactNode
   description?: ReactNode
   className?: string
+  addButtonClassName?: string
   showBackButton?: boolean
   backHref?: string
   backButtonLabel?: string
@@ -21,6 +22,7 @@ export function PageHeader({
   title,
   description,
   className,
+  addButtonClassName,
   showBackButton = false,
   backHref = '/',
   backButtonLabel = 'Go back',
@@ -51,7 +53,11 @@ export function PageHeader({
       {showAddButton ? (
         <Link
           href={addHref}
-          className={cn(buttonVariants({ variant: 'default', size: 'icon' }), 'h-10 w-10 rounded-full shadow-sm')}
+          className={cn(
+            buttonVariants({ variant: 'default', size: 'icon' }),
+            'h-10 w-10 rounded-full shadow-sm',
+            addButtonClassName
+          )}
           aria-label={addButtonLabel}
           title={addButtonLabel}
         >
