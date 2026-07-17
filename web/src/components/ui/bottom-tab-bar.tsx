@@ -28,15 +28,18 @@ export function BottomTabBar() {
               href={tab.href}
               className={cn(
                 buttonVariants({ variant: active ? 'secondary' : 'ghost', size: 'sm' }),
-                'relative h-10 rounded-full px-4 text-sm',
+                'relative h-10 rounded-full text-sm',
+                active ? 'px-4' : 'w-10 px-0',
                 active
-                  ? 'bg-white/55 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] hover:bg-white/65 dark:bg-white/18 dark:text-white'
+                  ? 'bg-white/55 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] hover:bg-white/65 dark:bg-white/18 dark:text-white dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
                   : 'text-slate-700 hover:bg-white/20 dark:text-slate-100 dark:hover:bg-white/10'
               )}
               aria-current={active ? 'page' : undefined}
+              aria-label={tab.label}
+              title={tab.label}
             >
-              <Icon className="mr-1 h-4 w-4" />
-              {tab.label}
+              <Icon className={cn('h-4 w-4', active && '-mr-0.5')} />
+              {active ? tab.label : null}
             </Link>
           )
         })}
