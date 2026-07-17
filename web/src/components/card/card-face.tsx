@@ -1,7 +1,8 @@
-import { Check, Copy, Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 
 import ChipIcon from '@/components/icons/chip-icon'
 import { NetworkLogo } from '@/components/icons/network-logo'
+import { CopyButton } from '@/components/ui/copy-button'
 import { cn } from '@/lib/utils'
 import type { WalletCard } from '@/models/card'
 import { formatExpiry, maskCardNumber } from '@/utils/card/format'
@@ -10,10 +11,9 @@ import { getCardTheme, getCardThemeByColorName } from '@/utils/card/theme'
 
 export type CardFaceProps = {
   card: WalletCard
-  onCopyNumber?: () => void
   onToggleNumberVisibility?: () => void
-  onCopyExpiry?: () => void
-  copiedField?: 'number' | 'expiry' | null
+  allowCopyNumber?: boolean
+  allowCopyExpiry?: boolean
   showCvv?: boolean
   showFullNumber?: boolean
   expiryAlignStart?: boolean
@@ -22,10 +22,9 @@ export type CardFaceProps = {
 
 export function CardFace({
   card,
-  onCopyNumber,
   onToggleNumberVisibility,
-  onCopyExpiry,
-  copiedField = null,
+  allowCopyNumber = false,
+  allowCopyExpiry = false,
   showCvv = false,
   showFullNumber = false,
   expiryAlignStart = false,
@@ -60,21 +59,18 @@ export function CardFace({
 
       <ChipIcon className="-ml-1.75 mb-4 mt-2 h-10 w-16 self-start" />
 
-      {onCopyNumber ? (
+      {allowCopyNumber ? (
         <div className="inline-flex justify-between w-full sm:w-fit items-center gap-0 sm:gap-2">
-          <button
-            type="button"
-            onClick={onCopyNumber}
+          <CopyButton
+            value={numberDigits}
+            label="Card number"
             className="group inline-flex items-center gap-0 sm:gap-2 rounded px-1 py-0.5 text-left"
-            aria-label="Copy card number"
+            showStatusIcon
+            copyIconClassName="text-slate-200/90 opacity-0 transition-opacity group-hover:opacity-100"
+            checkIconClassName="text-green-300"
           >
             <span className="font-mono text-lg tracking-[0.18em]">{number}</span>
-            {copiedField === 'number' ? (
-              <Check className="h-4 w-4 text-green-300" />
-            ) : (
-              <Copy className="h-4 w-4 text-slate-200/90 opacity-0 transition-opacity group-hover:opacity-100" />
-            )}
-          </button>
+          </CopyButton>
 
           {onToggleNumberVisibility ? (
             <button
@@ -111,23 +107,20 @@ export function CardFace({
           )}
         >
           <p className={cn('text-[10px] uppercase tracking-[0.2em]', theme.mutedText)}>Expires</p>
-          {onCopyExpiry ? (
-            <button
-              type="button"
-              onClick={onCopyExpiry}
+          {allowCopyExpiry ? (
+            <CopyButton
+              value={expiry}
+              label="Expiry date"
               className={cn(
                 'group mt-1 inline-flex items-center gap-2 rounded py-0.5',
                 expiryAlignStart ? 'justify-start self-start' : 'justify-end self-end'
               )}
-              aria-label="Copy expiry date"
+              showStatusIcon
+              copyIconClassName="text-slate-200/90 opacity-0 transition-opacity group-hover:opacity-100"
+              checkIconClassName="text-green-300"
             >
               <span className="font-mono text-sm leading-4">{expiry}</span>
-              {copiedField === 'expiry' ? (
-                <Check className="h-4 w-4 text-green-300" />
-              ) : (
-                <Copy className="h-4 w-4 text-slate-200/90 opacity-0 transition-opacity group-hover:opacity-100" />
-              )}
-            </button>
+            </CopyButton>
           ) : (
             <p className="mt-1 font-mono text-sm leading-4">{expiry}</p>
           )}

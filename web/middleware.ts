@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import { updateSession } from '@/lib/supabase/middleware'
 
-const PROTECTED_PREFIXES = ['/card', '/doc', '/settings']
+const PROTECTED_PREFIXES = ['/card', '/doc', '/credential', '/settings']
 
 function isProtectedPath(pathname: string) {
   return PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix))

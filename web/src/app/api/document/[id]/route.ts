@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
 import { isDocumentCategory } from '@/constants/document/categories'
+import { detokenizeDocumentNumber } from '@/lib/security/doc-token'
 import { createClient } from '@/lib/supabase/server'
 
 type DocumentUpdatePayload = {
@@ -73,7 +74,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
 
   const { data, error } = await supabase
     .from('document_record')
-    .select('id, user_id, document_type, masked_number, document_number_last4, name_on_document, category, metadata, verified_at, expires_at, created_at, updated_at')
+    .select('id, user_id, document_type, document_number_token, masked_number, document_number_last4, name_on_document, category, metadata, verified_at, expires_at, created_at, updated_at')
     .eq('id', id)
     .eq('user_id', user.id)
     .single()
@@ -82,7 +83,20 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
     return NextResponse.json({ error: getDocumentWriteErrorMessage(error) }, { status: 404 })
   }
 
-  return NextResponse.json({ data })
+  let documentNumber = ''
+  try {
+    documentNumber = detokenizeDocumentNumber(data.document_number_token)
+  } catch {
+    return NextResponse.json({ error: 'Failed to decode document number' }, { status: 500 })
+  }
+
+  return NextResponse.json({
+    data: {
+      ...data,
+      document_number: documentNumber,
+      document_number_token: undefined,
+    },
+  })
 }
 
 export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {

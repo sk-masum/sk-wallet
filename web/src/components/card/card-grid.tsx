@@ -11,7 +11,6 @@ import type { WalletCard } from '@/models/card'
 import { clientApiDelete } from '@/lib/api/client'
 import { showToast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
-import { formatExpiry } from '@/utils/card/format'
 
 type CardGridProps = {
   cards: WalletCard[]
@@ -22,7 +21,6 @@ export function CardGrid({ cards }: CardGridProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const [copiedField, setCopiedField] = useState<'number' | 'expiry' | null>(null)
   const [showCvv, setShowCvv] = useState(false)
   const [showFullNumber, setShowFullNumber] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -45,16 +43,6 @@ export function CardGrid({ cards }: CardGridProps) {
     () => cards.find((card) => String(card.id) === selectedCardId) ?? null,
     [cards, selectedCardId]
   )
-
-  const copyText = async (field: 'number' | 'expiry', value: string) => {
-    try {
-      await navigator.clipboard.writeText(value)
-      setCopiedField(field)
-      setTimeout(() => setCopiedField(null), 1200)
-    } catch {
-      setCopiedField(null)
-    }
-  }
 
   const handleDelete = async () => {
     if (!selectedCardId || isDeleting) return
@@ -106,7 +94,7 @@ export function CardGrid({ cards }: CardGridProps) {
             className={cn(
               'max-h-[90dvh] w-[calc(100vw-2rem)] max-w-120 overflow-visible border-0 bg-transparent p-0 shadow-none',
               isMobile &&
-                'top-auto bottom-0 left-0 right-0 w-full max-w-none translate-x-0 translate-y-0 rounded-none'
+              'top-auto bottom-0 left-0 right-0 w-full max-w-none translate-x-0 translate-y-0 rounded-none'
             )}
           >
             <DialogClose
@@ -121,16 +109,13 @@ export function CardGrid({ cards }: CardGridProps) {
             <div className="max-h-[calc(90dvh-2rem)] overflow-y-auto px-4 pb-4 sm:px-0 sm:pb-0">
               <CardFace
                 card={selectedCard}
-                copiedField={copiedField}
                 showCvv={showCvv}
                 showFullNumber={showFullNumber}
                 expiryAlignStart
                 className="rounded-b-none"
-                onCopyNumber={() => copyText('number', String(selectedCard.number ?? '').replace(/\D/g, ''))}
                 onToggleNumberVisibility={() => setShowFullNumber((prev) => !prev)}
-                onCopyExpiry={() =>
-                  copyText('expiry', formatExpiry(selectedCard.expiry_month, selectedCard.expiry_year))
-                }
+                allowCopyNumber
+                allowCopyExpiry
               />
 
               <div className="-mt-px rounded-b-xl border border-t-0 border-slate-500/80 bg-transparent p-3 backdrop-blur-md dark:border-white/20">

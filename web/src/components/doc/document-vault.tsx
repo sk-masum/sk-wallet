@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import NoDocIcon from '@/components/icons/nodoc-icon'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { CopyButton } from '@/components/ui/copy-button'
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ import {
 } from '@/components/ui/select'
 import { getDocumentCategoryLabel } from '@/constants/document/categories'
 import { DOCUMENT_TYPE_OPTIONS, getDocumentTypeConfig } from '@/constants/document/types'
+import { clientApiGet } from '@/lib/api/client'
 import { clientApiDelete } from '@/lib/api/client'
 import { showToast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
@@ -65,6 +67,9 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
   const [searchValue, setSearchValue] = useState('')
   const [selectedType, setSelectedType] = useState('ALL')
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null)
+  const [selectedDocumentDetail, setSelectedDocumentDetail] = useState<
+    (UserDocument & { document_number?: string }) | null
+  >(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
@@ -79,6 +84,40 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
       variant: 'error',
     })
   }, [initialError])
+
+  useEffect(() => {
+    if (!selectedDocumentId) {
+      setSelectedDocumentDetail(null)
+      return
+    }
+
+    let cancelled = false
+
+    const loadSelectedDocumentDetail = async () => {
+      const { response, data } = await clientApiGet<{
+        data?: UserDocument & { document_number?: string }
+        error?: string
+      }>(`/api/document/${selectedDocumentId}`)
+
+      if (cancelled) return
+
+      if (!response.ok || !data?.data) {
+        showToast({
+          message: data?.error || 'Failed to load document details.',
+          variant: 'error',
+        })
+        return
+      }
+
+      setSelectedDocumentDetail(data.data)
+    }
+
+    void loadSelectedDocumentDetail()
+
+    return () => {
+      cancelled = true
+    }
+  }, [selectedDocumentId])
 
   const sortedDocuments = useMemo(
     () => [...documents].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()),
@@ -224,7 +263,17 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
 
             <div className="space-y-3 text-sm">
               <div className="flex items-start justify-between gap-2">
-                <p className="text-xs text-muted-foreground">Category</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-muted-foreground">Category</p>
+                  <CopyButton
+                    value={getDocumentCategoryLabel(String(selectedDocument.category ?? 'other'))}
+                    label="Category"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
+                    showStatusIcon
+                    copyIconClassName="h-3.5 w-3.5"
+                    checkIconClassName="h-3.5 w-3.5 text-green-600"
+                  />
+                </div>
                 <span
                   className={cn(
                     'inline-flex rounded-full border px-2 py-0.5 text-xs font-medium capitalize',
@@ -236,46 +285,118 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
               </div>
 
               <div>
-                <p className="text-xs text-muted-foreground">Document number</p>
-                <p className="font-mono">{selectedDocument.masked_number}</p>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs text-muted-foreground">Document number</p>
+                  <CopyButton
+                    value={selectedDocumentDetail?.document_number || selectedDocument.masked_number}
+                    label="Document number"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
+                    showStatusIcon
+                    copyIconClassName="h-3.5 w-3.5"
+                    checkIconClassName="h-3.5 w-3.5 text-green-600"
+                  />
+                </div>
+                <p className="font-mono">
+                  {selectedDocumentDetail?.document_number || selectedDocument.masked_number}
+                </p>
               </div>
 
               <div>
-                <p className="text-xs text-muted-foreground">Name on document</p>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs text-muted-foreground">Name on document</p>
+                  <CopyButton
+                    value={selectedDocument.name_on_document || ''}
+                    label="Name on document"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
+                    showStatusIcon
+                    copyIconClassName="h-3.5 w-3.5"
+                    checkIconClassName="h-3.5 w-3.5 text-green-600"
+                  />
+                </div>
                 <p>{selectedDocument.name_on_document || 'N/A'}</p>
               </div>
 
               {getMetadataText(selectedDocument.metadata, 'issued_date') ? (
                 <div>
-                  <p className="text-xs text-muted-foreground">Issued date</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">Issued date</p>
+                    <CopyButton
+                      value={getMetadataText(selectedDocument.metadata, 'issued_date')}
+                      label="Issued date"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
+                      showStatusIcon
+                      copyIconClassName="h-3.5 w-3.5"
+                      checkIconClassName="h-3.5 w-3.5 text-green-600"
+                    />
+                  </div>
                   <p>{getMetadataText(selectedDocument.metadata, 'issued_date')}</p>
                 </div>
               ) : null}
 
               {getMetadataText(selectedDocument.metadata, 'expiry_date') ? (
                 <div>
-                  <p className="text-xs text-muted-foreground">Expiry date</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">Expiry date</p>
+                    <CopyButton
+                      value={getMetadataText(selectedDocument.metadata, 'expiry_date')}
+                      label="Expiry date"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
+                      showStatusIcon
+                      copyIconClassName="h-3.5 w-3.5"
+                      checkIconClassName="h-3.5 w-3.5 text-green-600"
+                    />
+                  </div>
                   <p>{getMetadataText(selectedDocument.metadata, 'expiry_date')}</p>
                 </div>
               ) : null}
 
               {getMetadataText(selectedDocument.metadata, 'guardian_name') ? (
                 <div>
-                  <p className="text-xs text-muted-foreground">Guardian name</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">Guardian name</p>
+                    <CopyButton
+                      value={getMetadataText(selectedDocument.metadata, 'guardian_name')}
+                      label="Guardian name"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
+                      showStatusIcon
+                      copyIconClassName="h-3.5 w-3.5"
+                      checkIconClassName="h-3.5 w-3.5 text-green-600"
+                    />
+                  </div>
                   <p>{getMetadataText(selectedDocument.metadata, 'guardian_name')}</p>
                 </div>
               ) : null}
 
               {getMetadataText(selectedDocument.metadata, 'address') ? (
                 <div>
-                  <p className="text-xs text-muted-foreground">Address</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">Address</p>
+                    <CopyButton
+                      value={getMetadataText(selectedDocument.metadata, 'address')}
+                      label="Address"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
+                      showStatusIcon
+                      copyIconClassName="h-3.5 w-3.5"
+                      checkIconClassName="h-3.5 w-3.5 text-green-600"
+                    />
+                  </div>
                   <p>{getMetadataText(selectedDocument.metadata, 'address')}</p>
                 </div>
               ) : null}
 
               {getMetadataText(selectedDocument.metadata, 'other_details') ? (
                 <div>
-                  <p className="text-xs text-muted-foreground">Other details</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">Other details</p>
+                    <CopyButton
+                      value={getMetadataText(selectedDocument.metadata, 'other_details')}
+                      label="Other details"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
+                      showStatusIcon
+                      copyIconClassName="h-3.5 w-3.5"
+                      checkIconClassName="h-3.5 w-3.5 text-green-600"
+                    />
+                  </div>
                   <p className="whitespace-pre-wrap">{getMetadataText(selectedDocument.metadata, 'other_details')}</p>
                 </div>
               ) : null}
