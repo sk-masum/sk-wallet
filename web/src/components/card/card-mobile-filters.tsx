@@ -131,7 +131,7 @@ export function CardMobileFilters({
                 onOpenChange={setMobileOpen}
                 title="Refine cards"
                 description="Apply filters, sorting, and grouping in one place."
-                className="border-x-0"
+                className="border-x-0 bg-linear-to-b from-background via-background to-background"
             >
                 <ListingFilterMobileSection label="Type" icon={<CreditCard className="h-3.5 w-3.5" />}>
                     <CardTypeButtonGroup selectedType={selectedType} hrefs={typeHrefs} className="h-10 max-w-none rounded-xl border-border/60 bg-background/90" />

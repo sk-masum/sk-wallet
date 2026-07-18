@@ -158,7 +158,7 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
                     className={cn(
                       'group relative block w-full text-left transition-all duration-300 ease-out hover:-translate-y-1 active:scale-[0.995] focus-visible:outline-none',
                       'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-6 motion-safe:duration-500',
-                      index > 0 && '-mt-26 sm:-mt-42',
+                      index > 0 && '-mt-28 sm:-mt-42',
                       'lg:mt-0'
                     )}
                     style={{ animationDelay: `${Math.min(index, 7) * 70}ms` }}

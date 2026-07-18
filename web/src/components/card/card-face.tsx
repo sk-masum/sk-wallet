@@ -46,11 +46,10 @@ export function CardFace({
   return (
     <div
       className={cn(
-        'relative flex min-h-56 flex-col justify-between rounded-xl border p-3 pt-1 text-slate-100 shadow-lg sm:p-5 sm:pt-2 w-full',
+        'relative flex min-h-56 flex-col justify-between rounded-3xl border-4 p-4 pt-3 pb-5 text-slate-100 shadow-lg sm:p-5 sm:pt-2 w-full border-muted',
         theme.surface,
         className
       )}
-      style={{ borderColor: theme.border }}
     >
       <div className="flex items-center justify-between gap-3">
         <div className={cn('truncate text-md font-medium tracking-wide', theme.mutedText)}>{name}</div>
