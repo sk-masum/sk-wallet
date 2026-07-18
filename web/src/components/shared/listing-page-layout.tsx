@@ -15,7 +15,7 @@ export function ListingPageLayout({
 }: ListingPageLayoutProps) {
     return (
         <main className={cn('min-h-screen', className)}>
-            <div className={cn('mx-auto w-full px-4 pb-28 pt-12 sm:px-6 lg:px-8', contentClassName)}>
+            <div className={cn('mx-auto w-full px-4 pb-28 pt-0 sm:pt-12 sm:px-6 lg:px-8', contentClassName)}>
                 {children}
             </div>
         </main>

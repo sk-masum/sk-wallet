@@ -1,20 +1,28 @@
 'use client'
 
-import Link from 'next/link'
 import { useState } from 'react'
-import { SlidersHorizontal, X } from 'lucide-react'
+import { ArrowUpDown, CreditCard, Layers3, Network } from 'lucide-react'
 
+import {
+    ListingFilterDesktopActions,
+    ListingFilterDesktopPanel,
+    ListingFilterDesktopSection,
+    ListingFilterMobileActions,
+    ListingFilterMobileSection,
+    ListingFilterMobileSheet,
+} from '@/components/shared/listing-filter-panels'
+import { ListingFilterTopBar } from '@/components/shared/listing-filter-topbar'
 import { CardTypeButtonGroup } from '@/components/ui/card-type-button-group'
-import { Button, buttonVariants } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
 import { NetworkFilterDropdown } from '@/components/ui/network-filter-dropdown'
-import { cn } from '@/lib/utils'
+import { CardSortDropdown } from '@/components/ui/card-sort-dropdown'
+import { CardGroupDropdown } from '@/components/ui/card-group-dropdown'
 
 type CardMobileFiltersProps = {
     query: string
     selectedType: 'all' | 'credit' | 'debit'
     selectedNetwork: string
+    selectedSort: 'newest' | 'oldest' | 'name-asc' | 'name-desc' | 'expiry-asc' | 'expiry-desc'
+    selectedGroup: 'none' | 'provider' | 'network'
     networkOptions: string[]
     activeFilterCount: number
     formAction?: string
@@ -31,6 +39,8 @@ export function CardMobileFilters({
     query,
     selectedType,
     selectedNetwork,
+    selectedSort,
+    selectedGroup,
     networkOptions,
     activeFilterCount,
     formAction = '/card',
@@ -38,84 +48,121 @@ export function CardMobileFilters({
     clearAllHref,
     typeHrefs,
 }: CardMobileFiltersProps) {
-    const [open, setOpen] = useState(false)
+    const [mobileOpen, setMobileOpen] = useState(false)
+    const [desktopOpen, setDesktopOpen] = useState(false)
+    const hasActiveControls =
+        query.length > 0 ||
+        selectedType !== 'all' ||
+        selectedNetwork.length > 0 ||
+        selectedSort !== 'newest' ||
+        selectedGroup !== 'none'
+
+    const hiddenSearchFields = (
+        <>
+            {selectedNetwork ? <input type="hidden" name="network" value={selectedNetwork} /> : null}
+            {selectedType !== 'all' ? <input type="hidden" name="type" value={selectedType} /> : null}
+            {selectedSort !== 'newest' ? <input type="hidden" name="sort" value={selectedSort} /> : null}
+            {selectedGroup !== 'none' ? <input type="hidden" name="group" value={selectedGroup} /> : null}
+        </>
+    )
 
     return (
-        <div className="mb-4 space-y-2 sm:hidden">
-            <div className="sticky top-2 z-20 rounded-2xl border border-border/70 bg-background/80 p-2 backdrop-blur">
-                <div className="flex items-center gap-2">
-                    <form action={formAction} method="get" className="relative flex-1">
-                        <Input
-                            name="q"
-                            defaultValue={query}
-                            placeholder="Search cards"
-                            aria-label="Search cards"
-                            className="h-9 pr-10"
-                        />
-                        {query ? (
-                            <Link
-                                href={clearSearchHref}
-                                className={cn(
-                                    buttonVariants({ variant: 'ghost', size: 'icon' }),
-                                    'absolute right-1 top-1 h-7 w-7 text-muted-foreground hover:text-foreground'
-                                )}
-                                aria-label="Clear search"
-                                title="Clear search"
-                            >
-                                <X className="h-4 w-4" />
-                            </Link>
-                        ) : null}
-                        {selectedNetwork ? <input type="hidden" name="network" value={selectedNetwork} /> : null}
-                        {selectedType !== 'all' ? <input type="hidden" name="type" value={selectedType} /> : null}
-                    </form>
+        <>
+            <ListingFilterTopBar
+                formAction={formAction}
+                searchValue={query}
+                searchMode="form"
+                clearSearchHref={clearSearchHref}
+                searchInputName="q"
+                searchHiddenFields={hiddenSearchFields}
+                mobileSearchPlaceholder="Search cards"
+                desktopSearchPlaceholder="Search cards by name, provider, or number"
+                mobileSearchAriaLabel="Search cards"
+                desktopSearchAriaLabel="Search cards by name, provider, or number"
+                mobileFilterCount={activeFilterCount}
+                onOpenMobileFilters={() => setMobileOpen(true)}
+                hasTextQuery={query.length > 0}
+                hasActiveControls={hasActiveControls}
+                resetHref={clearAllHref}
+                desktopFilterOpen={desktopOpen}
+                onToggleDesktopFilters={() => setDesktopOpen((prev) => !prev)}
+                desktopExpandedClassName="max-h-[520px]"
+                desktopPanel={
+                    <ListingFilterDesktopPanel>
+                        <ListingFilterDesktopSection label="Card type" className="space-y-2">
+                            <CardTypeButtonGroup
+                                selectedType={selectedType}
+                                className="h-10 w-full max-w-none rounded-xl border-border/60 bg-background/90"
+                                hrefs={typeHrefs}
+                            />
+                        </ListingFilterDesktopSection>
 
-                    <Button
-                        type="button"
-                        variant="outline"
-                        className="h-9 gap-2 rounded-full px-3"
-                        onClick={() => setOpen(true)}
-                    >
-                        <SlidersHorizontal className="h-4 w-4" />
-                        Filters
-                        {activeFilterCount > 0 ? (
-                            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-primary-foreground">
-                                {activeFilterCount}
-                            </span>
-                        ) : null}
-                    </Button>
+                        <div className="grid grid-cols-3 gap-4">
+                            <ListingFilterDesktopSection label="Network">
+                                <NetworkFilterDropdown
+                                    options={networkOptions}
+                                    selectedNetwork={selectedNetwork}
+                                    query={query}
+                                    selectedType={selectedType}
+                                    className="h-10 w-full rounded-xl border-border/60 bg-background/95"
+                                />
+                            </ListingFilterDesktopSection>
+
+                            <ListingFilterDesktopSection label="Sort">
+                                <CardSortDropdown selectedSort={selectedSort} className="h-10 w-full rounded-xl border-border/60 bg-background/95" />
+                            </ListingFilterDesktopSection>
+
+                            <ListingFilterDesktopSection label="Group">
+                                <CardGroupDropdown selectedGroup={selectedGroup} className="h-10 w-full rounded-xl border-border/60 bg-background/95" />
+                            </ListingFilterDesktopSection>
+                        </div>
+
+                        <ListingFilterDesktopActions
+                            hasActiveControls={hasActiveControls}
+                            resetHref={clearAllHref}
+                            onCollapse={() => setDesktopOpen(false)}
+                        />
+                    </ListingFilterDesktopPanel>
+                }
+            />
+
+            <ListingFilterMobileSheet
+                open={mobileOpen}
+                onOpenChange={setMobileOpen}
+                title="Refine cards"
+                description="Apply filters, sorting, and grouping in one place."
+                className="border-x-0"
+            >
+                <ListingFilterMobileSection label="Type" icon={<CreditCard className="h-3.5 w-3.5" />}>
+                    <CardTypeButtonGroup selectedType={selectedType} hrefs={typeHrefs} className="h-10 max-w-none rounded-xl border-border/60 bg-background/90" />
+                </ListingFilterMobileSection>
+
+                <ListingFilterMobileSection label="Network" icon={<Network className="h-3.5 w-3.5" />} className="space-y-1.5">
+                    <NetworkFilterDropdown
+                        options={networkOptions}
+                        selectedNetwork={selectedNetwork}
+                        query={query}
+                        selectedType={selectedType}
+                        className="h-10 w-full rounded-xl border-border/60 bg-background/95"
+                    />
+                </ListingFilterMobileSection>
+
+                <div className="grid grid-cols-2 gap-3">
+                    <ListingFilterMobileSection label="Sort" icon={<ArrowUpDown className="h-3.5 w-3.5" />} className="space-y-1.5">
+                        <CardSortDropdown selectedSort={selectedSort} className="h-10 w-full rounded-xl border-border/60 bg-background/95" />
+                    </ListingFilterMobileSection>
+
+                    <ListingFilterMobileSection label="Group" icon={<Layers3 className="h-3.5 w-3.5" />} className="space-y-1.5">
+                        <CardGroupDropdown selectedGroup={selectedGroup} className="h-10 w-full rounded-xl border-border/60 bg-background/95" />
+                    </ListingFilterMobileSection>
                 </div>
-            </div>
 
-            <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="top-auto bottom-0 left-0 right-0 w-full max-w-none translate-x-0 translate-y-0 rounded-b-none border-x-0 pb-6">
-                    <DialogHeader>
-                        <DialogTitle>Filter cards</DialogTitle>
-                        <DialogDescription>Refine by card type and network.</DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-4">
-                        <CardTypeButtonGroup selectedType={selectedType} hrefs={typeHrefs} className="max-w-none" />
-
-                        <NetworkFilterDropdown
-                            options={networkOptions}
-                            selectedNetwork={selectedNetwork}
-                            query={query}
-                            selectedType={selectedType}
-                            className="w-full"
-                        />
-
-                        {activeFilterCount > 0 ? (
-                            <Link
-                                href={clearAllHref}
-                                className={cn(buttonVariants({ variant: 'ghost' }), 'w-full justify-center')}
-                                onClick={() => setOpen(false)}
-                            >
-                                Clear all filters
-                            </Link>
-                        ) : null}
-                    </div>
-                </DialogContent>
-            </Dialog>
-        </div>
+                <ListingFilterMobileActions
+                    hasActiveControls={hasActiveControls}
+                    resetHref={clearAllHref}
+                    onDone={() => setMobileOpen(false)}
+                />
+            </ListingFilterMobileSheet>
+        </>
     )
 }

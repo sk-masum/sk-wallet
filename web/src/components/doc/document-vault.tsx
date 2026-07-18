@@ -1,29 +1,20 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Pencil, SlidersHorizontal, Trash2, X } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Pencil, Trash2 } from 'lucide-react'
 
 import NoDocIcon from '@/components/icons/nodoc-icon'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CopyButton } from '@/components/ui/copy-button'
 import {
   Dialog,
-  DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { getDocumentCategoryLabel } from '@/constants/document/categories'
 import { DOCUMENT_TYPE_OPTIONS, getDocumentTypeConfig } from '@/constants/document/types'
 import { clientApiGet } from '@/lib/api/client'
@@ -65,15 +56,19 @@ function getMetadataText(metadata: Record<string, unknown> | null | undefined, k
 
 export function DocumentVault({ initialDocuments, initialError = '' }: DocumentVaultProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [documents, setDocuments] = useState<UserDocument[]>(initialDocuments)
-  const [searchValue, setSearchValue] = useState('')
-  const [selectedType, setSelectedType] = useState('ALL')
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null)
   const [selectedDocumentDetail, setSelectedDocumentDetail] = useState<
     (UserDocument & { document_number?: string }) | null
   >(null)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+
+  const searchValue = (searchParams.get('q') ?? '').trim()
+  const selectedTypeParam = (searchParams.get('type') ?? 'ALL').trim().toUpperCase()
+  const selectedType = DOCUMENT_TYPE_OPTIONS.some((item) => item.code === selectedTypeParam)
+    ? selectedTypeParam
+    : 'ALL'
 
   useEffect(() => {
     setDocuments(initialDocuments)
@@ -189,130 +184,7 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
   }
 
   return (
-    <section className="space-y-4">
-      <div className="sticky top-2 z-20 rounded-2xl border border-border/70 bg-background/80 p-2 backdrop-blur sm:hidden">
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <Input
-              value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
-              placeholder="Search documents"
-              aria-label="Search documents"
-              className="h-9 pr-10"
-            />
-            {searchValue ? (
-              <button
-                type="button"
-                onClick={() => setSearchValue('')}
-                className={cn(
-                  buttonVariants({ variant: 'ghost', size: 'icon' }),
-                  'absolute right-1 top-1 h-7 w-7 text-muted-foreground hover:text-foreground'
-                )}
-                aria-label="Clear search"
-                title="Clear search"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            ) : null}
-          </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            className="h-9 gap-2 rounded-full px-3"
-            onClick={() => setMobileFilterOpen(true)}
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            Filters
-            {selectedType !== 'ALL' ? (
-              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-primary-foreground">
-                1
-              </span>
-            ) : null}
-          </Button>
-        </div>
-      </div>
-
-      <Dialog open={mobileFilterOpen} onOpenChange={setMobileFilterOpen}>
-        <DialogContent className="top-auto bottom-0 left-0 right-0 w-full max-w-none translate-x-0 translate-y-0 rounded-b-none border-x-0 pb-6 sm:hidden">
-          <DialogHeader>
-            <DialogTitle>Filter documents</DialogTitle>
-            <DialogDescription>Refine by document type.</DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger className="w-full" aria-label="Filter by document type">
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All types</SelectItem>
-                {DOCUMENT_TYPE_OPTIONS.map((item) => (
-                  <SelectItem key={item.code} value={item.code}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {selectedType !== 'ALL' || searchValue ? (
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full"
-                onClick={() => {
-                  setSelectedType('ALL')
-                  setSearchValue('')
-                  setMobileFilterOpen(false)
-                }}
-              >
-                Clear filters
-              </Button>
-            ) : null}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <div className="hidden items-center gap-3 rounded-2xl border border-border/70 bg-background/80 p-3 backdrop-blur sm:flex">
-        <div className="relative flex-1">
-          <Input
-            value={searchValue}
-            onChange={(event) => setSearchValue(event.target.value)}
-            placeholder="Search by number, type, or name"
-            className="pr-10"
-            aria-label="Search documents"
-          />
-          {searchValue ? (
-            <button
-              type="button"
-              onClick={() => setSearchValue('')}
-              className={cn(
-                buttonVariants({ variant: 'ghost', size: 'icon' }),
-                'absolute right-1 top-1 h-7 w-7 text-muted-foreground hover:text-foreground'
-              )}
-              aria-label="Clear search"
-              title="Clear search"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          ) : null}
-        </div>
-
-        <Select value={selectedType} onValueChange={setSelectedType}>
-          <SelectTrigger className="w-56" aria-label="Filter by document type">
-            <SelectValue placeholder="Filter by type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">All types</SelectItem>
-            {DOCUMENT_TYPE_OPTIONS.map((item) => (
-              <SelectItem key={item.code} value={item.code}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
+    <section className="mx-auto w-full max-w-5xl space-y-4">
       {filteredDocuments.length === 0 ? (
         <Card>
           <CardHeader>

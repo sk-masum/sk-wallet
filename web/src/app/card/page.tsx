@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { AlertTriangle, WalletCards, X } from 'lucide-react'
+import { AlertTriangle, WalletCards } from 'lucide-react'
 
 import { buttonVariants } from '@/components/ui/button'
 import {
@@ -13,6 +13,8 @@ import {
 import { BottomTabBar } from '@/components/ui/bottom-tab-bar'
 import { CardMobileFilters } from '@/components/card/card-mobile-filters'
 import { CardTypeButtonGroup } from '@/components/ui/card-type-button-group'
+import { CardGroupDropdown } from '@/components/ui/card-group-dropdown'
+import { CardSortDropdown } from '@/components/ui/card-sort-dropdown'
 import { Input } from '@/components/ui/input'
 import {
   NetworkFilterDropdown,
@@ -22,7 +24,6 @@ import { CardLoadErrorToast } from '@/components/card/card-load-error-toast'
 import { ListingPageLayout } from '@/components/shared/listing-page-layout'
 import {
   ListingActiveFiltersRow,
-  ListingDesktopFilterRow,
   ListingPageHeader,
 } from '@/components/shared/listing-page-header'
 import {
@@ -34,12 +35,46 @@ import { serverApiGet } from '@/lib/api/server'
 import { buildCardFilterHref } from '@/utils/card/filter'
 import { CARD_NETWORK_FILTER_OPTIONS, resolveNetworkLabel } from '@/utils/card/network'
 
+const SORT_LABELS: Record<string, string> = {
+  oldest: 'Oldest first',
+  'name-asc': 'Name (A-Z)',
+  'name-desc': 'Name (Z-A)',
+  'expiry-asc': 'Expiry (Soonest)',
+  'expiry-desc': 'Expiry (Latest)',
+}
+
+const parseCardExpiryValue = (card: WalletCard) => {
+  const month = Number.parseInt(String(card.expiry_month ?? ''), 10)
+  const yearRaw = Number.parseInt(String(card.expiry_year ?? ''), 10)
+
+  if (Number.isNaN(month) || month < 1 || month > 12 || Number.isNaN(yearRaw)) {
+    return null
+  }
+
+  const year = yearRaw < 100 ? 2000 + yearRaw : yearRaw
+  return year * 100 + month
+}
+
 export default async function CardPage({ searchParams }: CardPageProps) {
   const params = searchParams ? await searchParams : {}
   const query = params.q?.trim() ?? ''
   const networkParam = params.network?.trim().toUpperCase() ?? ''
   const typeParam = params.type?.trim().toLowerCase() ?? 'all'
+  const sortParam = params.sort?.trim().toLowerCase() ?? 'newest'
+  const groupParam = params.group?.trim().toLowerCase() ?? 'none'
   const selectedType = typeParam === 'credit' || typeParam === 'debit' ? typeParam : 'all'
+  const selectedSort =
+    sortParam === 'oldest' ||
+      sortParam === 'name-asc' ||
+      sortParam === 'name-desc' ||
+      sortParam === 'expiry-asc' ||
+      sortParam === 'expiry-desc'
+      ? sortParam
+      : 'newest'
+  const selectedGroup =
+    groupParam === 'provider' || groupParam === 'network'
+      ? groupParam
+      : 'none'
   const selectedNetwork = networkParam === 'ALL' ? '' : networkParam
   const queryLower = query.toLowerCase()
   const queryDigits = query.replace(/\D/g, '')
@@ -58,14 +93,19 @@ export default async function CardPage({ searchParams }: CardPageProps) {
   const hasTextQuery = query.length > 0
   const hasNetworkFilter = selectedNetwork.length > 0
   const hasTypeFilter = selectedType !== 'all'
+  const hasSortSelection = selectedSort !== 'newest'
+  const hasGrouping = selectedGroup !== 'none'
   const hasFilters = hasTextQuery || hasNetworkFilter || hasTypeFilter
-  const activeFilterCount = Number(hasTypeFilter) + Number(hasNetworkFilter)
+  const hasActiveControls = hasFilters || hasSortSelection || hasGrouping
+  const activeFilterCount = Number(hasTypeFilter) + Number(hasNetworkFilter) + Number(hasGrouping)
 
-  const buildFilterHref = (next: { network?: string; type?: string; q?: string }) =>
+  const buildFilterHref = (next: { network?: string; type?: string; sort?: string; group?: string; q?: string }) =>
     buildCardFilterHref(
       {
         selectedNetwork,
         selectedType,
+        selectedSort,
+        selectedGroup,
         query,
       },
       next
@@ -93,23 +133,52 @@ export default async function CardPage({ searchParams }: CardPageProps) {
     return matchesText && matchesNetwork && matchesType
   })
 
+  const sortedCards = [...filteredCards].sort((a, b) => {
+    if (selectedSort === 'name-asc' || selectedSort === 'name-desc') {
+      const aName = (a.card_name ?? '').toString().toLowerCase()
+      const bName = (b.card_name ?? '').toString().toLowerCase()
+      return selectedSort === 'name-asc' ? aName.localeCompare(bName) : bName.localeCompare(aName)
+    }
+
+    if (selectedSort === 'expiry-asc' || selectedSort === 'expiry-desc') {
+      const aExpiry = parseCardExpiryValue(a)
+      const bExpiry = parseCardExpiryValue(b)
+
+      if (aExpiry === null && bExpiry === null) return 0
+      if (aExpiry === null) return 1
+      if (bExpiry === null) return -1
+
+      return selectedSort === 'expiry-asc' ? aExpiry - bExpiry : bExpiry - aExpiry
+    }
+
+    const aDateRaw = a.updated_at ?? a.created_at ?? ''
+    const bDateRaw = b.updated_at ?? b.created_at ?? ''
+    const aTime = Number.isNaN(Date.parse(aDateRaw)) ? 0 : Date.parse(aDateRaw)
+    const bTime = Number.isNaN(Date.parse(bDateRaw)) ? 0 : Date.parse(bDateRaw)
+    return selectedSort === 'oldest' ? aTime - bTime : bTime - aTime
+  })
+
   return (
     <ListingPageLayout contentClassName="max-w-212.5">
       <ListingPageHeader
         title="Cards"
-        description={`${filteredCards.length} ${filteredCards.length === 1 ? 'card' : 'cards'}${activeFilterCount > 0 ? ` • ${activeFilterCount} filter${activeFilterCount === 1 ? '' : 's'}` : ''
+        className="pt-6"
+        description={`${sortedCards.length} ${sortedCards.length === 1 ? 'card' : 'cards'}${activeFilterCount > 0 ? ` • ${activeFilterCount} filter${activeFilterCount === 1 ? '' : 's'}` : ''
           }`}
         addHref="/card/new"
         addLabel="Add card"
+        mobileStickyHeader
         mobileFilters={
           <CardMobileFilters
             query={query}
             selectedType={selectedType}
             selectedNetwork={selectedNetwork}
+            selectedSort={selectedSort}
+            selectedGroup={selectedGroup}
             networkOptions={networkOptions}
             activeFilterCount={activeFilterCount}
             clearSearchHref={buildFilterHref({ q: '' })}
-            clearAllHref={buildFilterHref({ q: '', network: '', type: 'all' })}
+            clearAllHref={buildFilterHref({ q: '', network: '', type: 'all', sort: 'newest', group: 'none' })}
             typeHrefs={{
               all: buildFilterHref({ type: 'all' }),
               credit: buildFilterHref({ type: 'credit' }),
@@ -117,85 +186,40 @@ export default async function CardPage({ searchParams }: CardPageProps) {
             }}
           />
         }
-        desktopFilters={
-          <ListingDesktopFilterRow className="rounded-3xl border-border/60 bg-card/75 p-3.5 shadow-xl backdrop-blur-xl">
-            <form action="/card" method="get" className="relative flex-1">
-              <Input
-                name="q"
-                defaultValue={query}
-                placeholder="Search by card name, provider, or number"
-                aria-label="Search cards by card name, provider, or number"
-                className="h-10 rounded-xl border-border/70 bg-background/90 pr-10"
-              />
-              {hasTextQuery ? (
-                <Link
-                  href={buildFilterHref({ q: '' })}
-                  className={cn(
-                    buttonVariants({ variant: 'ghost', size: 'icon' }),
-                    'absolute right-1 top-1 h-7 w-7 text-muted-foreground hover:text-foreground'
-                  )}
-                  aria-label="Clear search"
-                  title="Clear search"
-                >
-                  <X className="h-4 w-4" />
-                </Link>
-              ) : null}
-              {selectedNetwork ? <input type="hidden" name="network" value={selectedNetwork} /> : null}
-              {selectedType !== 'all' ? <input type="hidden" name="type" value={selectedType} /> : null}
-            </form>
-
-            <CardTypeButtonGroup
-              selectedType={selectedType}
-              className="w-84 max-w-none rounded-xl"
-              hrefs={{
-                all: buildFilterHref({ type: 'all' }),
-                credit: buildFilterHref({ type: 'credit' }),
-                debit: buildFilterHref({ type: 'debit' }),
-              }}
-            />
-
-            <NetworkFilterDropdown
-              options={networkOptions}
-              selectedNetwork={selectedNetwork}
-              query={query}
-              selectedType={selectedType}
-              className="w-52"
-            />
-
-            {hasFilters ? (
-              <Link
-                href={buildFilterHref({ q: '', network: '', type: 'all' })}
-                className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'shrink-0')}
-              >
-                Clear all
-              </Link>
-            ) : null}
-          </ListingDesktopFilterRow>
-        }
         activeFilters={
-          hasFilters ? (
+          hasActiveControls ? (
             <ListingActiveFiltersRow className="items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-2">
                 {hasTextQuery ? (
-                  <span className="inline-flex rounded-full border border-border/70 bg-card/80 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                  <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">
                     Query: {query}
                   </span>
                 ) : null}
                 {hasTypeFilter ? (
-                  <span className="inline-flex rounded-full border border-border/70 bg-card/80 px-2.5 py-1 text-xs font-medium text-muted-foreground capitalize">
+                  <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80 capitalize">
                     Type: {selectedType}
                   </span>
                 ) : null}
                 {hasNetworkFilter ? (
-                  <span className="inline-flex rounded-full border border-border/70 bg-card/80 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                  <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">
                     Network: {selectedNetwork}
+                  </span>
+                ) : null}
+                {hasSortSelection ? (
+                  <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">
+                    Sort: {SORT_LABELS[selectedSort]}
+                  </span>
+                ) : null}
+                {hasGrouping ? (
+                  <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">
+                    Group: {selectedGroup === 'provider' ? 'Provider' : 'Network'}
                   </span>
                 ) : null}
               </div>
 
               <Link
-                href={buildFilterHref({ q: '', network: '', type: 'all' })}
-                className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-8 rounded-full px-3 text-xs')}
+                href={buildFilterHref({ q: '', network: '', type: 'all', sort: 'newest', group: 'none' })}
+                className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-8 rounded-full border border-border/60 bg-background/80 px-3 text-xs')}
               >
                 Reset filters
               </Link>
@@ -240,7 +264,7 @@ export default async function CardPage({ searchParams }: CardPageProps) {
             </div>
           </CardContent>
         </Card>
-      ) : hasFilters && !filteredCards.length ? (
+      ) : hasFilters && !sortedCards.length ? (
         <Card className="border-border/70 bg-card/90 shadow-lg">
           <CardHeader className="pb-2 text-center">
             <CardTitle className="justify-center">No matching cards</CardTitle>
@@ -259,7 +283,7 @@ export default async function CardPage({ searchParams }: CardPageProps) {
               </div>
 
               <Link
-                href={buildFilterHref({ q: '', network: '', type: 'all' })}
+                href={buildFilterHref({ q: '', network: '', type: 'all', sort: 'newest', group: 'none' })}
                 className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'rounded-full px-4')}
               >
                 Clear filters
@@ -268,7 +292,7 @@ export default async function CardPage({ searchParams }: CardPageProps) {
           </CardContent>
         </Card>
       ) : (
-        <CardGrid cards={filteredCards} />
+        <CardGrid cards={sortedCards} groupBy={selectedGroup} />
       )}
 
       <BottomTabBar />

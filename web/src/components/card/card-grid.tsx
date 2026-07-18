@@ -7,30 +7,19 @@ import { CardFace } from '@/components/card/card-face'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { Eye, EyeOff, Pencil, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react'
 import type { WalletCard } from '@/models/card'
 import { clientApiDelete } from '@/lib/api/client'
 import { showToast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
+import { resolveNetworkLabel } from '@/utils/card/network'
 
 type CardGridProps = {
   cards: WalletCard[]
+  groupBy?: 'none' | 'provider' | 'network'
 }
 
-const getNetworkLabel = (network: WalletCard['network']) =>
-  network === 1
-    ? 'Visa'
-    : network === 2
-      ? 'Mastercard'
-      : network === 3
-        ? 'AmEx'
-        : network === 4
-          ? 'RuPay'
-          : network === 5
-            ? 'Discover'
-            : 'Other'
-
-export function CardGrid({ cards }: CardGridProps) {
+export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
   const router = useRouter()
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
@@ -38,6 +27,7 @@ export function CardGrid({ cards }: CardGridProps) {
   const [showCvv, setShowCvv] = useState(false)
   const [showFullNumber, setShowFullNumber] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 640px)')
@@ -57,6 +47,51 @@ export function CardGrid({ cards }: CardGridProps) {
     () => cards.find((card) => String(card.id) === selectedCardId) ?? null,
     [cards, selectedCardId]
   )
+
+  const groupedCards = useMemo(() => {
+    if (groupBy === 'none') {
+      return [{ title: '', cards }]
+    }
+
+    const groupMap = new Map<string, WalletCard[]>()
+
+    for (const card of cards) {
+      const key =
+        groupBy === 'provider'
+          ? (card.provider ?? '').trim() || 'Unknown provider'
+          : resolveNetworkLabel(card.network) || 'Other network'
+      const existing = groupMap.get(key)
+      if (existing) {
+        existing.push(card)
+      } else {
+        groupMap.set(key, [card])
+      }
+    }
+
+    return [...groupMap.entries()].map(([title, groupCards]) => ({ title, cards: groupCards }))
+  }, [cards, groupBy])
+
+  useEffect(() => {
+    if (groupBy === 'none') {
+      setCollapsedGroups({})
+      return
+    }
+
+    setCollapsedGroups((prev) => {
+      const next: Record<string, boolean> = {}
+      for (const group of groupedCards) {
+        next[group.title] = prev[group.title] ?? false
+      }
+      return next
+    })
+  }, [groupBy, groupedCards])
+
+  const toggleGroup = (groupTitle: string) => {
+    setCollapsedGroups((prev) => ({
+      ...prev,
+      [groupTitle]: !prev[groupTitle],
+    }))
+  }
 
   const handleDelete = async () => {
     if (!selectedCardId || isDeleting) return
@@ -84,42 +119,73 @@ export function CardGrid({ cards }: CardGridProps) {
 
   return (
     <>
-      <section className="mx-auto w-full max-w-5xl lg:grid lg:grid-cols-2 lg:gap-6">
-        {cards.map((card, index) => {
-          const id = String(card.id ?? 'N/A')
-          const isSelected = selectedCardId === id
-          return (
-            <button
-              key={id}
-              type="button"
-              className={cn(
-                'group relative block w-full text-left transition-all duration-300 ease-out hover:-translate-y-1 active:scale-[0.995] focus-visible:outline-none',
-                'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-6 motion-safe:duration-500',
-                index > 0 && '-mt-26 sm:-mt-42',
-                'lg:mt-0'
-              )}
-              style={{ animationDelay: `${Math.min(index, 7) * 70}ms` }}
-              onClick={() => setSelectedCardId(id)}
-              aria-label={`Open card ${id}`}
-            >
-              <span
-                className={cn(
-                  'pointer-events-none absolute inset-x-4 -bottom-2 h-8 rounded-full bg-primary/20 blur-xl opacity-0 transition-opacity duration-300',
-                  'group-hover:opacity-100 group-focus-visible:opacity-100',
-                  isSelected && 'opacity-100'
-                )}
-              />
-              <div
-                className={cn(
-                  'relative transition-transform duration-300 ease-out group-hover:scale-[1.01] group-focus-visible:scale-[1.01]',
-                  isSelected && 'scale-[1.01]'
-                )}
+      <section className="mx-auto w-full max-w-5xl space-y-6">
+        {groupedCards.map((group) => (
+          <div key={group.title || 'all-cards'} className="space-y-3">
+            {groupBy !== 'none' ? (
+              <button
+                type="button"
+                onClick={() => toggleGroup(group.title)}
+                aria-expanded={!collapsedGroups[group.title]}
+                aria-controls={`card-group-${group.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
+                className="flex w-full items-center justify-between rounded-xl border border-border/65 bg-card/60 px-3 py-2 text-left transition-colors hover:bg-card"
               >
-                <CardFace card={card} />
-              </div>
-            </button>
-          )
-        })}
+                <span className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                  {group.title}
+                </span>
+                <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                  {group.cards.length}
+                  {collapsedGroups[group.title] ? (
+                    <ChevronRight className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </span>
+              </button>
+            ) : null}
+
+            <div
+              id={`card-group-${group.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
+              className={cn(collapsedGroups[group.title] && groupBy !== 'none' ? 'hidden' : 'lg:grid lg:grid-cols-2 lg:gap-6')}
+            >
+              {group.cards.map((card, index) => {
+                const id = String(card.id ?? 'N/A')
+                const isSelected = selectedCardId === id
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    className={cn(
+                      'group relative block w-full text-left transition-all duration-300 ease-out hover:-translate-y-1 active:scale-[0.995] focus-visible:outline-none',
+                      'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-6 motion-safe:duration-500',
+                      index > 0 && '-mt-26 sm:-mt-42',
+                      'lg:mt-0'
+                    )}
+                    style={{ animationDelay: `${Math.min(index, 7) * 70}ms` }}
+                    onClick={() => setSelectedCardId(id)}
+                    aria-label={`Open card ${id}`}
+                  >
+                    <span
+                      className={cn(
+                        'pointer-events-none absolute inset-x-4 -bottom-2 h-8 rounded-full bg-primary/20 blur-xl opacity-0 transition-opacity duration-300',
+                        'group-hover:opacity-100 group-focus-visible:opacity-100',
+                        isSelected && 'opacity-100'
+                      )}
+                    />
+                    <div
+                      className={cn(
+                        'relative transition-transform duration-300 ease-out group-hover:scale-[1.01] group-focus-visible:scale-[1.01]',
+                        isSelected && 'scale-[1.01]'
+                      )}
+                    >
+                      <CardFace card={card} />
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ))}
       </section>
 
       <Dialog open={Boolean(selectedCard)} onOpenChange={(open) => !open && setSelectedCardId(null)}>

@@ -17,6 +17,7 @@ type ListingPageHeaderProps = {
     mobileFilters?: ReactNode
     desktopFilters?: ReactNode
     activeFilters?: ReactNode
+    mobileStickyHeader?: boolean
 }
 
 const sharedDesktopAddButtonClass =
@@ -36,20 +37,43 @@ export function ListingPageHeader({
     mobileFilters,
     desktopFilters,
     activeFilters,
+    mobileStickyHeader = false,
 }: ListingPageHeaderProps) {
     return (
         <>
-            <PageHeader
-                title={title}
-                description={description}
-                showAddButton
-                addHref={addHref}
-                addButtonLabel={addLabel}
-                addButtonClassName={cn(sharedDesktopAddButtonClass, addButtonClassName)}
-                className={cn('mb-6', className)}
-            />
+            {mobileStickyHeader ? (
+                <div
+                    className={cn(
+                        '-mx-4 sticky top-0 z-40 border-b border-border/45 bg-linear-to-b from-background/97 via-background/93 to-background/84 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] shadow-[0_18px_40px_-28px_hsl(var(--foreground)/0.65)] backdrop-blur-xl sm:static sm:mx-0 sm:mb-4 sm:rounded-2xl sm:bg-linear-to-r sm:from-background/98 sm:via-card/92 sm:to-background/98 sm:px-5 sm:pt-4 sm:shadow-[0_20px_44px_-30px_hsl(var(--foreground)/0.55)] sm:ring-1 sm:ring-border/35 sm:backdrop-blur-none',
+                        mobileFilters ? 'mb-4' : 'mb-0'
+                    )}
+                >
+                    <PageHeader
+                        title={title}
+                        description={description}
+                        showAddButton
+                        addHref={addHref}
+                        addButtonLabel={addLabel}
+                        addButtonClassName={cn(sharedDesktopAddButtonClass, addButtonClassName)}
+                        className={cn('mb-3 sm:mb-4', className)}
+                    />
+                    {mobileFilters}
+                </div>
+            ) : (
+                <>
+                    <PageHeader
+                        title={title}
+                        description={description}
+                        showAddButton
+                        addHref={addHref}
+                        addButtonLabel={addLabel}
+                        addButtonClassName={cn(sharedDesktopAddButtonClass, addButtonClassName)}
+                        className={cn('mb-6', className)}
+                    />
+                    {mobileFilters}
+                </>
+            )}
 
-            {mobileFilters}
             {desktopFilters}
             {activeFilters}
 

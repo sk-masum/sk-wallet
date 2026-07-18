@@ -2,6 +2,7 @@ export interface WalletCard {
   id: string | number
   owner_id: string | null
   created_at: string | null
+  updated_at?: string | null
   expiry_month: string | number | null
   expiry_year: string | number | null
   card_name: string | null
@@ -33,5 +34,7 @@ export interface CardPageProps {
     q?: string
     network?: string
     type?: string
+    sort?: string
+    group?: string
   }>
 }
