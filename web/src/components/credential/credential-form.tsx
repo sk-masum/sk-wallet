@@ -6,6 +6,15 @@ import { FormActions } from '@/components/ui/form-actions'
 import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
 import {
+    entityFormActionsDividerClass,
+    entityFormControlClass,
+    entityFormFieldCardClass,
+    entityFormGridClass,
+    entityFormLabelClass,
+    entityFormSelectClass,
+    entityFormTextareaClass,
+} from '@/components/shared/entity-form-ui'
+import {
     Select,
     SelectContent,
     SelectItem,
@@ -88,8 +97,8 @@ export function CredentialForm({
     }
 
     return (
-        <form onSubmit={handleSubmit} className="grid gap-4 rounded-lg border border-border p-4 sm:grid-cols-2">
-            <FormField id="cred-type" label="Credential type" error={fieldErrors.type}>
+        <form onSubmit={handleSubmit} className={entityFormGridClass}>
+            <FormField id="cred-type" label="Credential type" error={fieldErrors.type} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
                 <Select
                     disabled={lockTypeField}
                     value={values.type}
@@ -98,7 +107,7 @@ export function CredentialForm({
                         setFieldErrors((prev) => ({ ...prev, type: undefined }))
                     }}
                 >
-                    <SelectTrigger id="cred-type" className={cn('w-full', fieldErrors.type && 'border-destructive')}>
+                    <SelectTrigger id="cred-type" className={cn(entityFormSelectClass, fieldErrors.type && 'border-destructive')}>
                         <SelectValue placeholder="Select credential type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -111,7 +120,7 @@ export function CredentialForm({
                 </Select>
             </FormField>
 
-            <FormField id="cred-service" label="Service name" error={fieldErrors.serviceName}>
+            <FormField id="cred-service" label="Service name" error={fieldErrors.serviceName} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
                 <Input
                     id="cred-service"
                     value={values.serviceName}
@@ -120,14 +129,14 @@ export function CredentialForm({
                         setFieldErrors((prev) => ({ ...prev, serviceName: undefined }))
                     }}
                     placeholder="e.g. Gmail, GitHub, HBL"
-                    className={fieldErrors.serviceName ? 'border-destructive focus-visible:ring-destructive' : ''}
+                    className={cn(entityFormControlClass, fieldErrors.serviceName && 'border-destructive focus-visible:ring-destructive')}
                     aria-invalid={Boolean(fieldErrors.serviceName)}
                     maxLength={120}
                     required
                 />
             </FormField>
 
-            <FormField id="cred-identifier" label="Identifier (optional)" error={fieldErrors.identifier}>
+            <FormField id="cred-identifier" label="Identifier (optional)" error={fieldErrors.identifier} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
                 <Input
                     id="cred-identifier"
                     value={values.identifier}
@@ -136,7 +145,7 @@ export function CredentialForm({
                         setFieldErrors((prev) => ({ ...prev, identifier: undefined }))
                     }}
                     placeholder="email / username / phone"
-                    className={fieldErrors.identifier ? 'border-destructive focus-visible:ring-destructive' : ''}
+                    className={cn(entityFormControlClass, fieldErrors.identifier && 'border-destructive focus-visible:ring-destructive')}
                     aria-invalid={Boolean(fieldErrors.identifier)}
                     maxLength={120}
                 />
@@ -147,6 +156,8 @@ export function CredentialForm({
                 label={allowEmptySecret ? 'Secret (leave empty to keep existing)' : 'Secret'}
                 hint={typeConfig?.hint ?? 'Store only trusted credentials.'}
                 error={fieldErrors.secret}
+                className={entityFormFieldCardClass}
+                labelClassName={entityFormLabelClass}
             >
                 <Input
                     id="cred-secret"
@@ -157,7 +168,7 @@ export function CredentialForm({
                         setFieldErrors((prev) => ({ ...prev, secret: undefined }))
                     }}
                     placeholder={typeConfig?.placeholder ?? 'Enter secret'}
-                    className={fieldErrors.secret ? 'border-destructive focus-visible:ring-destructive' : ''}
+                    className={cn(entityFormControlClass, fieldErrors.secret && 'border-destructive focus-visible:ring-destructive')}
                     aria-invalid={Boolean(fieldErrors.secret)}
                     autoCapitalize="none"
                     autoComplete="off"
@@ -165,7 +176,7 @@ export function CredentialForm({
                 />
             </FormField>
 
-            <FormField id="cred-url" label="Website URL (optional)" error={fieldErrors.url} className="sm:col-span-2">
+            <FormField id="cred-url" label="Website URL (optional)" error={fieldErrors.url} className={cn(entityFormFieldCardClass, 'sm:col-span-2')} labelClassName={entityFormLabelClass}>
                 <Input
                     id="cred-url"
                     value={values.url}
@@ -174,13 +185,13 @@ export function CredentialForm({
                         setFieldErrors((prev) => ({ ...prev, url: undefined }))
                     }}
                     placeholder="https://example.com"
-                    className={fieldErrors.url ? 'border-destructive focus-visible:ring-destructive' : ''}
+                    className={cn(entityFormControlClass, fieldErrors.url && 'border-destructive focus-visible:ring-destructive')}
                     aria-invalid={Boolean(fieldErrors.url)}
                     maxLength={400}
                 />
             </FormField>
 
-            <FormField id="cred-notes" label="Notes (optional)" error={fieldErrors.notes} className="sm:col-span-2">
+            <FormField id="cred-notes" label="Notes (optional)" error={fieldErrors.notes} className={cn(entityFormFieldCardClass, 'sm:col-span-2')} labelClassName={entityFormLabelClass}>
                 <Textarea
                     id="cred-notes"
                     value={values.notes}
@@ -189,13 +200,15 @@ export function CredentialForm({
                         setFieldErrors((prev) => ({ ...prev, notes: undefined }))
                     }}
                     placeholder="Any extra details"
-                    className={fieldErrors.notes ? 'border-destructive focus-visible:ring-destructive' : ''}
+                    className={cn(entityFormTextareaClass, fieldErrors.notes && 'border-destructive focus-visible:ring-destructive')}
                     aria-invalid={Boolean(fieldErrors.notes)}
                     maxLength={1000}
                 />
             </FormField>
 
-            <FormActions submitLabel={submitLabel} isSubmitting={isSubmitting} showReset={showReset} />
+            <div className={entityFormActionsDividerClass}>
+                <FormActions submitLabel={submitLabel} isSubmitting={isSubmitting} showReset={showReset} />
+            </div>
         </form>
     )
 }

@@ -14,6 +14,7 @@ import {
 import { ListingFilterTopBar } from '@/components/shared/listing-filter-topbar'
 import { CardTypeButtonGroup } from '@/components/ui/card-type-button-group'
 import { NetworkFilterDropdown } from '@/components/ui/network-filter-dropdown'
+import { ProviderFilterDropdown } from '@/components/ui/provider-filter-dropdown'
 import { CardSortDropdown } from '@/components/ui/card-sort-dropdown'
 import { CardGroupDropdown } from '@/components/ui/card-group-dropdown'
 
@@ -21,9 +22,11 @@ type CardMobileFiltersProps = {
     query: string
     selectedType: 'all' | 'credit' | 'debit'
     selectedNetwork: string
+    selectedProvider: string
     selectedSort: 'newest' | 'oldest' | 'name-asc' | 'name-desc' | 'expiry-asc' | 'expiry-desc'
     selectedGroup: 'none' | 'provider' | 'network'
     networkOptions: string[]
+    providerOptions: string[]
     activeFilterCount: number
     formAction?: string
     clearSearchHref: string
@@ -39,9 +42,11 @@ export function CardMobileFilters({
     query,
     selectedType,
     selectedNetwork,
+    selectedProvider,
     selectedSort,
     selectedGroup,
     networkOptions,
+    providerOptions,
     activeFilterCount,
     formAction = '/card',
     clearSearchHref,
@@ -54,12 +59,14 @@ export function CardMobileFilters({
         query.length > 0 ||
         selectedType !== 'all' ||
         selectedNetwork.length > 0 ||
+        selectedProvider.length > 0 ||
         selectedSort !== 'newest' ||
         selectedGroup !== 'none'
 
     const hiddenSearchFields = (
         <>
             {selectedNetwork ? <input type="hidden" name="network" value={selectedNetwork} /> : null}
+            {selectedProvider ? <input type="hidden" name="provider" value={selectedProvider} /> : null}
             {selectedType !== 'all' ? <input type="hidden" name="type" value={selectedType} /> : null}
             {selectedSort !== 'newest' ? <input type="hidden" name="sort" value={selectedSort} /> : null}
             {selectedGroup !== 'none' ? <input type="hidden" name="group" value={selectedGroup} /> : null}
@@ -97,13 +104,21 @@ export function CardMobileFilters({
                             />
                         </ListingFilterDesktopSection>
 
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-4 gap-4">
                             <ListingFilterDesktopSection label="Network">
                                 <NetworkFilterDropdown
                                     options={networkOptions}
                                     selectedNetwork={selectedNetwork}
                                     query={query}
                                     selectedType={selectedType}
+                                    className="h-10 w-full rounded-xl border-border/60 bg-background/95"
+                                />
+                            </ListingFilterDesktopSection>
+
+                            <ListingFilterDesktopSection label="Provider">
+                                <ProviderFilterDropdown
+                                    options={providerOptions}
+                                    selectedProvider={selectedProvider}
                                     className="h-10 w-full rounded-xl border-border/60 bg-background/95"
                                 />
                             </ListingFilterDesktopSection>
@@ -143,6 +158,14 @@ export function CardMobileFilters({
                         selectedNetwork={selectedNetwork}
                         query={query}
                         selectedType={selectedType}
+                        className="h-10 w-full rounded-xl border-border/60 bg-background/95"
+                    />
+                </ListingFilterMobileSection>
+
+                <ListingFilterMobileSection label="Provider" icon={<CreditCard className="h-3.5 w-3.5" />} className="space-y-1.5">
+                    <ProviderFilterDropdown
+                        options={providerOptions}
+                        selectedProvider={selectedProvider}
                         className="h-10 w-full rounded-xl border-border/60 bg-background/95"
                     />
                 </ListingFilterMobileSection>

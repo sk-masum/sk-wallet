@@ -1,5 +1,6 @@
 type BuildCardFilterHrefParams = {
   selectedNetwork: string
+  selectedProvider: string
   selectedType: string
   selectedSort: string
   selectedGroup: string
@@ -8,6 +9,7 @@ type BuildCardFilterHrefParams = {
 
 type CardFilterOverride = {
   network?: string
+  provider?: string
   type?: string
   sort?: string
   group?: string
@@ -19,6 +21,7 @@ export function buildCardFilterHref(
   next: CardFilterOverride
 ) {
   const nextNetwork = next.network ?? current.selectedNetwork
+  const nextProvider = next.provider ?? current.selectedProvider
   const nextType = next.type ?? current.selectedType
   const nextSort = next.sort ?? current.selectedSort
   const nextGroup = next.group ?? current.selectedGroup
@@ -31,6 +34,10 @@ export function buildCardFilterHref(
 
   if (nextNetwork) {
     nextParams.set('network', nextNetwork)
+  }
+
+  if (nextProvider) {
+    nextParams.set('provider', nextProvider)
   }
 
   if (nextType && nextType !== 'all') {

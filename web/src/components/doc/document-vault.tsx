@@ -66,9 +66,15 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
 
   const searchValue = (searchParams.get('q') ?? '').trim()
   const selectedTypeParam = (searchParams.get('type') ?? 'ALL').trim().toUpperCase()
+  const selectedCategory = (searchParams.get('category') ?? 'all').trim().toLowerCase()
+  const selectedSortParam = (searchParams.get('sort') ?? 'newest').trim().toLowerCase()
   const selectedType = DOCUMENT_TYPE_OPTIONS.some((item) => item.code === selectedTypeParam)
     ? selectedTypeParam
     : 'ALL'
+  const selectedSort =
+    selectedSortParam === 'oldest' || selectedSortParam === 'name-asc' || selectedSortParam === 'name-desc'
+      ? selectedSortParam
+      : 'newest'
 
   useEffect(() => {
     setDocuments(initialDocuments)
@@ -118,8 +124,18 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
   }, [selectedDocumentId])
 
   const sortedDocuments = useMemo(
-    () => [...documents].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()),
-    [documents]
+    () => [...documents].sort((a, b) => {
+      if (selectedSort === 'name-asc' || selectedSort === 'name-desc') {
+        const aLabel = (getDocumentTypeConfig(a.document_type)?.label ?? a.document_type).toLowerCase()
+        const bLabel = (getDocumentTypeConfig(b.document_type)?.label ?? b.document_type).toLowerCase()
+        return selectedSort === 'name-asc' ? aLabel.localeCompare(bLabel) : bLabel.localeCompare(aLabel)
+      }
+
+      const aTime = new Date(a.updated_at).getTime()
+      const bTime = new Date(b.updated_at).getTime()
+      return selectedSort === 'oldest' ? aTime - bTime : bTime - aTime
+    }),
+    [documents, selectedSort]
   )
 
   const filteredDocuments = useMemo(() => {
@@ -127,6 +143,10 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
 
     return sortedDocuments.filter((doc) => {
       if (selectedType !== 'ALL' && doc.document_type !== selectedType) {
+        return false
+      }
+
+      if (selectedCategory !== 'all' && String(doc.category ?? 'other').toLowerCase() !== selectedCategory) {
         return false
       }
 
@@ -144,7 +164,7 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
 
       return searchable.includes(query)
     })
-  }, [searchValue, selectedType, sortedDocuments])
+  }, [searchValue, selectedCategory, selectedType, sortedDocuments])
 
   const selectedDocument = useMemo(
     () => filteredDocuments.find((doc) => doc.id === selectedDocumentId) ?? null,

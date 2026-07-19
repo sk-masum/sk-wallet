@@ -33,6 +33,7 @@ export interface CardPageProps {
   searchParams?: Promise<{
     q?: string
     network?: string
+    provider?: string
     type?: string
     sort?: string
     group?: string

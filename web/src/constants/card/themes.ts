@@ -97,4 +97,52 @@ export const CARD_THEMES: CardTheme[] = [
     border: 'rgba(125, 211, 252, 0.88)',
     mutedText: 'text-cyan-100/80',
   },
+  {
+    colorName: 'Solar Yellow',
+    surface: 'bg-linear-to-br from-yellow-600 via-amber-600 to-orange-700',
+    border: 'rgba(250, 204, 21, 0.95)',
+    mutedText: 'text-yellow-100/85',
+  },
+  {
+    colorName: 'Lemon Moss',
+    surface: 'bg-linear-to-br from-lime-500 via-yellow-600 to-emerald-700',
+    border: 'rgba(190, 242, 100, 0.92)',
+    mutedText: 'text-lime-100/85',
+  },
+  {
+    colorName: 'Golden Night',
+    surface: 'bg-linear-to-br from-amber-500 via-yellow-600 to-zinc-900',
+    border: 'rgba(245, 158, 11, 0.92)',
+    mutedText: 'text-amber-100/85',
+  },
+  {
+    colorName: 'Honey Bronze',
+    surface: 'bg-linear-to-br from-yellow-500 via-orange-600 to-red-800',
+    border: 'rgba(251, 191, 36, 0.9)',
+    mutedText: 'text-yellow-100/85',
+  },
+  {
+    colorName: 'Aurora Mint',
+    surface: 'bg-linear-to-br from-emerald-500 via-teal-600 to-cyan-700',
+    border: 'rgba(110, 231, 183, 0.9)',
+    mutedText: 'text-emerald-100/80',
+  },
+  {
+    colorName: 'Blue Ember',
+    surface: 'bg-linear-to-br from-blue-700 via-indigo-800 to-orange-700',
+    border: 'rgba(147, 197, 253, 0.88)',
+    mutedText: 'text-blue-100/80',
+  },
+  {
+    colorName: 'Plum Sunset',
+    surface: 'bg-linear-to-br from-purple-700 via-fuchsia-700 to-orange-600',
+    border: 'rgba(216, 180, 254, 0.9)',
+    mutedText: 'text-fuchsia-100/80',
+  },
+  {
+    colorName: 'Arctic Steel',
+    surface: 'bg-linear-to-br from-slate-600 via-sky-700 to-blue-900',
+    border: 'rgba(186, 230, 253, 0.86)',
+    mutedText: 'text-sky-100/80',
+  },
 ]

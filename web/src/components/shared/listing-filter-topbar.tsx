@@ -101,9 +101,9 @@ export function ListingFilterTopBar({
         <>
             <div className={cn(mobileContainerClassName ?? 'sm:hidden')}>
                 <div className={cn('pb-2', mobileInnerClassName)}>
-                    <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-linear-to-r from-background/97 via-card/92 to-background/96 p-2.5 shadow-[0_22px_44px_-24px_hsl(var(--foreground)/0.58)] ring-1 ring-border/35 backdrop-blur-xl">
-                        <div className="pointer-events-none absolute -top-8 left-1/4 h-16 w-32 rounded-full bg-primary/18 blur-2xl" />
-                        <div className="pointer-events-none absolute -bottom-10 right-2 h-20 w-24 rounded-full bg-primary/10 blur-2xl" />
+                    <div className="relative overflow-hidden rounded-2xl border border-border/45 bg-linear-to-r from-background/90 via-card/82 to-background/88 p-2.5 shadow-[0_18px_36px_-24px_hsl(var(--foreground)/0.5)] ring-1 ring-border/30 backdrop-blur-xl dark:border-white/10 dark:from-black/55 dark:via-zinc-900/70 dark:to-black/55 dark:shadow-[0_18px_36px_-24px_rgba(0,0,0,0.85)] dark:ring-white/10">
+                        <div className="pointer-events-none absolute -top-8 left-1/4 h-16 w-32 rounded-full bg-primary/10 blur-2xl dark:hidden" />
+                        <div className="pointer-events-none absolute -bottom-10 right-2 h-20 w-24 rounded-full bg-primary/6 blur-2xl dark:hidden" />
                         <div className="relative flex items-center gap-2">
                             <form action={formAction} method="get" className="relative flex-1">
                                 <Input
@@ -117,7 +117,7 @@ export function ListingFilterTopBar({
                                     }
                                     placeholder={mobileSearchPlaceholder}
                                     aria-label={mobileSearchAriaLabel}
-                                    className="h-10 rounded-xl border-border/65 bg-background/97 pr-10 shadow-inner shadow-black/5"
+                                    className="h-10 rounded-xl border-border/65 bg-background/90 pr-10 shadow-inner shadow-black/5 dark:border-white/10 dark:bg-black/35 dark:shadow-black/30"
                                 />
                                 {hasTextQuery ? renderClearSearchAction(false) : null}
                                 {searchHiddenFields}
@@ -126,7 +126,7 @@ export function ListingFilterTopBar({
                             <Button
                                 type="button"
                                 variant="outline"
-                                className="h-10 gap-2 rounded-xl border-border/65 bg-background/95 px-3.5 shadow-sm"
+                                className="h-10 gap-2 rounded-xl border-border/65 bg-background/88 px-3.5 shadow-sm dark:border-white/10 dark:bg-black/35 dark:shadow-black/30"
                                 onClick={onOpenMobileFilters}
                             >
                                 <SlidersHorizontal className="h-4 w-4" />

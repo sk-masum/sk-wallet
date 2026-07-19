@@ -23,10 +23,11 @@ function FormActions({
   resetClassName,
 }: FormActionsProps) {
   return (
-    <div className={cn('sm:col-span-2 flex flex-col gap-2 sm:flex-row', className)}>
+    <div className={cn('sm:col-span-2 flex flex-col gap-2 sm:flex-row sm:justify-end', className)}>
       <Button
         type="submit"
-        className={cn('px-6 w-full text-md uppercase tracking-wider sm:w-auto', submitClassName)}
+        variant="primary"
+        className={cn('h-11 w-full rounded-xl px-6 text-sm font-semibold uppercase tracking-[0.08em] shadow-sm sm:w-auto', submitClassName)}
         disabled={isSubmitting}
       >
         {isSubmitting ? submittingLabel : submitLabel}
@@ -34,8 +35,8 @@ function FormActions({
       {showReset ? (
         <Button
           type="reset"
-          variant="outline"
-          className={cn('px-6 w-full text-md uppercase tracking-wider sm:w-auto', resetClassName)}
+          variant="secondary"
+          className={cn('h-11 w-full rounded-xl border border-border/65 bg-background/80 px-6 text-sm font-semibold uppercase tracking-[0.08em] text-foreground shadow-sm transition-colors hover:bg-muted/55 sm:w-auto', resetClassName)}
           disabled={isSubmitting}
         >
           {resetLabel}

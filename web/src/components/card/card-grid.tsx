@@ -208,6 +208,7 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
                 onToggleNumberVisibility={() => setShowFullNumber((prev) => !prev)}
                 allowCopyNumber
                 allowCopyExpiry
+                allowCopyCvv
               />
 
               <div className="-mt-px rounded-b-2xl border border-t-0 border-border/65 bg-linear-to-b from-background/94 to-muted/35 px-3 pb-3 pt-2.5 backdrop-blur-md sm:px-4 sm:pb-4 sm:pt-3">

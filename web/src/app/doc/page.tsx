@@ -7,6 +7,7 @@ import { DocumentMobileFilters } from '@/components/doc/document-mobile-filters'
 import { buttonVariants } from '@/components/ui/button'
 import { ListingActiveFiltersRow, ListingPageHeader } from '@/components/shared/listing-page-header'
 import { ListingPageLayout } from '@/components/shared/listing-page-layout'
+import { DOCUMENT_CATEGORY_OPTIONS, getDocumentCategoryLabel } from '@/constants/document/categories'
 import { DOCUMENT_TYPE_OPTIONS, getDocumentTypeConfig } from '@/constants/document/types'
 import { serverApiGet } from '@/lib/api/server'
 import { cn } from '@/lib/utils'
@@ -16,19 +17,37 @@ type DocPageProps = {
   searchParams?: Promise<{
     q?: string
     type?: string
+    category?: string
+    sort?: string
   }>
+}
+
+const DOCUMENT_SORT_LABELS: Record<string, string> = {
+  oldest: 'Oldest first',
+  'name-asc': 'Name (A-Z)',
+  'name-desc': 'Name (Z-A)',
 }
 
 export default async function DocPage({ searchParams }: DocPageProps) {
   const params = searchParams ? await searchParams : {}
   const query = params.q?.trim() ?? ''
   const typeParam = params.type?.trim().toUpperCase() ?? 'ALL'
+  const categoryParam = params.category?.trim().toLowerCase() ?? 'all'
+  const sortParam = params.sort?.trim().toLowerCase() ?? 'newest'
   const isKnownType = DOCUMENT_TYPE_OPTIONS.some((item) => item.code === typeParam)
+  const isKnownCategory = DOCUMENT_CATEGORY_OPTIONS.some((item) => item.value === categoryParam)
   const selectedType = isKnownType ? typeParam : 'ALL'
+  const selectedCategory = isKnownCategory ? categoryParam : 'all'
+  const selectedSort =
+    sortParam === 'oldest' || sortParam === 'name-asc' || sortParam === 'name-desc'
+      ? sortParam
+      : 'newest'
   const hasTextQuery = query.length > 0
   const hasTypeFilter = selectedType !== 'ALL'
-  const hasActiveControls = hasTextQuery || hasTypeFilter
-  const activeControlCount = Number(hasTextQuery) + Number(hasTypeFilter)
+  const hasCategoryFilter = selectedCategory !== 'all'
+  const hasSortSelection = selectedSort !== 'newest'
+  const hasActiveControls = hasTextQuery || hasTypeFilter || hasCategoryFilter || hasSortSelection
+  const activeControlCount = Number(hasTextQuery) + Number(hasTypeFilter) + Number(hasCategoryFilter) + Number(hasSortSelection)
 
   const { response, data: result } = await serverApiGet<{ data?: UserDocument[]; error?: string }>(
     '/api/document'
@@ -50,7 +69,14 @@ export default async function DocPage({ searchParams }: DocPageProps) {
         addHref="/doc/new"
         addLabel="Add document"
         mobileStickyHeader
-        mobileFilters={<DocumentMobileFilters query={query} selectedType={selectedType} />}
+        mobileFilters={
+          <DocumentMobileFilters
+            query={query}
+            selectedType={selectedType}
+            selectedCategory={selectedCategory}
+            selectedSort={selectedSort}
+          />
+        }
         activeFilters={
           hasActiveControls ? (
             <ListingActiveFiltersRow className="items-center justify-between gap-3">
@@ -63,6 +89,16 @@ export default async function DocPage({ searchParams }: DocPageProps) {
                 {hasTypeFilter ? (
                   <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">
                     Type: {getDocumentTypeConfig(selectedType)?.label ?? selectedType}
+                  </span>
+                ) : null}
+                {hasCategoryFilter ? (
+                  <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">
+                    Category: {getDocumentCategoryLabel(selectedCategory)}
+                  </span>
+                ) : null}
+                {hasSortSelection ? (
+                  <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">
+                    Sort: {DOCUMENT_SORT_LABELS[selectedSort]}
                   </span>
                 ) : null}
               </div>

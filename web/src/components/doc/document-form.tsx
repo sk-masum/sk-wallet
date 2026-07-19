@@ -9,6 +9,16 @@ import { Calendar } from '@/components/ui/calendar'
 import { FormActions } from '@/components/ui/form-actions'
 import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
+import {
+  entityFormActionsDividerClass,
+  entityFormControlClass,
+  entityFormDateButtonClass,
+  entityFormFieldCardClass,
+  entityFormGridClass,
+  entityFormLabelClass,
+  entityFormSelectClass,
+  entityFormTextareaClass,
+} from '@/components/shared/entity-form-ui'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -121,8 +131,8 @@ export function DocumentForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-4 rounded-lg border border-border p-4 sm:grid-cols-2">
-      <FormField id="doc-type" label="Document type" error={fieldErrors.type}>
+    <form onSubmit={handleSubmit} className={entityFormGridClass}>
+      <FormField id="doc-type" label="Document type" error={fieldErrors.type} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
         <Select
           disabled={lockTypeField}
           value={values.type}
@@ -131,7 +141,7 @@ export function DocumentForm({
             setFieldErrors((prev) => ({ ...prev, type: undefined, number: undefined }))
           }}
         >
-          <SelectTrigger id="doc-type" className={cn('w-full', fieldErrors.type && 'border-destructive')}>
+          <SelectTrigger id="doc-type" className={cn(entityFormSelectClass, fieldErrors.type && 'border-destructive')}>
             <SelectValue placeholder="Select document type" />
           </SelectTrigger>
           <SelectContent>
@@ -144,7 +154,7 @@ export function DocumentForm({
         </Select>
       </FormField>
 
-      <FormField id="doc-category" label="Category" error={fieldErrors.category} >
+      <FormField id="doc-category" label="Category" error={fieldErrors.category} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
         <Select
           value={values.category}
           onValueChange={(value) => {
@@ -152,7 +162,7 @@ export function DocumentForm({
             setFieldErrors((prev) => ({ ...prev, category: undefined }))
           }}
         >
-          <SelectTrigger id="doc-category" className={cn('w-full', fieldErrors.category && 'border-destructive')}>
+          <SelectTrigger id="doc-category" className={cn(entityFormSelectClass, fieldErrors.category && 'border-destructive')}>
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent>
@@ -170,6 +180,8 @@ export function DocumentForm({
         label="Document number"
         hint={typeConfig?.hint ?? 'Choose a type to see validation hint'}
         error={fieldErrors.number}
+        className={entityFormFieldCardClass}
+        labelClassName={entityFormLabelClass}
       >
         <Input
           id="doc-number"
@@ -180,7 +192,7 @@ export function DocumentForm({
             setFieldErrors((prev) => ({ ...prev, number: undefined }))
           }}
           placeholder={typeConfig?.placeholder ?? 'Enter document number'}
-          className={fieldErrors.number ? 'border-destructive focus-visible:ring-destructive' : ''}
+          className={cn(entityFormControlClass, fieldErrors.number && 'border-destructive focus-visible:ring-destructive')}
           aria-invalid={Boolean(fieldErrors.number)}
           autoCapitalize="characters"
           disabled={lockNumberField}
@@ -188,7 +200,7 @@ export function DocumentForm({
         />
       </FormField>
 
-      <FormField id="doc-name" label="Name on document (optional)" error={fieldErrors.nameOnDocument}>
+      <FormField id="doc-name" label="Name on document (optional)" error={fieldErrors.nameOnDocument} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
         <Input
           id="doc-name"
           value={values.nameOnDocument}
@@ -197,13 +209,13 @@ export function DocumentForm({
             setFieldErrors((prev) => ({ ...prev, nameOnDocument: undefined }))
           }}
           placeholder="As printed on document"
-          className={fieldErrors.nameOnDocument ? 'border-destructive focus-visible:ring-destructive' : ''}
+          className={cn(entityFormControlClass, fieldErrors.nameOnDocument && 'border-destructive focus-visible:ring-destructive')}
           aria-invalid={Boolean(fieldErrors.nameOnDocument)}
           maxLength={120}
         />
       </FormField>
 
-      <FormField id="doc-issued-date" label="Issued date (optional)" error={fieldErrors.issuedDate}>
+      <FormField id="doc-issued-date" label="Issued date (optional)" error={fieldErrors.issuedDate} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
         <Popover>
           <PopoverTrigger asChild>
             <Button
@@ -211,7 +223,7 @@ export function DocumentForm({
               type="button"
               variant="outline"
               className={cn(
-                'w-full justify-start text-left font-normal',
+                entityFormDateButtonClass,
                 !issuedDateValue && 'text-muted-foreground',
                 fieldErrors.issuedDate && 'border-destructive'
               )}
@@ -237,7 +249,7 @@ export function DocumentForm({
         </Popover>
       </FormField>
 
-      <FormField id="doc-expiry-date" label="Expiry date (optional)" error={fieldErrors.expiryDate}>
+      <FormField id="doc-expiry-date" label="Expiry date (optional)" error={fieldErrors.expiryDate} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
         <Popover>
           <PopoverTrigger asChild>
             <Button
@@ -245,7 +257,7 @@ export function DocumentForm({
               type="button"
               variant="outline"
               className={cn(
-                'w-full justify-start text-left font-normal',
+                entityFormDateButtonClass,
                 !expiryDateValue && 'text-muted-foreground',
                 fieldErrors.expiryDate && 'border-destructive'
               )}
@@ -271,7 +283,7 @@ export function DocumentForm({
         </Popover>
       </FormField>
 
-      <FormField id="doc-guardian" label="Guardian name (optional)" error={fieldErrors.guardianName}>
+      <FormField id="doc-guardian" label="Guardian name (optional)" error={fieldErrors.guardianName} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
         <Input
           id="doc-guardian"
           value={values.guardianName}
@@ -280,13 +292,13 @@ export function DocumentForm({
             setFieldErrors((prev) => ({ ...prev, guardianName: undefined }))
           }}
           placeholder="Father / Mother / Guardian"
-          className={fieldErrors.guardianName ? 'border-destructive focus-visible:ring-destructive' : ''}
+          className={cn(entityFormControlClass, fieldErrors.guardianName && 'border-destructive focus-visible:ring-destructive')}
           aria-invalid={Boolean(fieldErrors.guardianName)}
           maxLength={120}
         />
       </FormField>
 
-      <FormField id="doc-address" label="Address (optional)" error={fieldErrors.address} className="sm:col-span-2">
+      <FormField id="doc-address" label="Address (optional)" error={fieldErrors.address} className={cn(entityFormFieldCardClass, 'sm:col-span-2')} labelClassName={entityFormLabelClass}>
         <Input
           id="doc-address"
           value={values.address}
@@ -295,7 +307,7 @@ export function DocumentForm({
             setFieldErrors((prev) => ({ ...prev, address: undefined }))
           }}
           placeholder="Current address"
-          className={fieldErrors.address ? 'border-destructive focus-visible:ring-destructive' : ''}
+          className={cn(entityFormControlClass, fieldErrors.address && 'border-destructive focus-visible:ring-destructive')}
           aria-invalid={Boolean(fieldErrors.address)}
           maxLength={240}
         />
@@ -305,7 +317,8 @@ export function DocumentForm({
         id="doc-other-details"
         label="Other details (optional)"
         error={fieldErrors.otherDetails}
-        className="sm:col-span-2"
+        className={cn(entityFormFieldCardClass, 'sm:col-span-2')}
+        labelClassName={entityFormLabelClass}
       >
         <Textarea
           id="doc-other-details"
@@ -315,17 +328,19 @@ export function DocumentForm({
             setFieldErrors((prev) => ({ ...prev, otherDetails: undefined }))
           }}
           placeholder="Any additional notes"
-          className={fieldErrors.otherDetails ? 'border-destructive focus-visible:ring-destructive' : ''}
+          className={cn(entityFormTextareaClass, fieldErrors.otherDetails && 'border-destructive focus-visible:ring-destructive')}
           aria-invalid={Boolean(fieldErrors.otherDetails)}
           maxLength={500}
         />
       </FormField>
 
-      <FormActions
-        submitLabel={submitLabel}
-        isSubmitting={isSubmitting}
-        showReset={showReset}
-      />
+      <div className={entityFormActionsDividerClass}>
+        <FormActions
+          submitLabel={submitLabel}
+          isSubmitting={isSubmitting}
+          showReset={showReset}
+        />
+      </div>
     </form>
   )
 }

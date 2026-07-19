@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2 } from 'lucide-react'
+import { CreditCard, Landmark, Layers3, Loader2 } from 'lucide-react'
 
-import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 type CardType = 'all' | 'credit' | 'debit'
@@ -41,47 +40,47 @@ export function CardTypeButtonGroup({
     })
   }
 
+  const options: Array<{ key: CardType; label: string; icon: typeof Layers3 }> = [
+    { key: 'all', label: 'All', icon: Layers3 },
+    { key: 'credit', label: 'Credit', icon: CreditCard },
+    { key: 'debit', label: 'Debit', icon: Landmark },
+  ]
+
   return (
     <div
-      className={cn('grid h-9 w-full max-w-sm grid-cols-3 rounded-md border border-border', className)}
+      className={cn(
+        'relative isolate grid h-10 w-full max-w-sm grid-cols-3 rounded-xl border border-border/65 bg-muted/30 p-1 shadow-inner shadow-black/5',
+        className
+      )}
       aria-busy={isPending}
     >
-      <button
-        type="button"
-        onClick={() => handleSelect('all')}
-        disabled={isPending}
-        className={cn(
-          buttonVariants({ variant: selectedType === 'all' ? 'secondary' : 'ghost' }),
-          'h-full w-full justify-center rounded-none border-r border-border first:rounded-l-md disabled:pointer-events-none'
-        )}
-      >
-        {isPending && pendingType === 'all' ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
-        All
-      </button>
-      <button
-        type="button"
-        onClick={() => handleSelect('credit')}
-        disabled={isPending}
-        className={cn(
-          buttonVariants({ variant: selectedType === 'credit' ? 'secondary' : 'ghost' }),
-          'h-full w-full justify-center rounded-none border-r border-border disabled:pointer-events-none'
-        )}
-      >
-        {isPending && pendingType === 'credit' ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
-        Credit
-      </button>
-      <button
-        type="button"
-        onClick={() => handleSelect('debit')}
-        disabled={isPending}
-        className={cn(
-          buttonVariants({ variant: selectedType === 'debit' ? 'secondary' : 'ghost' }),
-          'h-full w-full justify-center rounded-none last:rounded-r-md disabled:pointer-events-none'
-        )}
-      >
-        {isPending && pendingType === 'debit' ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
-        Debit
-      </button>
+      {options.map((option) => {
+        const isActive = selectedType === option.key
+        const isLoading = isPending && pendingType === option.key
+        const Icon = option.icon
+
+        return (
+          <button
+            key={option.key}
+            type="button"
+            onClick={() => handleSelect(option.key)}
+            disabled={isPending}
+            className={cn(
+              'z-10 h-full w-full rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 ease-out disabled:pointer-events-none',
+              'inline-flex items-center justify-center gap-1.5 px-2',
+              'focus-visible:z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45',
+              isActive
+                ? 'bg-linear-to-b from-background to-background/95 text-foreground shadow-[0_7px_14px_-10px_hsl(var(--foreground)/0.65)] ring-1 ring-border/70'
+                : 'text-muted-foreground hover:bg-background/65 hover:text-foreground'
+            )}
+            aria-pressed={isActive}
+          >
+            {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+            {!isLoading ? <Icon className="h-3.5 w-3.5" /> : null}
+            {option.label}
+          </button>
+        )
+      })}
     </div>
   )
 }
