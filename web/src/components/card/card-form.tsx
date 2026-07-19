@@ -8,9 +8,11 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { FormActions } from '@/components/ui/form-actions'
 import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CardNumberInput } from '@/components/card/card-number-input'
 import { CvvOtpInput } from '@/components/card/cvv-otp-input'
 import { CARD_PATTERNS, getRandomCardPatternKey } from '@/constants/card/patterns'
+import { CARD_TAG_SUGGESTIONS } from '@/constants/card/tags'
 import {
   entityFormActionsDividerClass,
   entityFormControlClass,
@@ -24,13 +26,16 @@ import { cn } from '@/lib/utils'
 import { MONTH_OPTIONS } from '@/constants/card/month-options'
 import { CARD_NETWORK_FORM_OPTIONS } from '@/utils/card/network'
 import { buildCardAppearance, getCardThemes, parseCardAppearance } from '@/utils/card/theme'
+import { parseCardTags } from '@/utils/card/form-data'
 import { getExpectedCvvLength, validateCardFormFields, type CardFormFieldErrors } from '@/utils/card/validation'
 
 type CardFormValues = {
   cardType: 'credit' | 'debit' | ''
   colorName: string
+  tags: string
   cardName: string
   provider: string
+  creditLimit: string
   network: string
   number: string
   holderName: string
@@ -46,6 +51,8 @@ type CardFormProps = {
   cardId?: string
   initialValues?: Partial<CardFormValues>
 }
+
+const TAG_PICKER_PLACEHOLDER = '__pick_tag__'
 
 function FormPendingOverlay() {
   const { pending } = useFormStatus()
@@ -97,8 +104,10 @@ export function CardForm({
   const values: CardFormValues = {
     cardType: initialValues?.cardType ?? 'credit',
     colorName: initialValues?.colorName ?? '',
+    tags: initialValues?.tags ?? '',
     cardName: initialValues?.cardName ?? '',
     provider: initialValues?.provider ?? '',
+    creditLimit: initialValues?.creditLimit ?? '',
     network: initialValues?.network ?? '',
     number: initialValues?.number ?? '',
     holderName: initialValues?.holderName ?? '',
@@ -113,10 +122,34 @@ export function CardForm({
   const initialPatternKey = appearance.patternKey
   const [selectedColorName, setSelectedColorName] = useState(initialColorName)
   const [selectedPatternKey, setSelectedPatternKey] = useState(initialPatternKey)
+  const [selectedCardType, setSelectedCardType] = useState<'credit' | 'debit'>(
+    values.cardType === 'debit' ? 'debit' : 'credit'
+  )
   const [selectedNetwork, setSelectedNetwork] = useState(values.network)
+  const [tagsValue, setTagsValue] = useState(values.tags)
+  const [tagPickerValue, setTagPickerValue] = useState(TAG_PICKER_PLACEHOLDER)
   const [fieldErrors, setFieldErrors] = useState<CardFormFieldErrors>({})
   const formRef = useRef<HTMLFormElement | null>(null)
   const cvvLength = getExpectedCvvLength(Number(selectedNetwork)) ?? 3
+  const selectedTagsSet = useMemo(() => {
+    return new Set(parseCardTags(tagsValue).map((tag) => tag.toLowerCase()))
+  }, [tagsValue])
+  const availableTagSuggestions = useMemo(() => {
+    return CARD_TAG_SUGGESTIONS.filter((tag) => !selectedTagsSet.has(tag.toLowerCase()))
+  }, [selectedTagsSet])
+
+  const scheduleTagValidation = () => {
+    window.requestAnimationFrame(() => validateFields(['tags']))
+  }
+
+  const handleTagPickerChange = (tag: string) => {
+    if (tag === TAG_PICKER_PLACEHOLDER) return
+
+    const mergedTags = parseCardTags([tagsValue, tag].filter(Boolean).join(', ')).join(', ')
+    setTagsValue(mergedTags)
+    setTagPickerValue(TAG_PICKER_PLACEHOLDER)
+    scheduleTagValidation()
+  }
 
   const getFieldErrorsFromForm = () => {
     if (!formRef.current) return {}
@@ -124,7 +157,9 @@ export function CardForm({
     const formData = new FormData(formRef.current)
     return validateCardFormFields({
       cardName: String(formData.get('card_name') ?? '').trim(),
+      tags: parseCardTags(String(formData.get('tags') ?? '')),
       provider: String(formData.get('provider') ?? '').trim(),
+      creditLimitRaw: String(formData.get('credit_limit') ?? '').trim(),
       number: String(formData.get('number') ?? '').trim(),
       holderName: String(formData.get('holder_name') ?? '').trim(),
       cardType: String(formData.get('card_type') ?? '').trim().toLowerCase(),
@@ -174,6 +209,7 @@ export function CardForm({
       className={entityFormGridClass}
     >
       {cardId ? <input type="hidden" name="id" value={cardId} /> : null}
+      {!cardId ? <input type="hidden" name="status" value="active" /> : null}
       <input type="hidden" name="color_name" value={buildCardAppearance(selectedColorName, selectedPatternKey)} />
       <FormPendingOverlay />
 
@@ -192,7 +228,10 @@ export function CardForm({
               name="card_type"
               value="credit"
               defaultChecked={values.cardType === 'credit'}
-              onChange={() => validateFields(['card_type'])}
+              onChange={() => {
+                setSelectedCardType('credit')
+                validateFields(['card_type', 'credit_limit'])
+              }}
               required
               className="peer sr-only"
             />
@@ -223,7 +262,10 @@ export function CardForm({
               name="card_type"
               value="debit"
               defaultChecked={values.cardType === 'debit'}
-              onChange={() => validateFields(['card_type'])}
+              onChange={() => {
+                setSelectedCardType('debit')
+                validateFields(['card_type', 'credit_limit'])
+              }}
               required
               className="peer sr-only"
             />
@@ -250,6 +292,29 @@ export function CardForm({
         </div>
       </FormField>
 
+      {selectedCardType === 'credit' ? (
+        <FormField
+          id="credit_limit"
+          label="CREDIT LIMIT"
+          error={fieldErrors.credit_limit}
+          className={entityFormFieldCardClass}
+          labelClassName={entityFormLabelClass}
+          hint="Required for credit cards. Enter total approved limit."
+        >
+          <Input
+            id="credit_limit"
+            name="credit_limit"
+            placeholder="e.g. 250000"
+            onChange={() => validateFields(['credit_limit'])}
+            className={cn(entityFormControlClass, fieldErrors.credit_limit && 'border-destructive focus-visible:ring-destructive')}
+            aria-invalid={Boolean(fieldErrors.credit_limit)}
+            inputMode="decimal"
+            defaultValue={values.creditLimit}
+            required
+          />
+        </FormField>
+      ) : null}
+
       <FormField id="card_name" label="CARD NAME" error={fieldErrors.card_name} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
         <Input
           id="card_name"
@@ -263,6 +328,54 @@ export function CardForm({
           defaultValue={values.cardName}
           required
         />
+      </FormField>
+
+      <FormField
+        id="tags"
+        label="TAGS"
+        error={fieldErrors.tags}
+        className={entityFormFieldCardClass}
+        labelClassName={entityFormLabelClass}
+        hint="Optional: type comma-separated tags, use autocomplete, or pick from dropdown."
+      >
+        <div className="space-y-2">
+          <Input
+            id="tags"
+            name="tags"
+            list="card-tag-suggestions"
+            placeholder="e.g. travel, family, recurring"
+            value={tagsValue}
+            onChange={(event) => {
+              setTagsValue(event.target.value)
+              validateFields(['tags'])
+            }}
+            className={cn(entityFormControlClass, fieldErrors.tags && 'border-destructive focus-visible:ring-destructive')}
+            aria-invalid={Boolean(fieldErrors.tags)}
+            maxLength={220}
+            autoComplete="off"
+          />
+          <datalist id="card-tag-suggestions">
+            {availableTagSuggestions.map((tag) => (
+              <option key={tag} value={tag} />
+            ))}
+          </datalist>
+
+          <Select
+            value={tagPickerValue === TAG_PICKER_PLACEHOLDER ? undefined : tagPickerValue}
+            onValueChange={handleTagPickerChange}
+          >
+            <SelectTrigger className={cn(entityFormSelectClass, 'h-10')} aria-label="Quick add tag">
+              <SelectValue placeholder="Quick add tag" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableTagSuggestions.map((tag) => (
+                <SelectItem key={tag} value={tag}>
+                  {tag}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </FormField>
       <FormField id="number" label="CARD NUMBER" error={fieldErrors.number} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
         <CardNumberInput

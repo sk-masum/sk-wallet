@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
+import { isCardStatus } from '@/constants/card/status';
 import { detokenizeCardCvv, detokenizeCardNumber, tokenizeCardCvv, tokenizeCardNumber } from '@/lib/security/card-token';
 
 function getCardWriteErrorMessage(error: { code?: string; message: string }) {
@@ -61,8 +62,11 @@ export async function PUT(request: Request, { params }: Params) {
 
   let payload: {
     color_name?: string;
+    status?: string;
+    tags?: string[];
     card_name?: string;
     provider?: string | null;
+    credit_limit?: number | null;
     number?: string;
     holder_name?: string;
     expiry_month?: number | null;
@@ -92,8 +96,21 @@ export async function PUT(request: Request, { params }: Params) {
     .from('card')
     .update({
       color_name: payload.color_name?.trim() || null,
+      ...(payload.status !== undefined && isCardStatus(String(payload.status).trim().toLowerCase())
+        ? { status: String(payload.status).trim().toLowerCase() }
+        : {}),
+      tags: Array.isArray(payload.tags)
+        ? payload.tags
+            .map((tag) => String(tag).trim())
+            .filter(Boolean)
+            .slice(0, 8)
+        : [],
       card_name: payload.card_name?.trim() || null,
       provider: payload.provider?.trim() || null,
+      credit_limit:
+        Boolean(payload.isCredit) && typeof payload.credit_limit === 'number' && Number.isFinite(payload.credit_limit)
+          ? payload.credit_limit
+          : null,
       number: tokenizedNumber,
       holder_name: payload.holder_name?.trim() || null,
       expiry_month: payload.expiry_month ?? null,
@@ -102,6 +119,43 @@ export async function PUT(request: Request, { params }: Params) {
       network: payload.network ?? null,
       isCredit: Boolean(payload.isCredit),
     })
+    .eq('id', id)
+    .eq('owner_id', user.id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
+}
+
+export async function PATCH(request: Request, { params }: Params) {
+  const { id } = await params;
+  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext();
+
+  if (unauthorizedResponse || !user) {
+    return unauthorizedResponse;
+  }
+
+  let payload: {
+    status?: string;
+  };
+
+  try {
+    payload = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  const normalizedStatus = String(payload.status ?? '').trim().toLowerCase();
+
+  if (!isCardStatus(normalizedStatus)) {
+    return NextResponse.json({ error: 'Invalid card status' }, { status: 400 });
+  }
+
+  const { error } = await supabase
+    .from('card')
+    .update({ status: normalizedStatus })
     .eq('id', id)
     .eq('owner_id', user.id);
 
@@ -122,7 +176,7 @@ export async function DELETE(_request: Request, { params }: Params) {
 
   const { error } = await supabase
     .from('card')
-    .delete()
+    .update({ status: 'replaced' })
     .eq('id', id)
     .eq('owner_id', user.id);
 

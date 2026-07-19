@@ -16,6 +16,7 @@ export type CardFaceProps = {
   allowCopyNumber?: boolean
   allowCopyExpiry?: boolean
   allowCopyCvv?: boolean
+  showCreditLimit?: boolean
   showCvv?: boolean
   showFullNumber?: boolean
   expiryAlignStart?: boolean
@@ -28,6 +29,7 @@ export function CardFace({
   allowCopyNumber = false,
   allowCopyExpiry = false,
   allowCopyCvv = false,
+  showCreditLimit = false,
   showCvv = false,
   showFullNumber = false,
   expiryAlignStart = false,
@@ -42,11 +44,18 @@ export function CardFace({
   const number = showFullNumber ? fullNumber : maskedNumber
   const expiry = formatExpiry(card.expiry_month, card.expiry_year)
   const cvv = String(card.cvv ?? '').trim() || 'N/A'
+  const creditLimitValue = Number(card.credit_limit)
+  const creditLimit = Number.isFinite(creditLimitValue) && creditLimitValue > 0
+    ? new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(creditLimitValue)
+    : 'No limit'
   const networkCode = resolveNetworkCode(card.network)
   const colorName = card.color_name?.trim() ?? ''
   const theme = colorName ? getCardThemeByColorName(colorName) : getCardTheme(id)
   const patternKey = parseCardAppearance(colorName).patternKey
   const pattern = getCardPatternByKey(patternKey)
+  const status = String(card.status ?? '').trim().toLowerCase()
+  const statusLabel =
+    status === 'blocked' ? 'Blocked' : status === 'replaced' ? 'Replaced' : null
 
   return (
     <div
@@ -61,11 +70,31 @@ export function CardFace({
       ) : null}
 
       <div className="flex items-center justify-between gap-3">
-        <div className={cn('truncate text-md font-medium tracking-wide', theme.mutedText)}>{name}</div>
+        <div className="min-w-0 space-y-1">
+          <div className={cn('truncate text-md font-medium tracking-wide', theme.mutedText)}>{name}</div>
+          {statusLabel ? (
+            <span
+              className={cn(
+                'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase backdrop-blur-sm',
+                status === 'blocked'
+                  ? 'border-amber-200/65 bg-amber-400/20 text-amber-100'
+                  : 'border-rose-200/65 bg-rose-500/20 text-rose-100'
+              )}
+            >
+              {statusLabel}
+            </span>
+          ) : null}
+        </div>
         <NetworkLogo brand={networkCode} className="h-12 w-auto shrink-0" />
       </div>
 
       <ChipIcon className="-ml-1.75 mb-4 mt-2 h-10 w-16 self-start" />
+
+      {showCreditLimit && card.isCredit ? (
+        <p className={cn('mb-2 text-[11px] tracking-[0.08em] uppercase', theme.mutedText)}>
+          Limit: {creditLimit}
+        </p>
+      ) : null}
 
       {allowCopyNumber ? (
         <div className="inline-flex justify-between w-full sm:w-fit items-center gap-0 sm:gap-2">

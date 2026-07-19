@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
+import { isCardStatus } from '@/constants/card/status';
 import { detokenizeCardCvv, detokenizeCardNumber, tokenizeCardCvv, tokenizeCardNumber } from '@/lib/security/card-token';
 
 function getCardWriteErrorMessage(error: { code?: string; message: string }) {
@@ -63,8 +64,11 @@ export async function POST(request: Request) {
 
   let payload: {
     color_name?: string;
+    status?: string;
+    tags?: string[];
     card_name?: string;
     provider?: string | null;
+    credit_limit?: number | null;
     number?: string;
     holder_name?: string;
     expiry_month?: number | null;
@@ -93,8 +97,21 @@ export async function POST(request: Request) {
   const { error } = await supabase.from('card').insert({
     owner_id: user.id,
     color_name: payload.color_name?.trim() || null,
+    status: isCardStatus(String(payload.status ?? '').trim().toLowerCase())
+      ? String(payload.status).trim().toLowerCase()
+      : 'active',
+    tags: Array.isArray(payload.tags)
+      ? payload.tags
+          .map((tag) => String(tag).trim())
+          .filter(Boolean)
+          .slice(0, 8)
+      : [],
     card_name: payload.card_name?.trim() || null,
     provider: payload.provider?.trim() || null,
+    credit_limit:
+      Boolean(payload.isCredit) && typeof payload.credit_limit === 'number' && Number.isFinite(payload.credit_limit)
+        ? payload.credit_limit
+        : null,
     number: tokenizedNumber,
     holder_name: payload.holder_name?.trim() || null,
     expiry_month: payload.expiry_month ?? null,

@@ -14,6 +14,7 @@ export const CARD_GROUP_OPTIONS = [
     { value: 'none', label: 'No grouping' },
     { value: 'provider', label: 'Group by provider' },
     { value: 'network', label: 'Group by network' },
+    { value: 'tags', label: 'Group by tags' },
 ] as const
 
 type CardGroupValue = (typeof CARD_GROUP_OPTIONS)[number]['value']

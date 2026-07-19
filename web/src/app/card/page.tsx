@@ -43,6 +43,8 @@ const SORT_LABELS: Record<string, string> = {
   'expiry-desc': 'Expiry (Latest)',
 }
 
+const EXPIRING_SOON_WINDOW_DAYS = 60
+
 const parseCardExpiryValue = (card: WalletCard) => {
   const month = Number.parseInt(String(card.expiry_month ?? ''), 10)
   const yearRaw = Number.parseInt(String(card.expiry_year ?? ''), 10)
@@ -55,11 +57,31 @@ const parseCardExpiryValue = (card: WalletCard) => {
   return year * 100 + month
 }
 
+const isCardExpiringSoon = (card: WalletCard, withinDays: number) => {
+  const month = Number.parseInt(String(card.expiry_month ?? ''), 10)
+  const yearRaw = Number.parseInt(String(card.expiry_year ?? ''), 10)
+
+  if (Number.isNaN(month) || month < 1 || month > 12 || Number.isNaN(yearRaw)) {
+    return false
+  }
+
+  const year = yearRaw < 100 ? 2000 + yearRaw : yearRaw
+  const expiryDate = new Date(year, month, 0, 23, 59, 59, 999)
+  const now = new Date()
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const endBoundary = new Date(startOfToday)
+  endBoundary.setDate(endBoundary.getDate() + withinDays)
+
+  return expiryDate >= startOfToday && expiryDate <= endBoundary
+}
+
 export default async function CardPage({ searchParams }: CardPageProps) {
   const params = searchParams ? await searchParams : {}
   const query = params.q?.trim() ?? ''
   const networkParam = params.network?.trim().toUpperCase() ?? ''
   const providerParam = params.provider?.trim() ?? ''
+  const tagParam = params.tag?.trim() ?? ''
+  const expiryParam = params.expiry?.trim().toLowerCase() ?? 'all'
   const typeParam = params.type?.trim().toLowerCase() ?? 'all'
   const sortParam = params.sort?.trim().toLowerCase() ?? 'newest'
   const groupParam = params.group?.trim().toLowerCase() ?? 'none'
@@ -73,11 +95,13 @@ export default async function CardPage({ searchParams }: CardPageProps) {
       ? sortParam
       : 'newest'
   const selectedGroup =
-    groupParam === 'provider' || groupParam === 'network'
+    groupParam === 'provider' || groupParam === 'network' || groupParam === 'tags'
       ? groupParam
       : 'none'
   const selectedNetwork = networkParam === 'ALL' ? '' : networkParam
   const selectedProvider = providerParam === 'ALL' ? '' : providerParam
+  const selectedTag = tagParam === 'ALL' ? '' : tagParam
+  const selectedExpiry = expiryParam === 'soon' ? 'soon' : 'all'
   const queryLower = query.toLowerCase()
   const queryDigits = query.replace(/\D/g, '')
 
@@ -99,21 +123,33 @@ export default async function CardPage({ searchParams }: CardPageProps) {
         .filter((provider) => provider.length > 0)
     )
   ).sort((a, b) => a.localeCompare(b))
+  const tagOptions = Array.from(
+    new Set(
+      allCards
+        .flatMap((card) => (Array.isArray(card.tags) ? card.tags : []))
+        .map((tag) => String(tag).trim())
+        .filter((tag) => tag.length > 0)
+    )
+  ).sort((a, b) => a.localeCompare(b))
   const hasTextQuery = query.length > 0
   const hasNetworkFilter = selectedNetwork.length > 0
   const hasProviderFilter = selectedProvider.length > 0
+  const hasTagFilter = selectedTag.length > 0
+  const hasExpiryFilter = selectedExpiry === 'soon'
   const hasTypeFilter = selectedType !== 'all'
   const hasSortSelection = selectedSort !== 'newest'
   const hasGrouping = selectedGroup !== 'none'
-  const hasFilters = hasTextQuery || hasNetworkFilter || hasProviderFilter || hasTypeFilter
+  const hasFilters = hasTextQuery || hasNetworkFilter || hasProviderFilter || hasTagFilter || hasExpiryFilter || hasTypeFilter
   const hasActiveControls = hasFilters || hasSortSelection || hasGrouping
-  const activeFilterCount = Number(hasTypeFilter) + Number(hasNetworkFilter) + Number(hasProviderFilter) + Number(hasGrouping)
+  const activeFilterCount = Number(hasTypeFilter) + Number(hasNetworkFilter) + Number(hasProviderFilter) + Number(hasTagFilter) + Number(hasExpiryFilter) + Number(hasGrouping)
 
-  const buildFilterHref = (next: { network?: string; provider?: string; type?: string; sort?: string; group?: string; q?: string }) =>
+  const buildFilterHref = (next: { network?: string; provider?: string; tag?: string; expiry?: string; type?: string; sort?: string; group?: string; q?: string }) =>
     buildCardFilterHref(
       {
         selectedNetwork,
         selectedProvider,
+        selectedTag,
+        selectedExpiry,
         selectedType,
         selectedSort,
         selectedGroup,
@@ -141,8 +177,10 @@ export default async function CardPage({ searchParams }: CardPageProps) {
 
     const matchesNetwork = !hasNetworkFilter || cardNetwork === selectedNetwork
     const matchesProvider = !hasProviderFilter || provider === selectedProvider.toLowerCase()
+    const matchesTag = !hasTagFilter || (Array.isArray(card.tags) && card.tags.some((tag) => String(tag).trim().toLowerCase() === selectedTag.toLowerCase()))
+    const matchesExpiry = !hasExpiryFilter || isCardExpiringSoon(card, EXPIRING_SOON_WINDOW_DAYS)
 
-    return matchesText && matchesNetwork && matchesProvider && matchesType
+    return matchesText && matchesNetwork && matchesProvider && matchesTag && matchesExpiry && matchesType
   })
 
   const sortedCards = [...filteredCards].sort((a, b) => {
@@ -186,13 +224,16 @@ export default async function CardPage({ searchParams }: CardPageProps) {
             selectedType={selectedType}
             selectedNetwork={selectedNetwork}
             selectedProvider={selectedProvider}
+            selectedTag={selectedTag}
+            selectedExpiry={selectedExpiry}
             selectedSort={selectedSort}
             selectedGroup={selectedGroup}
             networkOptions={networkOptions}
             providerOptions={providerOptions}
+            tagOptions={tagOptions}
             activeFilterCount={activeFilterCount}
             clearSearchHref={buildFilterHref({ q: '' })}
-            clearAllHref={buildFilterHref({ q: '', network: '', provider: '', type: 'all', sort: 'newest', group: 'none' })}
+            clearAllHref={buildFilterHref({ q: '', network: '', provider: '', tag: '', expiry: 'all', type: 'all', sort: 'newest', group: 'none' })}
             typeHrefs={{
               all: buildFilterHref({ type: 'all' }),
               credit: buildFilterHref({ type: 'credit' }),
@@ -224,6 +265,16 @@ export default async function CardPage({ searchParams }: CardPageProps) {
                     Provider: {selectedProvider}
                   </span>
                 ) : null}
+                {hasTagFilter ? (
+                  <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">
+                    Tag: {selectedTag}
+                  </span>
+                ) : null}
+                {hasExpiryFilter ? (
+                  <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">
+                    Expiry: Next {EXPIRING_SOON_WINDOW_DAYS} days
+                  </span>
+                ) : null}
                 {hasSortSelection ? (
                   <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">
                     Sort: {SORT_LABELS[selectedSort]}
@@ -231,13 +282,13 @@ export default async function CardPage({ searchParams }: CardPageProps) {
                 ) : null}
                 {hasGrouping ? (
                   <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">
-                    Group: {selectedGroup === 'provider' ? 'Provider' : 'Network'}
+                    Group: {selectedGroup === 'provider' ? 'Provider' : selectedGroup === 'network' ? 'Network' : 'Tags'}
                   </span>
                 ) : null}
               </div>
 
               <Link
-                href={buildFilterHref({ q: '', network: '', provider: '', type: 'all', sort: 'newest', group: 'none' })}
+                href={buildFilterHref({ q: '', network: '', provider: '', tag: '', expiry: 'all', type: 'all', sort: 'newest', group: 'none' })}
                 className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-8 rounded-full border border-border/60 bg-background/80 px-3 text-xs')}
               >
                 Reset filters
@@ -288,7 +339,7 @@ export default async function CardPage({ searchParams }: CardPageProps) {
           <CardHeader className="pb-2 text-center">
             <CardTitle className="justify-center">No matching cards</CardTitle>
             <CardDescription>
-              Try a different card name, provider, number, network, or card type filter.
+              Try a different card name, provider, number, network, tag, or card type filter.
             </CardDescription>
           </CardHeader>
           <CardContent className="pb-6">
@@ -302,7 +353,7 @@ export default async function CardPage({ searchParams }: CardPageProps) {
               </div>
 
               <Link
-                href={buildFilterHref({ q: '', network: '', provider: '', type: 'all', sort: 'newest', group: 'none' })}
+                href={buildFilterHref({ q: '', network: '', provider: '', tag: '', expiry: 'all', type: 'all', sort: 'newest', group: 'none' })}
                 className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'rounded-full px-4')}
               >
                 Clear filters

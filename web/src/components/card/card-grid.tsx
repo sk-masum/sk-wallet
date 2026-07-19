@@ -7,16 +7,17 @@ import { CardFace } from '@/components/card/card-face'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { ChevronDown, ChevronRight, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, Eye, EyeOff, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { CARD_STATUS_OPTIONS, isCardStatus } from '@/constants/card/status'
 import type { WalletCard } from '@/models/card'
-import { clientApiDelete } from '@/lib/api/client'
+import { clientApiDelete, clientApiPatch } from '@/lib/api/client'
 import { showToast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 import { resolveNetworkLabel } from '@/utils/card/network'
 
 type CardGridProps = {
   cards: WalletCard[]
-  groupBy?: 'none' | 'provider' | 'network'
+  groupBy?: 'none' | 'provider' | 'network' | 'tags'
 }
 
 export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
@@ -27,6 +28,9 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
   const [showCvv, setShowCvv] = useState(false)
   const [showFullNumber, setShowFullNumber] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
+  const [mobileActionsOpen, setMobileActionsOpen] = useState(false)
+  const [selectedStatus, setSelectedStatus] = useState<'active' | 'inactive' | 'blocked' | 'replaced'>('active')
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
@@ -41,12 +45,20 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
     setShowCvv(false)
     setShowFullNumber(false)
     setConfirmDeleteOpen(false)
+    setMobileActionsOpen(false)
   }, [selectedCardId])
 
   const selectedCard = useMemo(
     () => cards.find((card) => String(card.id) === selectedCardId) ?? null,
     [cards, selectedCardId]
   )
+
+  useEffect(() => {
+    if (!selectedCard) return
+
+    const rawStatus = String(selectedCard.status ?? '').trim().toLowerCase()
+    setSelectedStatus(isCardStatus(rawStatus) ? rawStatus : 'active')
+  }, [selectedCard])
 
   const groupedCards = useMemo(() => {
     if (groupBy === 'none') {
@@ -56,10 +68,15 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
     const groupMap = new Map<string, WalletCard[]>()
 
     for (const card of cards) {
+      const tags = Array.isArray(card.tags)
+        ? card.tags.map((tag) => String(tag).trim()).filter(Boolean)
+        : []
       const key =
         groupBy === 'provider'
           ? (card.provider ?? '').trim() || 'Unknown provider'
-          : resolveNetworkLabel(card.network) || 'Other network'
+          : groupBy === 'network'
+            ? resolveNetworkLabel(card.network) || 'Other network'
+            : tags[0] || 'Untagged'
       const existing = groupMap.get(key)
       if (existing) {
         existing.push(card)
@@ -108,12 +125,35 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
       setConfirmDeleteOpen(false)
       setSelectedCardId(null)
       setShowCvv(false)
-      showToast({ message: 'Card deleted successfully.', variant: 'success' })
+      showToast({ message: 'Card archived successfully.', variant: 'success' })
       router.refresh()
     } catch {
-      showToast({ message: 'Unable to delete card. Please try again.', variant: 'error' })
+      showToast({ message: 'Unable to archive card. Please try again.', variant: 'error' })
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  const handleStatusUpdate = async () => {
+    if (!selectedCardId || isUpdatingStatus) return
+
+    setIsUpdatingStatus(true)
+    try {
+      const { response, data } = await clientApiPatch<{ success?: boolean; error?: string }>(
+        `/api/card/${selectedCardId}`,
+        { status: selectedStatus }
+      )
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Status update failed')
+      }
+
+      showToast({ message: 'Card status updated successfully.', variant: 'success' })
+      router.refresh()
+    } catch {
+      showToast({ message: 'Unable to update card status. Please try again.', variant: 'error' })
+    } finally {
+      setIsUpdatingStatus(false)
     }
   }
 
@@ -203,6 +243,7 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
                 card={selectedCard}
                 showCvv={showCvv}
                 showFullNumber={showFullNumber}
+                showCreditLimit
                 expiryAlignStart
                 className="rounded-b-none"
                 onToggleNumberVisibility={() => setShowFullNumber((prev) => !prev)}
@@ -212,48 +253,198 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
               />
 
               <div className="-mt-px rounded-b-2xl border border-t-0 border-border/65 bg-linear-to-b from-background/94 to-muted/35 px-3 pb-3 pt-2.5 backdrop-blur-md sm:px-4 sm:pb-4 sm:pt-3">
-                <div className="grid grid-cols-2 gap-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
-                    onClick={() => setShowCvv((prev) => !prev)}
-                  >
-                    <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                      {showCvv ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                    </span>
-                    {showCvv ? 'Hide CVV' : 'Show CVV'}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
-                    onClick={() => router.push(`/card/${selectedCard.id}`)}
-                  >
-                    <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                      <Pencil className="h-3.5 w-3.5" />
-                    </span>
-                    Edit card
-                  </Button>
-                </div>
+                {isMobile ? (
+                  <>
+                    <div className="grid grid-cols-2 gap-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
+                        onClick={() => router.push(`/card/${selectedCard.id}`)}
+                      >
+                        <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                          <Pencil className="h-3.5 w-3.5" />
+                        </span>
+                        Edit card
+                      </Button>
 
-                <div className="mt-2.5 border-t border-border/55 pt-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 sm:mt-3 sm:pt-3">
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    className="h-11 w-full justify-start rounded-xl border border-destructive/45 bg-linear-to-r from-rose-600 to-red-600 px-3 text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:from-rose-500 hover:to-red-500 hover:shadow-md active:scale-[0.98]"
-                    onClick={() => setConfirmDeleteOpen(true)}
-                    disabled={isDeleting}
-                  >
-                    <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/15">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </span>
-                    {isDeleting ? 'Deleting...' : 'Delete card'}
-                  </Button>
-                </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
+                        onClick={() => setMobileActionsOpen(true)}
+                      >
+                        <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                          <MoreHorizontal className="h-3.5 w-3.5" />
+                        </span>
+                        More actions
+                      </Button>
+                    </div>
+
+                    <Dialog open={mobileActionsOpen} onOpenChange={(open) => !isDeleting && setMobileActionsOpen(open)}>
+                      <DialogContent className="top-auto bottom-0 left-0 right-0 max-h-[85dvh] w-full max-w-none translate-x-0 translate-y-0 overflow-y-auto rounded-t-3xl rounded-b-none border-x-0 border-t border-border/55 bg-background p-4 sm:hidden">
+                        <div className="space-y-3">
+                          <p className="text-sm font-semibold">Card actions</p>
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="h-11 w-full justify-start rounded-xl border-border/70 bg-background/90"
+                            onClick={() => setShowCvv((prev) => !prev)}
+                            disabled={isUpdatingStatus || isDeleting}
+                          >
+                            <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                              {showCvv ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                            </span>
+                            {showCvv ? 'Hide CVV' : 'Show CVV'}
+                          </Button>
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="h-11 w-full justify-start rounded-xl border-border/70 bg-background/90"
+                            onClick={() => setShowFullNumber((prev) => !prev)}
+                            disabled={isUpdatingStatus || isDeleting}
+                          >
+                            <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                              {showFullNumber ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                            </span>
+                            {showFullNumber ? 'Hide full number' : 'Show full number'}
+                          </Button>
+
+                          <div className="space-y-2 rounded-xl border border-border/60 bg-background/75 p-2.5">
+                            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">Card status</p>
+                            <div className="flex flex-col gap-2">
+                              <select
+                                value={selectedStatus}
+                                onChange={(event) => {
+                                  const value = event.target.value
+                                  if (isCardStatus(value)) {
+                                    setSelectedStatus(value)
+                                  }
+                                }}
+                                className="h-10 w-full rounded-lg border border-border/65 bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                disabled={isUpdatingStatus || isDeleting}
+                              >
+                                {CARD_STATUS_OPTIONS.map((statusOption) => (
+                                  <option key={statusOption.value} value={statusOption.value}>
+                                    {statusOption.label}
+                                  </option>
+                                ))}
+                              </select>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="h-10 w-full rounded-lg border-border/70 bg-background/90"
+                                onClick={handleStatusUpdate}
+                                disabled={isUpdatingStatus || isDeleting}
+                              >
+                                {isUpdatingStatus ? 'Updating...' : 'Update status'}
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="pt-1">
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              className="h-11 w-full justify-start rounded-xl border border-destructive/45 bg-linear-to-r from-rose-600 to-red-600 px-3 text-white"
+                              onClick={() => {
+                                setMobileActionsOpen(false)
+                                setConfirmDeleteOpen(true)
+                              }}
+                              disabled={isDeleting || isUpdatingStatus}
+                            >
+                              <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/15">
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </span>
+                              {isDeleting ? 'Archiving...' : 'Archive card'}
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
+                        onClick={() => setShowCvv((prev) => !prev)}
+                      >
+                        <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                          {showCvv ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        </span>
+                        {showCvv ? 'Hide CVV' : 'Show CVV'}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
+                        onClick={() => router.push(`/card/${selectedCard.id}`)}
+                      >
+                        <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                          <Pencil className="h-3.5 w-3.5" />
+                        </span>
+                        Edit card
+                      </Button>
+                    </div>
+
+                    <div className="mt-2.5 border-t border-border/55 pt-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 sm:mt-3 sm:pt-3">
+                      <div className="mb-2.5 space-y-2 rounded-xl border border-border/60 bg-background/75 p-2.5">
+                        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">Card status</p>
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                          <select
+                            value={selectedStatus}
+                            onChange={(event) => {
+                              const value = event.target.value
+                              if (isCardStatus(value)) {
+                                setSelectedStatus(value)
+                              }
+                            }}
+                            className="h-10 flex-1 rounded-lg border border-border/65 bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            disabled={isUpdatingStatus || isDeleting}
+                          >
+                            {CARD_STATUS_OPTIONS.map((statusOption) => (
+                              <option key={statusOption.value} value={statusOption.value}>
+                                {statusOption.label}
+                              </option>
+                            ))}
+                          </select>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="h-10 rounded-lg border-border/70 bg-background/90 px-4"
+                            onClick={handleStatusUpdate}
+                            disabled={isUpdatingStatus || isDeleting}
+                          >
+                            {isUpdatingStatus ? 'Updating...' : 'Update status'}
+                          </Button>
+                        </div>
+                      </div>
+
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="h-11 w-full justify-start rounded-xl border border-destructive/45 bg-linear-to-r from-rose-600 to-red-600 px-3 text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:from-rose-500 hover:to-red-500 hover:shadow-md active:scale-[0.98]"
+                        onClick={() => setConfirmDeleteOpen(true)}
+                        disabled={isDeleting}
+                      >
+                        <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/15">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </span>
+                        {isDeleting ? 'Archiving...' : 'Archive card'}
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </DetailDialogContent>
@@ -274,13 +465,13 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
                       <span className="relative text-sm font-bold">-</span>
                     </div>
                   </div>
-                  <p className="text-sm font-medium">Deleting card...</p>
+                  <p className="text-sm font-medium">Archiving card...</p>
                 </div>
               </div>
             ) : null}
-            <h3 className="text-lg font-semibold">Delete card?</h3>
+            <h3 className="text-lg font-semibold">Archive card?</h3>
             <p className="text-sm text-muted-foreground">
-              This will permanently remove the card from Supabase. This action cannot be undone.
+              This marks the card as Replaced and keeps it in history.
             </p>
             <div className="flex justify-end gap-2 pt-2">
               <Button
@@ -297,7 +488,7 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
                 onClick={handleDelete}
                 disabled={isDeleting}
               >
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {isDeleting ? 'Archiving...' : 'Archive'}
               </Button>
             </div>
           </div>

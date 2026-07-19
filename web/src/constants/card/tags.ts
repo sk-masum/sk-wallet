@@ -1,0 +1,18 @@
+export const CARD_TAG_SUGGESTIONS = [
+  'Travel',
+  'Business',
+  'Personal',
+  'Family',
+  'Subscriptions',
+  'Groceries',
+  'Bills',
+  'Dining',
+  'Fuel',
+  'Shopping',
+  'Health',
+  'Education',
+  'Online',
+  'International',
+  'Rewards',
+  'Emergency',
+] as const

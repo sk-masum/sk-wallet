@@ -13,12 +13,15 @@ type NewCardPageProps = {
 async function createCard(formData: FormData) {
   'use server'
 
-  const { colorName, cardName, provider, normalizedNumber, holderName, cardType, network, expiryMonth, expiryYearRaw, cvv } =
+  const { colorName, status, tags, cardName, provider, creditLimitRaw, creditLimit, normalizedNumber, holderName, cardType, network, expiryMonth, expiryYearRaw, cvv } =
     parseCardFormData(formData)
 
   const validationError = validateCardForm({
     cardName,
+    status,
+    tags,
     provider,
+    creditLimitRaw,
     number: normalizedNumber,
     holderName,
     cardType,
@@ -42,16 +45,19 @@ async function createCard(formData: FormData) {
   const isCredit = cardType === 'credit'
 
   const { response, data: result } = await serverApiPost<{ error?: string }>('/api/card', {
-      color_name: colorName,
-      card_name: cardName,
-      provider: provider || null,
-      number: normalizedCardNumber,
-      holder_name: holderName,
-      expiry_month: normalizedExpiryMonth,
-      expiry_year: Number(expiryYearRaw),
-      cvv: normalizedCvv,
-      network,
-      isCredit,
+    color_name: colorName,
+    status,
+    tags,
+    card_name: cardName,
+    provider: provider || null,
+    credit_limit: isCredit ? creditLimit : null,
+    number: normalizedCardNumber,
+    holder_name: holderName,
+    expiry_month: normalizedExpiryMonth,
+    expiry_year: Number(expiryYearRaw),
+    cvv: normalizedCvv,
+    network,
+    isCredit,
   })
 
   if (response.status === 401) {

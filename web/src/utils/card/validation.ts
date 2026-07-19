@@ -1,9 +1,13 @@
 import { CardNetwork } from '@/models/card'
 import { CARD_VALIDATION_ORDERED_FIELDS } from '@/constants/card/validation'
+import { isCardStatus } from '@/constants/card/status'
 
 export type CardFormValidationInput = {
   cardName: string
+  status?: string
+  tags?: string[]
   provider: string
+  creditLimitRaw?: string
   number: string
   holderName: string
   cardType: string
@@ -16,7 +20,10 @@ export type CardFormValidationInput = {
 
 export type CardFormFieldErrors = Partial<{
   card_type: string
+  credit_limit: string
+  status: string
   card_name: string
+  tags: string
   provider: string
   network: string
   number: string
@@ -119,6 +126,25 @@ export function validateCardFormFields(input: CardFormValidationInput): CardForm
     errors.card_name = 'Card name cannot exceed 80 characters.'
   }
 
+  const tags = input.tags ?? []
+  if (tags.length > 8) {
+    errors.tags = 'You can add up to 8 tags.'
+  }
+
+  if (!errors.tags) {
+    for (const tag of tags) {
+      if (tag.length > 24) {
+        errors.tags = 'Each tag must be 24 characters or fewer.'
+        break
+      }
+
+      if (!/^[A-Za-z0-9][A-Za-z0-9 .&'/_-]*$/.test(tag)) {
+        errors.tags = 'Tags can contain letters, numbers, spaces, and . & / _ -'
+        break
+      }
+    }
+  }
+
   if (input.provider.length > 50) {
     errors.provider = 'Bank name cannot exceed 50 characters.'
   }
@@ -141,6 +167,24 @@ export function validateCardFormFields(input: CardFormValidationInput): CardForm
 
   if (input.cardType !== 'credit' && input.cardType !== 'debit') {
     errors.card_type = 'Please select card type: credit or debit.'
+  }
+
+  const creditLimitRaw = String(input.creditLimitRaw ?? '').trim()
+  if (input.cardType === 'credit') {
+    if (!creditLimitRaw) {
+      errors.credit_limit = 'Credit limit is required for credit cards.'
+    } else {
+      const normalizedCreditLimit = Number(creditLimitRaw.replace(/,/g, ''))
+      if (!Number.isFinite(normalizedCreditLimit) || normalizedCreditLimit <= 0) {
+        errors.credit_limit = 'Credit limit must be a positive number.'
+      } else if (normalizedCreditLimit > 99999999) {
+        errors.credit_limit = 'Credit limit is too large.'
+      }
+    }
+  }
+
+  if (!isCardStatus(String(input.status ?? 'active'))) {
+    errors.status = 'Please select a valid card status.'
   }
 
   if (

@@ -2,8 +2,12 @@ import { buildCardAppearance, parseCardAppearance } from '@/utils/card/theme'
 
 export type ParsedCardFormData = {
   colorName: string
+  status: string
+  tags: string[]
   cardName: string
   provider: string
+  creditLimitRaw: string
+  creditLimit: number | null
   number: string
   normalizedNumber: string
   holderName: string
@@ -21,8 +25,13 @@ export type ParsedCardFormDataWithId = ParsedCardFormData & {
 export function parseCardFormData(formData: FormData): ParsedCardFormData {
   const colorNameRaw = String(formData.get('color_name') ?? '').trim()
   const { colorName, patternKey } = parseCardAppearance(colorNameRaw)
+  const status = String(formData.get('status') ?? 'active').trim().toLowerCase()
+  const tags = parseCardTags(String(formData.get('tags') ?? ''))
   const cardName = String(formData.get('card_name') ?? '').trim()
   const provider = String(formData.get('provider') ?? '').trim()
+  const creditLimitRaw = String(formData.get('credit_limit') ?? '').trim()
+  const normalizedCreditLimit = creditLimitRaw.replace(/,/g, '')
+  const creditLimit = normalizedCreditLimit.length > 0 ? Number(normalizedCreditLimit) : null
   const number = String(formData.get('number') ?? '').trim()
   const normalizedNumber = number.replace(/\D/g, '')
   const holderName = String(formData.get('holder_name') ?? '').trim()
@@ -34,8 +43,12 @@ export function parseCardFormData(formData: FormData): ParsedCardFormData {
 
   return {
     colorName: buildCardAppearance(colorName, patternKey),
+    status,
+    tags,
     cardName,
     provider,
+    creditLimitRaw,
+    creditLimit: Number.isFinite(creditLimit) ? creditLimit : null,
     number,
     normalizedNumber,
     holderName,
@@ -45,6 +58,22 @@ export function parseCardFormData(formData: FormData): ParsedCardFormData {
     expiryYearRaw,
     cvv,
   }
+}
+
+export function parseCardTags(rawTags: string) {
+  const seen = new Set<string>()
+
+  return rawTags
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter((tag) => tag.length > 0)
+    .filter((tag) => {
+      const normalized = tag.toLowerCase()
+      if (seen.has(normalized)) return false
+      seen.add(normalized)
+      return true
+    })
+    .slice(0, 8)
 }
 
 export function parseCardFormDataWithId(formData: FormData): ParsedCardFormDataWithId {

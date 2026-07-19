@@ -7,13 +7,18 @@ export interface WalletCard {
   expiry_year: string | number | null
   card_name: string | null
   color_name: string | null
+  tags?: string[] | null
   provider: string | null
+  credit_limit?: string | number | null
   number: string | number | null
   cvv: string | null
   holder_name: string | null
   network: CardNetwork | string | number | null
   isCredit: boolean | null
+  status?: CardStatus | null
 }
+
+export type CardStatus = 'active' | 'inactive' | 'blocked' | 'replaced'
 
 export type CardTheme = {
   colorName: string
@@ -34,6 +39,8 @@ export interface CardPageProps {
     q?: string
     network?: string
     provider?: string
+    tag?: string
+    expiry?: string
     type?: string
     sort?: string
     group?: string
