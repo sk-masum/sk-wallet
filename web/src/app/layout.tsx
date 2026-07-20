@@ -7,26 +7,108 @@ import { BiometricGuard } from '@/components/security/biometric-guard'
 import { AppToaster } from '@/components/ui/app-toaster'
 import { QueryToastBridge } from '@/components/ui/query-toast-bridge'
 
+const IOS_SPLASH_SCREENS = [
+  {
+    href: '/apple-splash/iphone-se-2',
+    media: '(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)',
+  },
+  {
+    href: '/apple-splash/iphone-se-2-landscape',
+    media: '(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)',
+  },
+  {
+    href: '/apple-splash/iphone-8-plus',
+    media: '(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
+  },
+  {
+    href: '/apple-splash/iphone-8-plus-landscape',
+    media: '(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)',
+  },
+  {
+    href: '/apple-splash/iphone-11-pro-max',
+    media: '(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
+  },
+  {
+    href: '/apple-splash/iphone-11-pro-max-landscape',
+    media: '(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)',
+  },
+  {
+    href: '/apple-splash/iphone-12-mini',
+    media: '(device-width: 360px) and (device-height: 780px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
+  },
+  {
+    href: '/apple-splash/iphone-12-mini-landscape',
+    media: '(device-width: 360px) and (device-height: 780px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)',
+  },
+  {
+    href: '/apple-splash/iphone-12-13-14',
+    media: '(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
+  },
+  {
+    href: '/apple-splash/iphone-12-13-14-landscape',
+    media: '(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)',
+  },
+  {
+    href: '/apple-splash/iphone-14-plus',
+    media: '(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
+  },
+  {
+    href: '/apple-splash/iphone-14-plus-landscape',
+    media: '(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)',
+  },
+  {
+    href: '/apple-splash/iphone-14-15-pro',
+    media: '(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
+  },
+  {
+    href: '/apple-splash/iphone-14-15-pro-landscape',
+    media: '(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)',
+  },
+  {
+    href: '/apple-splash/iphone-15-pro-max',
+    media: '(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
+  },
+  {
+    href: '/apple-splash/iphone-15-pro-max-landscape',
+    media: '(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)',
+  },
+]
+
 export const metadata: Metadata = {
   title: 'SK Wallet',
   description: 'A digital wallet for managing cards.',
   manifest: '/manifest.webmanifest',
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-title': 'SK Wallet',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+  },
+  formatDetection: {
+    telephone: false,
+    date: false,
+    address: false,
+    email: false,
+  },
   icons: {
     icon: [
       { url: '/icons/icon-192.svg', type: 'image/svg+xml' },
       { url: '/favicon.ico', sizes: 'any' },
     ],
     shortcut: ['/icons/icon-192.svg'],
-    apple: [{ url: '/icons/icon-192.svg', type: 'image/svg+xml' }],
+    apple: [{ url: '/apple-icon', sizes: '180x180', type: 'image/png' }],
   },
   appleWebApp: {
     capable: true,
     title: 'SK Wallet',
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
   },
 }
 
 export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
   themeColor: '#0b5fff',
 }
 
@@ -37,6 +119,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {IOS_SPLASH_SCREENS.map((splash) => (
+          <link
+            key={splash.href}
+            rel="apple-touch-startup-image"
+            media={splash.media}
+            href={splash.href}
+          />
+        ))}
+      </head>
       <body>
         <ServiceWorkerRegister />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

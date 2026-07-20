@@ -1,27 +1,95 @@
-const CACHE_NAME = 'sk-wallet-v3';
-const ASSETS_TO_CACHE = ['/', '/offline.html', '/manifest.webmanifest', '/favicon.ico'];
+const CACHE_VERSION = 'v4';
+const STATIC_CACHE = `sk-wallet-static-${CACHE_VERSION}`;
+const PAGE_CACHE = `sk-wallet-pages-${CACHE_VERSION}`;
+const RUNTIME_CACHE = `sk-wallet-runtime-${CACHE_VERSION}`;
+const OFFLINE_URL = '/offline.html';
+const ASSETS_TO_CACHE = ['/', OFFLINE_URL, '/manifest.webmanifest', '/favicon.ico'];
+
+function isCacheableResponse(response) {
+  return response && response.ok && (response.type === 'basic' || response.type === 'opaque');
+}
+
+async function putInCache(cacheName, request, response) {
+  if (!isCacheableResponse(response)) return;
+  const cache = await caches.open(cacheName);
+  await cache.put(request, response);
+}
+
+async function staleWhileRevalidate(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+
+  const networkFetch = fetch(request)
+    .then(async (response) => {
+      await putInCache(cacheName, request, response.clone());
+      return response;
+    })
+    .catch(() => cached);
+
+  return cached || networkFetch;
+}
+
+async function cacheFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+
+  const response = await fetch(request);
+  await putInCache(cacheName, request, response.clone());
+  return response;
+}
+
+async function navigationHandler(event) {
+  try {
+    const preloadResponse = await event.preloadResponse;
+    if (preloadResponse) {
+      await putInCache(PAGE_CACHE, event.request, preloadResponse.clone());
+      return preloadResponse;
+    }
+
+    const networkResponse = await fetch(event.request);
+    await putInCache(PAGE_CACHE, event.request, networkResponse.clone());
+    return networkResponse;
+  } catch {
+    const cache = await caches.open(PAGE_CACHE);
+    const cachedPage = await cache.match(event.request);
+    if (cachedPage) return cachedPage;
+
+    const offlinePage = await caches.match(OFFLINE_URL);
+    if (offlinePage) return offlinePage;
+
+    return new Response('Offline', {
+      status: 503,
+      statusText: 'Offline',
+      headers: { 'Content-Type': 'text/plain' },
+    });
+  }
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
+    caches.open(STATIC_CACHE).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-          return Promise.resolve();
-        })
-      )
-    )
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(
+        keys
+          .filter((key) => ![STATIC_CACHE, PAGE_CACHE, RUNTIME_CACHE].includes(key))
+          .map((key) => caches.delete(key))
+      );
+
+      if (self.registration.navigationPreload) {
+        await self.registration.navigationPreload.enable();
+      }
+
+      await self.clients.claim();
+    })()
   );
-  self.clients.claim();
 });
 
 self.addEventListener('message', (event) => {
@@ -35,52 +103,38 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
   const isSameOrigin = url.origin === self.location.origin;
-  const isNavigation = event.request.mode === 'navigate';
-  const isStaticAsset = ['style', 'script', 'image', 'font'].includes(event.request.destination);
+  const destination = event.request.destination;
 
   if (!isSameOrigin) {
     return;
   }
 
-  if (isNavigation) {
+  if (event.request.mode === 'navigate') {
+    event.respondWith(navigationHandler(event));
+    return;
+  }
+
+  if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put('/', responseClone));
+          putInCache(RUNTIME_CACHE, event.request, response.clone());
           return response;
         })
-        .catch(async () => {
-          const offlinePage = await caches.match('/offline.html');
-          if (offlinePage) return offlinePage;
-
-          const cachedPage = await caches.match('/');
-          if (cachedPage) return cachedPage;
-
-          return new Response('Offline', {
-            status: 503,
-            statusText: 'Offline',
-            headers: { 'Content-Type': 'text/plain' },
-          });
-        })
+        .catch(() => caches.match(event.request))
     );
     return;
   }
 
-  if (isStaticAsset) {
-    event.respondWith(
-      caches.match(event.request).then((cached) => {
-        const networkFetch = fetch(event.request)
-          .then((response) => {
-            if (response && response.ok && response.type === 'basic') {
-              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
-            }
-            return response;
-          })
-          .catch(() => cached);
-
-        return cached || networkFetch;
-      })
-    );
+  if (destination === 'style' || destination === 'script' || destination === 'worker' || destination === 'font') {
+    event.respondWith(staleWhileRevalidate(event.request, STATIC_CACHE));
+    return;
   }
+
+  if (destination === 'image') {
+    event.respondWith(cacheFirst(event.request, RUNTIME_CACHE));
+    return;
+  }
+
+  event.respondWith(staleWhileRevalidate(event.request, RUNTIME_CACHE));
 });
