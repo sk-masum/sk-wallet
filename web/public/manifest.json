@@ -1,21 +1,58 @@
 {
   "name": "Sk Wallet",
   "short_name": "Wallet",
+  "lang": "en",
+  "dir": "ltr",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "orientation": "portrait",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "description": "A digital wallet for managing cards, credentials, and documents.",
   "icons": [
     {
-      "src": "/web-app-manifest-192x192.png",
+      "src": "/icons/icon-192-maskable.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/web-app-manifest-512x512.png",
+      "src": "/icons/icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     }
   ],
+  "categories": [
+    "finance",
+    "productivity",
+    "security"
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Card",
+      "short_name": "Card",
+      "description": "Create a new card entry",
+      "url": "/card/new"
+    },
+    {
+      "name": "Add Document",
+      "short_name": "Doc",
+      "description": "Create a new document entry",
+      "url": "/doc/new"
+    },
+    {
+      "name": "Add Credential",
+      "short_name": "Credential",
+      "description": "Create a new credential entry",
+      "url": "/credential/new"
+    }
+  ],
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
-  "display": "standalone"
+  "display": "standalone",
+  "prefer_related_applications": false
 }

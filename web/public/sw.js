@@ -3,7 +3,7 @@ const STATIC_CACHE = `sk-wallet-static-${CACHE_VERSION}`;
 const PAGE_CACHE = `sk-wallet-pages-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `sk-wallet-runtime-${CACHE_VERSION}`;
 const OFFLINE_URL = '/offline.html';
-const ASSETS_TO_CACHE = ['/', OFFLINE_URL, '/manifest.webmanifest', '/favicon.ico'];
+const ASSETS_TO_CACHE = ['/', OFFLINE_URL, '/manifest.json', '/icons/favicon.ico'];
 
 function isCacheableResponse(response) {
   return response && response.ok && (response.type === 'basic' || response.type === 'opaque');
