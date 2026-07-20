@@ -77,11 +77,11 @@ const IOS_SPLASH_SCREENS = [
 export const metadata: Metadata = {
   title: 'SK Wallet',
   description: 'A digital wallet for managing cards.',
-  manifest: '/manifest.webmanifest',
+  manifest: '/manifest.json',
   other: {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
-    'apple-mobile-web-app-title': 'SK Wallet',
+    'apple-mobile-web-app-title': 'Wallet',
     'apple-mobile-web-app-status-bar-style': 'black-translucent',
   },
   formatDetection: {
@@ -92,15 +92,16 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/icons/icon-192.svg', type: 'image/svg+xml' },
+      { url: '/icon0.svg', type: 'image/svg+xml' },
+      { url: '/icon1.png', type: 'image/png', sizes: '512x512' },
       { url: '/favicon.ico', sizes: 'any' },
     ],
-    shortcut: ['/icons/icon-192.svg'],
-    apple: [{ url: '/apple-icon', sizes: '180x180', type: 'image/png' }],
+    shortcut: ['/favicon.ico'],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   appleWebApp: {
     capable: true,
-    title: 'SK Wallet',
+    title: 'Wallet',
     statusBarStyle: 'black-translucent',
   },
 }
@@ -120,6 +121,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="apple-mobile-web-app-title" content="Wallet" />
         {IOS_SPLASH_SCREENS.map((splash) => (
           <link
             key={splash.href}
