@@ -21,10 +21,10 @@ type ListingPageHeaderProps = {
 }
 
 const sharedDesktopAddButtonClass =
-    'hidden sm:inline-flex ring-2 ring-primary/25 shadow-[0_10px_25px_-10px_hsl(var(--primary)/0.9)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_30px_-12px_hsl(var(--primary)/0.95)]'
+    'hidden sm:inline-flex ring-2 ring-primary/25 shadow-[0_10px_25px_-10px_rgba(0,0,0,0.6)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_30px_-12px_rgba(0,0,0,0.7)]'
 
 const sharedMobileFabButtonClass =
-    'fixed bottom-22 right-4 z-40 h-13 w-13 rounded-full ring-2 ring-primary/30 shadow-[0_14px_34px_-14px_hsl(var(--primary)/0.95)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_40px_-18px_hsl(var(--primary)/1)] sm:hidden'
+    'fixed bottom-22 right-4 z-40 h-13 w-13 rounded-full ring-2 ring-primary/30 shadow-[0_14px_34px_-14px_rgba(0,0,0,0.68)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_40px_-18px_rgba(0,0,0,0.78)] sm:hidden'
 
 export function ListingPageHeader({
     title,
@@ -44,7 +44,7 @@ export function ListingPageHeader({
             {mobileStickyHeader ? (
                 <div
                     className={cn(
-                        '-mx-4 sticky top-0 z-40 border-b border-border/45 bg-linear-to-b from-background/97 via-background/93 to-background/84 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] shadow-[0_18px_40px_-28px_hsl(var(--foreground)/0.65)] backdrop-blur-xl sm:static sm:mx-0 sm:mb-4 sm:rounded-2xl sm:bg-linear-to-r sm:from-background/98 sm:via-card/92 sm:to-background/98 sm:px-5 sm:pt-4 sm:shadow-[0_20px_44px_-30px_hsl(var(--foreground)/0.55)] sm:ring-1 sm:ring-border/35 sm:backdrop-blur-none',
+                        '-mx-4 sticky top-0 z-40 border-b border-border/45 bg-linear-to-b from-background/97 via-background/93 to-background/84 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] shadow-[0_18px_40px_-28px_rgba(0,0,0,0.62)] backdrop-blur-xl sm:static sm:mx-0 sm:mb-4 sm:rounded-2xl sm:bg-linear-to-r sm:from-background/98 sm:via-card/92 sm:to-background/98 sm:px-5 sm:pt-4 sm:shadow-[0_20px_44px_-30px_rgba(0,0,0,0.55)] sm:ring-1 sm:ring-border/35 sm:backdrop-blur-none',
                         mobileFilters ? 'mb-4' : 'mb-0'
                     )}
                 >

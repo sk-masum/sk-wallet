@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { X } from 'lucide-react'
 
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -14,7 +15,7 @@ type ListingFilterDesktopPanelProps = {
 
 export function ListingFilterDesktopPanel({ children, className }: ListingFilterDesktopPanelProps) {
     return (
-        <div className={cn('mt-3 space-y-4 rounded-2xl bg-background/94 p-4 shadow-inner shadow-black/5 ring-1 ring-border/30', className)}>
+        <div className={cn('mt-3 space-y-4 rounded-2xl bg-background/94 p-4 shadow-inner shadow-black/8 ring-1 ring-border/30', className)}>
             {children}
         </div>
     )
@@ -113,13 +114,24 @@ export function ListingFilterMobileSheet({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
+                showCloseButton={false}
                 className={cn(
-                    'top-auto bottom-0 left-0 right-0 flex max-h-[88dvh] w-full max-w-none translate-x-0 translate-y-0 flex-col overflow-hidden rounded-t-3xl rounded-b-none border-x-0 border-t border-border/55 bg-linear-to-b from-background via-background to-card/55 pb-6 shadow-[0_-30px_70px_-26px_hsl(var(--foreground)/0.55)] sm:hidden',
+                    'top-auto bottom-0 left-0 right-0 flex max-h-[88dvh] w-full max-w-none translate-x-0 translate-y-0 flex-col overflow-hidden rounded-t-3xl rounded-b-none border-x-0 border-t border-border/55 bg-linear-to-b from-background via-background to-card/55 pb-6 shadow-[0_-30px_70px_-26px_rgba(0,0,0,0.55)] sm:hidden',
                     className
                 )}
             >
-                <div className="sticky top-0 z-10 border-b border-border/45 bg-background/92 pb-3 backdrop-blur-xl">
+                <div className="sticky top-0 z-20 border-b border-border/45 bg-linear-to-b from-background/98 via-background/94 to-background/88 pb-3 shadow-[0_14px_28px_-20px_rgba(0,0,0,0.55)] backdrop-blur-xl">
                     <div className="mx-auto h-1.5 w-14 rounded-full bg-muted/90" />
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-2 h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+                        onClick={() => onOpenChange(false)}
+                        aria-label="Close filters"
+                    >
+                        <X className="h-4 w-4" />
+                    </Button>
                     <DialogHeader>
                         <DialogTitle className="text-left text-base">{title}</DialogTitle>
                         <DialogDescription className="text-left">{description}</DialogDescription>
@@ -141,7 +153,7 @@ type ListingFilterMobileSectionProps = {
 
 export function ListingFilterMobileSection({ label, icon, children, className }: ListingFilterMobileSectionProps) {
     return (
-        <div className={cn('space-y-2 rounded-2xl border border-border/50 bg-card/68 p-3.5 shadow-[0_14px_24px_-16px_hsl(var(--foreground)/0.45)]', className)}>
+        <div className={cn('space-y-2 rounded-2xl border border-border/50 bg-card/68 p-3.5 shadow-[0_14px_24px_-16px_rgba(0,0,0,0.42)]', className)}>
             <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
                 {icon}
                 {label}

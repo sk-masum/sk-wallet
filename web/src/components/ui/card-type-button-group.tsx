@@ -70,7 +70,7 @@ export function CardTypeButtonGroup({
               'inline-flex items-center justify-center gap-1.5 px-2',
               'focus-visible:z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45',
               isActive
-                ? 'bg-linear-to-b from-background to-background/95 text-foreground shadow-[0_7px_14px_-10px_hsl(var(--foreground)/0.65)] ring-1 ring-border/70'
+                ? 'bg-linear-to-b from-background to-background/95 text-foreground shadow-[0_7px_14px_-10px_rgba(0,0,0,0.55)] ring-1 ring-border/70'
                 : 'text-muted-foreground hover:bg-background/65 hover:text-foreground'
             )}
             aria-pressed={isActive}

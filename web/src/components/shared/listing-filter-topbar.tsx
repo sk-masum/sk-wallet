@@ -37,7 +37,7 @@ type ListingFilterTopBarProps = {
 }
 
 const defaultDesktopContainerClassName =
-    'relative mb-4 hidden flex-wrap items-center gap-3 rounded-2xl bg-background/88 p-3.5 shadow-[0_16px_36px_-24px_hsl(var(--foreground)/0.5)] ring-1 ring-border/35 backdrop-blur-xl sm:flex'
+    'relative mb-4 hidden flex-wrap items-center gap-3 rounded-2xl bg-background/88 p-3.5 shadow-[0_16px_36px_-24px_rgba(0,0,0,0.5)] ring-1 ring-border/35 backdrop-blur-xl sm:flex'
 
 export function ListingFilterTopBar({
     formAction,
@@ -101,9 +101,9 @@ export function ListingFilterTopBar({
         <>
             <div className={cn(mobileContainerClassName ?? 'sm:hidden')}>
                 <div className={cn('pb-2', mobileInnerClassName)}>
-                    <div className="relative overflow-hidden rounded-2xl border border-border/45 bg-linear-to-r from-background/90 via-card/82 to-background/88 p-2.5 shadow-[0_18px_36px_-24px_hsl(var(--foreground)/0.5)] ring-1 ring-border/30 backdrop-blur-xl dark:border-white/10 dark:from-black/55 dark:via-zinc-900/70 dark:to-black/55 dark:shadow-[0_18px_36px_-24px_rgba(0,0,0,0.85)] dark:ring-white/10">
-                        <div className="pointer-events-none absolute -top-8 left-1/4 h-16 w-32 rounded-full bg-primary/10 blur-2xl dark:hidden" />
-                        <div className="pointer-events-none absolute -bottom-10 right-2 h-20 w-24 rounded-full bg-primary/6 blur-2xl dark:hidden" />
+                    <div className="relative overflow-hidden rounded-2xl border border-border/45 bg-linear-to-r from-background/90 via-card/82 to-background/88 p-2.5 shadow-[0_18px_36px_-22px_rgba(0,0,0,0.62)] ring-1 ring-border/30 backdrop-blur-xl dark:border-white/10 dark:from-black/55 dark:via-zinc-900/70 dark:to-black/55 dark:shadow-[0_18px_36px_-22px_rgba(0,0,0,0.9)] dark:ring-white/10">
+                        <div className="pointer-events-none absolute -top-8 left-1/4 h-16 w-32 rounded-full bg-primary/7 blur-2xl dark:hidden" />
+                        <div className="pointer-events-none absolute -bottom-10 right-2 h-20 w-24 rounded-full bg-primary/3 blur-2xl dark:hidden" />
                         <div className="relative flex items-center gap-2">
                             <form action={formAction} method="get" className="relative flex-1">
                                 <Input
