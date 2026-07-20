@@ -7,22 +7,119 @@ import { BiometricGuard } from '@/components/security/biometric-guard';
 import { AppToaster } from '@/components/ui/app-toaster';
 import { QueryToastBridge } from '@/components/ui/query-toast-bridge';
 
-const IOS_SPLASH_LIGHT = '/splash-screen/splash-screen.png';
-const IOS_SPLASH_DARK = '/splash-screen/splash-screen_dark.png';
+type IosSplashAsset = {
+  media: string;
+  portraitSize: `${number}-${number}`;
+};
 
-const IOS_SPLASH_MEDIA: string[] = [
-  '(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
-  '(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
-  '(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
-  '(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
-  '(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)',
-  '(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
-  '(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
-  '(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
-  '(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
-  '(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)',
-  '(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)',
-  '(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)',
+const IOS_SPLASH_FALLBACK_LIGHT =
+  '/splash-generated-light/apple-splash-1179-2556.png';
+const IOS_SPLASH_FALLBACK_DARK =
+  '/splash-generated-dark/apple-splash-1179-2556.png';
+
+const splashPath = (
+  mode: 'light' | 'dark',
+  portraitSize: `${number}-${number}`,
+  orientation: 'portrait' | 'landscape'
+) => {
+  const [w, h] = portraitSize.split('-');
+  const size = orientation === 'portrait' ? `${w}-${h}` : `${h}-${w}`;
+  return `/splash-generated-${mode}/apple-splash-${size}.png`;
+};
+
+const IOS_SPLASH_ASSETS: IosSplashAsset[] = [
+  {
+    media: '(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)',
+    portraitSize: '640-1136',
+  },
+  {
+    media: '(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)',
+    portraitSize: '750-1334',
+  },
+  {
+    media: '(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)',
+    portraitSize: '1242-2208',
+  },
+  {
+    media: '(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)',
+    portraitSize: '828-1792',
+  },
+  {
+    media: '(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)',
+    portraitSize: '1242-2688',
+  },
+  {
+    media: '(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)',
+    portraitSize: '1125-2436',
+  },
+  {
+    media: '(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)',
+    portraitSize: '1170-2532',
+  },
+  {
+    media: '(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)',
+    portraitSize: '1179-2556',
+  },
+  {
+    media: '(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3)',
+    portraitSize: '1206-2622',
+  },
+  {
+    media: '(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)',
+    portraitSize: '1284-2778',
+  },
+  {
+    media: '(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)',
+    portraitSize: '1290-2796',
+  },
+  {
+    media: '(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3)',
+    portraitSize: '1320-2868',
+  },
+  {
+    media: '(device-width: 744px) and (device-height: 1133px) and (-webkit-device-pixel-ratio: 2)',
+    portraitSize: '1488-2266',
+  },
+  {
+    media: '(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)',
+    portraitSize: '1536-2048',
+  },
+  {
+    media: '(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2)',
+    portraitSize: '1620-2160',
+  },
+  {
+    media: '(device-width: 820px) and (device-height: 1180px) and (-webkit-device-pixel-ratio: 2)',
+    portraitSize: '1640-2360',
+  },
+  {
+    media: '(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)',
+    portraitSize: '1668-2224',
+  },
+  {
+    media: '(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)',
+    portraitSize: '1668-2388',
+  },
+  {
+    media: '(device-width: 834px) and (device-height: 1210px) and (-webkit-device-pixel-ratio: 2)',
+    portraitSize: '1668-2420',
+  },
+  {
+    media: '(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)',
+    portraitSize: '2048-2732',
+  },
+  {
+    media: '(device-width: 1032px) and (device-height: 1376px) and (-webkit-device-pixel-ratio: 2)',
+    portraitSize: '2064-2752',
+  },
+  {
+    media: '(device-width: 360px) and (device-height: 780px) and (-webkit-device-pixel-ratio: 3)',
+    portraitSize: '1080-2340',
+  },
+  {
+    media: '(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3)',
+    portraitSize: '1260-2736',
+  },
 ];
 
 export const metadata: Metadata = {
@@ -82,24 +179,36 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="apple-touch-startup-image" href={IOS_SPLASH_LIGHT} />
+        <link rel="apple-touch-startup-image" href={IOS_SPLASH_FALLBACK_LIGHT} />
         <link
           rel="apple-touch-startup-image"
           media="(prefers-color-scheme: dark)"
-          href={IOS_SPLASH_DARK}
+          href={IOS_SPLASH_FALLBACK_DARK}
         />
-        {IOS_SPLASH_MEDIA.flatMap((media) => [
+        {IOS_SPLASH_ASSETS.flatMap((asset) => [
           <link
-            key={`light-${media}`}
+            key={`light-portrait-${asset.media}`}
             rel="apple-touch-startup-image"
-            media={media}
-            href={IOS_SPLASH_LIGHT}
+            media={`screen and ${asset.media} and (orientation: portrait)`}
+            href={splashPath('light', asset.portraitSize, 'portrait')}
           />,
           <link
-            key={`dark-${media}`}
+            key={`dark-portrait-${asset.media}`}
             rel="apple-touch-startup-image"
-            media={`${media} and (prefers-color-scheme: dark)`}
-            href={IOS_SPLASH_DARK}
+            media={`screen and ${asset.media} and (orientation: portrait) and (prefers-color-scheme: dark)`}
+            href={splashPath('dark', asset.portraitSize, 'portrait')}
+          />,
+          <link
+            key={`light-landscape-${asset.media}`}
+            rel="apple-touch-startup-image"
+            media={`screen and ${asset.media} and (orientation: landscape)`}
+            href={splashPath('light', asset.portraitSize, 'landscape')}
+          />,
+          <link
+            key={`dark-landscape-${asset.media}`}
+            rel="apple-touch-startup-image"
+            media={`screen and ${asset.media} and (orientation: landscape) and (prefers-color-scheme: dark)`}
+            href={splashPath('dark', asset.portraitSize, 'landscape')}
           />,
         ])}
       </head>
