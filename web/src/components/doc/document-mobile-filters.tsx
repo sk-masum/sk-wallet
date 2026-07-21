@@ -115,7 +115,7 @@ export function DocumentMobileFilters({ query, selectedType, selectedCategory, s
                 resetHref={clearAllHref}
                 desktopFilterOpen={desktopOpen}
                 onToggleDesktopFilters={() => setDesktopOpen((prev) => !prev)}
-                desktopExpandedClassName="max-h-130"
+                desktopExpandedClassName="max-h-[700px]"
                 desktopPanel={
                     <ListingFilterDesktopPanel>
                         <div className="grid grid-cols-2 gap-4">
@@ -182,39 +182,37 @@ export function DocumentMobileFilters({ query, selectedType, selectedCategory, s
                 title="Refine documents"
                 description="Apply document filters in one place."
             >
-                <div className="grid grid-cols-2 gap-3">
-                    <ListingFilterMobileSection label="Type" icon={<CreditCard className="h-3.5 w-3.5" />} className="space-y-1.5">
-                        <Select value={selectedType} onValueChange={handleTypeChange}>
-                            <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by document type">
-                                <SelectValue placeholder="Filter by type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">All types</SelectItem>
-                                {DOCUMENT_TYPE_OPTIONS.map((item) => (
-                                    <SelectItem key={item.code} value={item.code}>
-                                        {item.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </ListingFilterMobileSection>
+                <ListingFilterMobileSection label="Type" icon={<CreditCard className="h-3.5 w-3.5" />}>
+                    <Select value={selectedType} onValueChange={handleTypeChange}>
+                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by document type">
+                            <SelectValue placeholder="Filter by type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="ALL">All types</SelectItem>
+                            {DOCUMENT_TYPE_OPTIONS.map((item) => (
+                                <SelectItem key={item.code} value={item.code}>
+                                    {item.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </ListingFilterMobileSection>
 
-                    <ListingFilterMobileSection label="Category" icon={<CreditCard className="h-3.5 w-3.5" />} className="space-y-1.5">
-                        <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-                            <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by document category">
-                                <SelectValue placeholder="Filter by category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All categories</SelectItem>
-                                {DOCUMENT_CATEGORY_OPTIONS.map((item) => (
-                                    <SelectItem key={item.value} value={item.value}>
-                                        {item.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </ListingFilterMobileSection>
-                </div>
+                <ListingFilterMobileSection label="Category" icon={<CreditCard className="h-3.5 w-3.5" />}>
+                    <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by document category">
+                            <SelectValue placeholder="Filter by category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All categories</SelectItem>
+                            {DOCUMENT_CATEGORY_OPTIONS.map((item) => (
+                                <SelectItem key={item.value} value={item.value}>
+                                    {item.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Sort" icon={<CreditCard className="h-3.5 w-3.5" />}>
                     <Select value={selectedSort} onValueChange={handleSortChange}>

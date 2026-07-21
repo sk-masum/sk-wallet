@@ -2,10 +2,10 @@
 
 import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { X } from 'lucide-react'
 
+import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 
 type ListingFilterDesktopPanelProps = {
@@ -15,7 +15,12 @@ type ListingFilterDesktopPanelProps = {
 
 export function ListingFilterDesktopPanel({ children, className }: ListingFilterDesktopPanelProps) {
     return (
-        <div className={cn('mt-3 space-y-4 rounded-2xl bg-background/94 p-4 shadow-inner shadow-black/8 ring-1 ring-border/30', className)}>
+        <div
+            className={cn(
+                'mt-3 space-y-4 rounded-2xl bg-background/95 p-3 sm:p-4 shadow-[0_18px_36px_-28px_rgba(0,0,0,0.55)] ring-1 ring-border/20 dark:bg-background/90 dark:ring-border/45',
+                className,
+            )}
+        >
             {children}
         </div>
     )
@@ -35,7 +40,12 @@ export function ListingFilterDesktopSection({
     labelClassName,
 }: ListingFilterDesktopSectionProps) {
     return (
-        <div className={cn('space-y-1.5 rounded-2xl bg-card/72 p-4 ring-1 ring-border/30', className)}>
+        <div
+            className={cn(
+                'space-y-1.5 rounded-2xl border border-border/40 bg-card/75 p-4 shadow-[0_10px_22px_-18px_rgba(0,0,0,0.45)] dark:border-border/60 dark:bg-card/65',
+                className,
+            )}
+        >
             <p className={cn('text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase', labelClassName)}>
                 {label}
             </p>
@@ -113,33 +123,17 @@ export function ListingFilterMobileSheet({
 }: ListingFilterMobileSheetProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent
-                showCloseButton={false}
-                className={cn(
-                    'top-auto bottom-0 left-0 right-0 flex max-h-[88dvh] w-full max-w-none translate-x-0 translate-y-0 flex-col overflow-hidden rounded-t-3xl rounded-b-none border-x-0 border-t border-border/55 bg-linear-to-b from-background via-background to-card/55 pb-6 shadow-[0_-30px_70px_-26px_rgba(0,0,0,0.55)] sm:hidden',
-                    className
-                )}
-            >
-                <div className="sticky top-0 z-20 border-b border-border/45 bg-linear-to-b from-background/98 via-background/94 to-background/88 pb-3 shadow-[0_14px_28px_-20px_rgba(0,0,0,0.55)] backdrop-blur-xl">
-                    <div className="mx-auto h-1.5 w-14 rounded-full bg-muted/90" />
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-2 top-2 h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
-                        onClick={() => onOpenChange(false)}
-                        aria-label="Close filters"
-                    >
-                        <X className="h-4 w-4" />
-                    </Button>
-                    <DialogHeader>
-                        <DialogTitle className="text-left text-base">{title}</DialogTitle>
-                        <DialogDescription className="text-left">{description}</DialogDescription>
-                    </DialogHeader>
-                </div>
+            <DetailDialogContent className={cn('sm:hidden', className)} scrollClassName="max-h-[calc(88dvh-2rem)] px-0 pb-0">
+                <div className="space-y-3 rounded-t-2xl bg-linear-to-b from-background via-background to-card/50 px-3 pb-4 pt-4 shadow-[0_-32px_80px_-30px_rgba(0,0,0,0.58)] dark:from-background dark:via-background/95 dark:to-card/70">
+                    <div className="sticky top-0 z-20 -mx-1 rounded-t-2xl border-b border-border/45 bg-linear-to-b from-background/98 via-background/95 to-background/88 px-1 pb-3 pt-1 shadow-[0_14px_24px_-20px_rgba(0,0,0,0.5)] backdrop-blur-xl dark:border-border/60 dark:from-background/95 dark:via-background/92 dark:to-background/80">
+                        <DialogHeader>
+                            <DialogTitle className="text-left text-2xl">{title}</DialogTitle>
+                        </DialogHeader>
+                    </div>
 
-                <div className="mt-3 space-y-4 overflow-y-auto pr-1">{children}</div>
-            </DialogContent>
+                    <div className="space-y-4 overflow-y-auto pr-1">{children}</div>
+                </div>
+            </DetailDialogContent>
         </Dialog>
     )
 }
@@ -153,7 +147,12 @@ type ListingFilterMobileSectionProps = {
 
 export function ListingFilterMobileSection({ label, icon, children, className }: ListingFilterMobileSectionProps) {
     return (
-        <div className={cn('space-y-2 rounded-2xl border border-border/50 bg-card/68 p-3.5 shadow-[0_14px_24px_-16px_rgba(0,0,0,0.42)]', className)}>
+        <div
+            className={cn(
+                'space-y-2 rounded-2xl border border-border/45 bg-card/76 p-3.5 shadow-[0_16px_28px_-20px_rgba(0,0,0,0.5)] dark:border-border/60 dark:bg-card/66',
+                className,
+            )}
+        >
             <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
                 {icon}
                 {label}
@@ -179,12 +178,12 @@ export function ListingFilterMobileActions({
     onDone,
 }: ListingFilterMobileActionsProps) {
     return (
-        <div className="flex items-center gap-2 pt-1">
+        <div className="sticky bottom-0 z-10 -mx-1 mt-1 flex items-center gap-2 rounded-xl border border-border/45 bg-background/92 p-2 backdrop-blur-sm dark:border-border/60 dark:bg-background/86">
             {hasActiveControls ? (
                 resetHref ? (
                     <Link
                         href={resetHref}
-                        className={cn(buttonVariants({ variant: 'ghost' }), 'h-10 flex-1 justify-center rounded-xl border border-border/60 bg-background/80')}
+                        className={cn(buttonVariants({ variant: 'ghost' }), 'h-10 flex-1 justify-center rounded-xl border border-border/60 bg-background/80 hover:bg-background')}
                         onClick={onDone}
                     >
                         Reset all
@@ -193,7 +192,7 @@ export function ListingFilterMobileActions({
                     <Button
                         type="button"
                         variant="ghost"
-                        className="h-10 flex-1 justify-center rounded-xl border border-border/60 bg-background/80"
+                        className="h-10 flex-1 justify-center rounded-xl border border-border/60 bg-background/80 hover:bg-background"
                         onClick={() => {
                             onReset?.()
                             onDone()
@@ -203,7 +202,7 @@ export function ListingFilterMobileActions({
                     </Button>
                 )
             ) : null}
-            <Button type="button" className="h-10 flex-1 rounded-xl" onClick={onDone}>
+            <Button type="button" className="h-10 flex-1 rounded-xl shadow-[0_10px_20px_-14px_hsl(var(--primary))]" onClick={onDone}>
                 {doneLabel}
             </Button>
         </div>

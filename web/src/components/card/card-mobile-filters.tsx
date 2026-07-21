@@ -198,13 +198,12 @@ export function CardMobileFilters({
                 onOpenChange={setMobileOpen}
                 title="Refine cards"
                 description="Apply filters, sorting, and grouping in one place."
-                className="border-x-0 bg-linear-to-b from-background via-background to-background"
             >
                 <ListingFilterMobileSection label="Type" icon={<CreditCard className="h-3.5 w-3.5" />}>
                     <CardTypeButtonGroup selectedType={selectedType} hrefs={typeHrefs} className="h-10 max-w-none rounded-xl border-border/60 bg-background/90" />
                 </ListingFilterMobileSection>
 
-                <ListingFilterMobileSection label="Network" icon={<Network className="h-3.5 w-3.5" />} className="space-y-1.5">
+                <ListingFilterMobileSection label="Network" icon={<Network className="h-3.5 w-3.5" />}>
                     <NetworkFilterDropdown
                         options={networkOptions}
                         selectedNetwork={selectedNetwork}
@@ -214,7 +213,7 @@ export function CardMobileFilters({
                     />
                 </ListingFilterMobileSection>
 
-                <ListingFilterMobileSection label="Provider" icon={<CreditCard className="h-3.5 w-3.5" />} className="space-y-1.5">
+                <ListingFilterMobileSection label="Provider" icon={<CreditCard className="h-3.5 w-3.5" />}>
                     <ProviderFilterDropdown
                         options={providerOptions}
                         selectedProvider={selectedProvider}
@@ -222,7 +221,7 @@ export function CardMobileFilters({
                     />
                 </ListingFilterMobileSection>
 
-                <ListingFilterMobileSection label="Tag" icon={<CreditCard className="h-3.5 w-3.5" />} className="space-y-1.5">
+                <ListingFilterMobileSection label="Tag" icon={<CreditCard className="h-3.5 w-3.5" />}>
                     <TagFilterDropdown
                         options={tagOptions}
                         selectedTag={selectedTag}
@@ -230,7 +229,7 @@ export function CardMobileFilters({
                     />
                 </ListingFilterMobileSection>
 
-                <ListingFilterMobileSection label="Expiry" icon={<CreditCard className="h-3.5 w-3.5" />} className="space-y-1.5">
+                <ListingFilterMobileSection label="Expiry" icon={<CreditCard className="h-3.5 w-3.5" />}>
                     <Select value={selectedExpiry} onValueChange={handleExpiryChange}>
                         <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by expiry">
                             <SelectValue placeholder="All cards" />
@@ -242,15 +241,13 @@ export function CardMobileFilters({
                     </Select>
                 </ListingFilterMobileSection>
 
-                <div className="grid grid-cols-2 gap-3">
-                    <ListingFilterMobileSection label="Sort" icon={<ArrowUpDown className="h-3.5 w-3.5" />} className="space-y-1.5">
-                        <CardSortDropdown selectedSort={selectedSort} className="h-10 w-full rounded-xl border-border/60 bg-background/95" />
-                    </ListingFilterMobileSection>
+                <ListingFilterMobileSection label="Sort" icon={<ArrowUpDown className="h-3.5 w-3.5" />}>
+                    <CardSortDropdown selectedSort={selectedSort} className="h-10 w-full rounded-xl border-border/60 bg-background/95" />
+                </ListingFilterMobileSection>
 
-                    <ListingFilterMobileSection label="Group" icon={<Layers3 className="h-3.5 w-3.5" />} className="space-y-1.5">
-                        <CardGroupDropdown selectedGroup={selectedGroup} className="h-10 w-full rounded-xl border-border/60 bg-background/95" />
-                    </ListingFilterMobileSection>
-                </div>
+                <ListingFilterMobileSection label="Group" icon={<Layers3 className="h-3.5 w-3.5" />}>
+                    <CardGroupDropdown selectedGroup={selectedGroup} className="h-10 w-full rounded-xl border-border/60 bg-background/95" />
+                </ListingFilterMobileSection>
 
                 <ListingFilterMobileActions
                     hasActiveControls={hasActiveControls}

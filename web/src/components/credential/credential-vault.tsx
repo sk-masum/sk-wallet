@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Check, Copy, LoaderCircle, Pencil, Trash2 } from 'lucide-react'
 
 import NoDocIcon from '@/components/icons/nodoc-icon'
+import { DeleteConfirmDialog } from '@/components/shared/delete-confirm-dialog'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,14 +17,28 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 import { CREDENTIAL_TYPE_OPTIONS, getCredentialTypeConfig } from '@/constants/credential/types'
-import { clientApiDelete } from '@/lib/api/client'
+import { clientApiDelete, clientApiGet } from '@/lib/api/client'
+import {
+    BIOMETRIC_CREDENTIAL_STORAGE_KEY,
+    isWebAuthnSupported,
+    verifyBiometricCredential,
+} from '@/lib/biometric'
 import { showToast } from '@/lib/toast'
+import { copyToClipboard } from '@/utils/copy'
 import { cn } from '@/lib/utils'
 import type { UserCredential } from '@/models/credential'
 
 type CredentialVaultProps = {
     initialCredentials: UserCredential[]
     initialError?: string
+}
+
+type CredentialSecretResponse = {
+    data?: {
+        id: string
+        secret: string
+    }
+    error?: string
 }
 
 function formatDateTime(value: string | null | undefined) {
@@ -40,7 +55,11 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
     const searchParams = useSearchParams()
     const [credentials, setCredentials] = useState<UserCredential[]>(initialCredentials)
     const [selectedCredentialId, setSelectedCredentialId] = useState<string | null>(null)
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [isCopyingSecret, setIsCopyingSecret] = useState(false)
+    const [secretCopied, setSecretCopied] = useState(false)
+    const secretCopyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     const searchValue = (searchParams.get('q') ?? '').trim()
     const selectedTypeParam = (searchParams.get('type') ?? 'ALL').trim().toUpperCase()
@@ -51,6 +70,18 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
     useEffect(() => {
         setCredentials(initialCredentials)
     }, [initialCredentials])
+
+    useEffect(() => {
+        return () => {
+            if (secretCopyTimeoutRef.current) {
+                clearTimeout(secretCopyTimeoutRef.current)
+            }
+        }
+    }, [])
+
+    useEffect(() => {
+        setConfirmDeleteOpen(false)
+    }, [selectedCredentialId])
 
     useEffect(() => {
         if (initialError) {
@@ -114,9 +145,6 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
     const handleDelete = async () => {
         if (!selectedCredential || isDeleting) return
 
-        const shouldDelete = window.confirm('Delete this credential? This action cannot be undone.')
-        if (!shouldDelete) return
-
         setIsDeleting(true)
         try {
             const { response, data } = await clientApiDelete<{ success?: boolean; error?: string }>(
@@ -129,10 +157,74 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
             }
 
             showToast({ message: 'Credential deleted successfully.', variant: 'success' })
+            setConfirmDeleteOpen(false)
             setSelectedCredentialId(null)
             router.refresh()
         } finally {
             setIsDeleting(false)
+        }
+    }
+
+    const handleCopyActualSecret = async () => {
+        if (!selectedCredential || isCopyingSecret) return
+
+        if (typeof window === 'undefined') {
+            return
+        }
+
+        if (!isWebAuthnSupported()) {
+            showToast({
+                message: 'Biometric authentication is not supported on this device.',
+                variant: 'error',
+            })
+            return
+        }
+
+        const biometricCredentialId = localStorage.getItem(BIOMETRIC_CREDENTIAL_STORAGE_KEY)
+        if (!biometricCredentialId) {
+            showToast({
+                message: 'Set up biometrics in settings first to copy the actual password.',
+                variant: 'error',
+            })
+            return
+        }
+
+        setIsCopyingSecret(true)
+        try {
+            const verified = await verifyBiometricCredential()
+            if (!verified) {
+                showToast({ message: 'Biometric verification failed.', variant: 'error' })
+                return
+            }
+
+            const { response, data } = await clientApiGet<CredentialSecretResponse>(
+                `/api/credential/${selectedCredential.id}/secret`
+            )
+
+            if (!response.ok) {
+                showToast({ message: data?.error || 'Failed to fetch password.', variant: 'error' })
+                return
+            }
+
+            const copyResult = await copyToClipboard(data?.data?.secret ?? '')
+            if (!copyResult.ok) {
+                showToast({ message: 'Failed to copy password.', variant: 'error' })
+                return
+            }
+
+            showToast({ message: 'Password copied.', variant: 'success' })
+            setSecretCopied(true)
+
+            if (secretCopyTimeoutRef.current) {
+                clearTimeout(secretCopyTimeoutRef.current)
+            }
+            secretCopyTimeoutRef.current = setTimeout(() => {
+                setSecretCopied(false)
+            }, 1200)
+        } catch {
+            showToast({ message: 'Biometric verification failed.', variant: 'error' })
+        } finally {
+            setIsCopyingSecret(false)
         }
     }
 
@@ -230,15 +322,24 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
 
                                 <div>
                                     <div className="flex items-center justify-between gap-2">
-                                        <p className="text-xs text-muted-foreground">Masked secret</p>
-                                        <CopyButton
-                                            value={selectedCredential.masked_secret}
-                                            label="Masked secret"
-                                            className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
-                                            showStatusIcon
-                                            copyIconClassName="h-3.5 w-3.5"
-                                            checkIconClassName="h-3.5 w-3.5 text-green-600"
-                                        />
+                                        <p className="text-xs text-muted-foreground">Password</p>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                void handleCopyActualSecret()
+                                            }}
+                                            disabled={isCopyingSecret}
+                                            className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
+                                            aria-label="Copy password"
+                                        >
+                                            {isCopyingSecret ? (
+                                                <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
+                                            ) : secretCopied ? (
+                                                <Check className="h-3.5 w-3.5 text-green-600" />
+                                            ) : (
+                                                <Copy className="h-3.5 w-3.5" />
+                                            )}
+                                        </button>
                                     </div>
                                     <p className="font-mono">{selectedCredential.masked_secret}</p>
                                 </div>
@@ -301,7 +402,7 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
                                         type="button"
                                         variant="destructive"
                                         size="sm"
-                                        onClick={handleDelete}
+                                        onClick={() => setConfirmDeleteOpen(true)}
                                         disabled={isDeleting}
                                     >
                                         <Trash2 className="mr-1 h-4 w-4" />
@@ -313,6 +414,17 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
                     </DetailDialogContent>
                 ) : null}
             </Dialog>
+
+            <DeleteConfirmDialog
+                open={confirmDeleteOpen}
+                onOpenChange={(open) => !isDeleting && setConfirmDeleteOpen(open)}
+                title="Delete credential?"
+                description="This action cannot be undone."
+                confirmLabel="Delete"
+                processingLabel="Deleting..."
+                isProcessing={isDeleting}
+                onConfirm={handleDelete}
+            />
         </section>
     )
 }

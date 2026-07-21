@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useFormStatus } from 'react-dom'
 import { Check, CreditCard, Landmark, Shuffle } from 'lucide-react'
 
@@ -13,6 +13,7 @@ import { CardNumberInput } from '@/components/card/card-number-input'
 import { CvvOtpInput } from '@/components/card/cvv-otp-input'
 import { CARD_PATTERNS, getRandomCardPatternKey } from '@/constants/card/patterns'
 import { CARD_TAG_SUGGESTIONS } from '@/constants/card/tags'
+import { CardNetwork } from '@/models/card'
 import {
   entityFormActionsDividerClass,
   entityFormControlClass,
@@ -28,6 +29,47 @@ import { CARD_NETWORK_FORM_OPTIONS } from '@/utils/card/network'
 import { buildCardAppearance, getCardThemes, parseCardAppearance } from '@/utils/card/theme'
 import { parseCardTags } from '@/utils/card/form-data'
 import { getExpectedCvvLength, validateCardFormFields, type CardFormFieldErrors } from '@/utils/card/validation'
+
+type CardProviderApiResponse = {
+  data?: string[]
+}
+
+function normalizeProvider(value: string) {
+  return value.trim().replace(/\s+/g, ' ')
+}
+
+function mergeProviderOptions(existing: string[], additions: string[]) {
+  const unique = new Map<string, string>()
+
+  for (const option of [...existing, ...additions]) {
+    const normalized = normalizeProvider(option)
+    if (!normalized) continue
+
+    const key = normalized.toLowerCase()
+    if (!unique.has(key)) {
+      unique.set(key, normalized)
+    }
+  }
+
+  return Array.from(unique.values()).sort((a, b) => a.localeCompare(b))
+}
+
+function getExpectedCardNumberLengths(network: string) {
+  const normalizedNetwork = Number(network)
+
+  if (normalizedNetwork === CardNetwork.AMEX) return [15]
+  if (normalizedNetwork === CardNetwork.MASTERCARD) return [16]
+  if (normalizedNetwork === CardNetwork.RUPAY) return [16, 19]
+  if (normalizedNetwork === CardNetwork.VISA) return [13, 16, 19]
+
+  return [13, 14, 15, 16, 17, 18, 19]
+}
+
+function formatExpectedLengthsLabel(lengths: number[]) {
+  if (lengths.length === 1) return `${lengths[0]} digits`
+  if (lengths.length === 2) return `${lengths[0]} or ${lengths[1]} digits`
+  return `${lengths[0]}-${lengths[lengths.length - 1]} digits`
+}
 
 type CardFormValues = {
   cardType: 'credit' | 'debit' | ''
@@ -126,8 +168,11 @@ export function CardForm({
     values.cardType === 'debit' ? 'debit' : 'credit'
   )
   const [selectedNetwork, setSelectedNetwork] = useState(values.network)
+  const [numberValue, setNumberValue] = useState(values.number)
   const [tagsValue, setTagsValue] = useState(values.tags)
   const [tagPickerValue, setTagPickerValue] = useState(TAG_PICKER_PLACEHOLDER)
+  const [providerValue, setProviderValue] = useState(values.provider)
+  const [showProviderSuggestions, setShowProviderSuggestions] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<CardFormFieldErrors>({})
   const formRef = useRef<HTMLFormElement | null>(null)
   const cvvLength = getExpectedCvvLength(Number(selectedNetwork)) ?? 3
@@ -137,6 +182,73 @@ export function CardForm({
   const availableTagSuggestions = useMemo(() => {
     return CARD_TAG_SUGGESTIONS.filter((tag) => !selectedTagsSet.has(tag.toLowerCase()))
   }, [selectedTagsSet])
+  const initialProviderOptions = useMemo(() => {
+    const normalizedCurrentProvider = normalizeProvider(values.provider)
+    return normalizedCurrentProvider ? [normalizedCurrentProvider] : []
+  }, [values.provider])
+  const [providerOptions, setProviderOptions] = useState(initialProviderOptions)
+  const filteredProviderOptions = useMemo(() => {
+    const normalizedQuery = providerValue.trim().toLowerCase()
+
+    if (!normalizedQuery) return providerOptions
+
+    return providerOptions.filter((providerOption) =>
+      providerOption.toLowerCase().includes(normalizedQuery)
+    )
+  }, [providerOptions, providerValue])
+  const canAddProviderOption = useMemo(() => {
+    const normalizedValue = normalizeProvider(providerValue)
+    if (!normalizedValue) return false
+
+    return !providerOptions.some(
+      (providerOption) => providerOption.toLowerCase() === normalizedValue.toLowerCase()
+    )
+  }, [providerOptions, providerValue])
+  const cardNumberDigitsCount = useMemo(() => numberValue.replace(/\D/g, '').length, [numberValue])
+  const expectedCardNumberLengths = useMemo(
+    () => getExpectedCardNumberLengths(selectedNetwork),
+    [selectedNetwork]
+  )
+  const isCardNumberLengthMatch = useMemo(
+    () => expectedCardNumberLengths.includes(cardNumberDigitsCount),
+    [expectedCardNumberLengths, cardNumberDigitsCount]
+  )
+  const cardNumberMatchHint = useMemo(() => {
+    if (cardNumberDigitsCount === 0) {
+      return `Expected: ${formatExpectedLengthsLabel(expectedCardNumberLengths)}`
+    }
+
+    if (isCardNumberLengthMatch) {
+      return `Length matched (${cardNumberDigitsCount} digits)`
+    }
+
+    return `Entered ${cardNumberDigitsCount} digits. Expected: ${formatExpectedLengthsLabel(expectedCardNumberLengths)}`
+  }, [cardNumberDigitsCount, expectedCardNumberLengths, isCardNumberLengthMatch])
+
+  useEffect(() => {
+    let ignore = false
+
+    const fetchProviderOptions = async () => {
+      try {
+        const response = await fetch('/api/card-provider', { cache: 'no-store' })
+        if (!response.ok) return
+
+        const result = (await response.json()) as CardProviderApiResponse
+        const providerNames = Array.isArray(result.data) ? result.data : []
+
+        if (ignore) return
+        setProviderOptions((previous) => mergeProviderOptions(previous, providerNames))
+      } catch {
+        // Keep existing local options if loading fails.
+      }
+    }
+
+    void fetchProviderOptions()
+
+    return () => {
+      ignore = true
+    }
+  }, [])
 
   const scheduleTagValidation = () => {
     window.requestAnimationFrame(() => validateFields(['tags']))
@@ -149,6 +261,20 @@ export function CardForm({
     setTagsValue(mergedTags)
     setTagPickerValue(TAG_PICKER_PLACEHOLDER)
     scheduleTagValidation()
+  }
+
+  const handleProviderOptionSelect = (providerOption: string, addIfMissing = false) => {
+    const normalizedProvider = normalizeProvider(providerOption)
+    if (!normalizedProvider) return
+
+    setProviderValue(normalizedProvider)
+
+    if (addIfMissing) {
+      setProviderOptions((previous) => mergeProviderOptions(previous, [normalizedProvider]))
+    }
+
+    setShowProviderSuggestions(false)
+    window.requestAnimationFrame(() => validateFields(['provider']))
   }
 
   const getFieldErrorsFromForm = () => {
@@ -378,14 +504,31 @@ export function CardForm({
         </div>
       </FormField>
       <FormField id="number" label="CARD NUMBER" error={fieldErrors.number} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
-        <CardNumberInput
-          id="number"
-          defaultValue={values.number}
-          network={selectedNetwork}
-          required
-          onChange={() => validateFields(['number'])}
-          className={cn(entityFormControlClass, fieldErrors.number && 'border-destructive focus-visible:ring-destructive')}
-        />
+        <div className="space-y-1.5">
+          <CardNumberInput
+            id="number"
+            defaultValue={values.number}
+            network={selectedNetwork}
+            required
+            onChange={(value) => {
+              setNumberValue(value)
+              validateFields(['number'])
+            }}
+            className={cn(entityFormControlClass, fieldErrors.number && 'border-destructive focus-visible:ring-destructive')}
+          />
+          <p
+            className={cn(
+              'text-xs',
+              fieldErrors.number
+                ? 'text-destructive'
+                : isCardNumberLengthMatch
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : 'text-muted-foreground'
+            )}
+          >
+            {cardNumberMatchHint}
+          </p>
+        </div>
       </FormField>
 
 
@@ -481,18 +624,67 @@ export function CardForm({
         error={fieldErrors.provider}
         className={entityFormFieldCardClass}
         labelClassName={entityFormLabelClass}
-        hint="Optional: bank or issuer name."
+        hint="Optional: type to search or add a new issuer."
       >
-        <Input
-          id="provider"
-          name="provider"
-          placeholder="e.g. HBL"
-          onChange={() => validateFields(['provider'])}
-          className={cn(entityFormControlClass, fieldErrors.provider && 'border-destructive focus-visible:ring-destructive')}
-          aria-invalid={Boolean(fieldErrors.provider)}
-          maxLength={50}
-          defaultValue={values.provider}
-        />
+        <div className="relative space-y-2">
+          <Input
+            id="provider"
+            name="provider"
+            placeholder="e.g. HBL"
+            value={providerValue}
+            onFocus={() => setShowProviderSuggestions(true)}
+            onBlur={() => {
+              window.setTimeout(() => setShowProviderSuggestions(false), 120)
+            }}
+            onChange={(event) => {
+              setProviderValue(event.target.value)
+              setShowProviderSuggestions(true)
+              validateFields(['provider'])
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && canAddProviderOption) {
+                event.preventDefault()
+                handleProviderOptionSelect(providerValue, true)
+              }
+            }}
+            className={cn(entityFormControlClass, fieldErrors.provider && 'border-destructive focus-visible:ring-destructive')}
+            aria-invalid={Boolean(fieldErrors.provider)}
+            maxLength={50}
+            autoComplete="off"
+          />
+          {showProviderSuggestions ? (
+            <div className="absolute z-40 mt-1 max-h-56 w-full overflow-y-auto rounded-md border border-border/70 bg-popover p-1 shadow-md">
+              {canAddProviderOption ? (
+                <button
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => handleProviderOptionSelect(providerValue, true)}
+                  className="flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-left text-sm transition-colors hover:bg-accent"
+                >
+                  <span>Add "{providerValue.trim()}"</span>
+                  <span className="text-xs text-muted-foreground">new</span>
+                </button>
+              ) : null}
+              {filteredProviderOptions.map((providerOption) => (
+                <button
+                  key={providerOption}
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => handleProviderOptionSelect(providerOption)}
+                  className={cn(
+                    'flex w-full items-center rounded-sm px-2 py-1.5 text-left text-sm transition-colors hover:bg-accent',
+                    providerValue.trim().toLowerCase() === providerOption.toLowerCase() && 'bg-accent'
+                  )}
+                >
+                  {providerOption}
+                </button>
+              ))}
+              {filteredProviderOptions.length === 0 && !canAddProviderOption ? (
+                <p className="px-2 py-1.5 text-sm text-muted-foreground">No matching providers</p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
       </FormField>
 
       <FormField id="holder_name" label="HOLDER NAME" error={fieldErrors.holder_name} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>

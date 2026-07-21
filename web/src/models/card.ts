@@ -9,6 +9,7 @@ export interface WalletCard {
   color_name: string | null
   tags?: string[] | null
   provider: string | null
+  provider_id?: string | number | null
   credit_limit?: string | number | null
   number: string | number | null
   cvv: string | null

@@ -77,6 +77,42 @@ function DialogContent({
   )
 }
 
+function ResponsiveDialogContent({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof DialogContent>) {
+  return (
+    <DialogContent
+      className={cn(
+        'w-[calc(100vw-2rem)] max-w-lg p-5',
+        'max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:right-0',
+        'max-sm:w-full max-sm:max-w-none max-sm:translate-x-0 max-sm:translate-y-0',
+        'max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0 max-sm:p-4',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </DialogContent>
+  )
+}
+
+function MobileBottomSheetContent({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof ResponsiveDialogContent>) {
+  return (
+    <ResponsiveDialogContent
+      className={cn('max-h-[88dvh] w-full max-w-none sm:hidden', className)}
+      {...props}
+    >
+      {children}
+    </ResponsiveDialogContent>
+  )
+}
+
 function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -127,6 +163,8 @@ export {
   Dialog,
   DialogClose,
   DialogContent,
+  ResponsiveDialogContent,
+  MobileBottomSheetContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,

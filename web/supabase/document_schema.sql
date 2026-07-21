@@ -48,7 +48,17 @@ create table if not exists public.document_record (
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now()),
   constraint document_record_document_type_check check (
-    document_type in ('AADHAAR', 'PAN', 'VOTER', 'DRIVING_LICENSE', 'RATION')
+    document_type in (
+      'AADHAAR',
+      'PAN',
+      'VOTER',
+      'DRIVING_LICENSE',
+      'RATION',
+      'PASSPORT',
+      'BIRTH_CERTIFICATE',
+      'VEHICLE_RC',
+      'OTHERS'
+    )
   ),
   constraint document_record_last4_check check (
     char_length(document_number_last4) between 1 and 4
@@ -62,6 +72,24 @@ create table if not exists public.document_record (
 
 do $$
 begin
+  alter table public.document_record
+    drop constraint if exists document_record_document_type_check;
+
+  alter table public.document_record
+    add constraint document_record_document_type_check check (
+      document_type in (
+        'AADHAAR',
+        'PAN',
+        'VOTER',
+        'DRIVING_LICENSE',
+        'RATION',
+        'PASSPORT',
+        'BIRTH_CERTIFICATE',
+        'VEHICLE_RC',
+        'OTHERS'
+      )
+    );
+
   if not exists (
     select 1
     from pg_constraint

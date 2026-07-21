@@ -18,6 +18,10 @@ function normalizeByType(type: DocumentTypeCode, value: string) {
     case DocumentTypeCode.VOTER:
     case DocumentTypeCode.DRIVING_LICENSE:
     case DocumentTypeCode.RATION:
+    case DocumentTypeCode.PASSPORT:
+    case DocumentTypeCode.BIRTH_CERTIFICATE:
+    case DocumentTypeCode.VEHICLE_RC:
+    case DocumentTypeCode.OTHERS:
       return compact.replace(/[^A-Z0-9]/g, '')
     default:
       return compact
@@ -49,6 +53,26 @@ function validateNumberByType(type: DocumentTypeCode, number: string) {
     case DocumentTypeCode.RATION:
       if (!/^[A-Z0-9]{8,20}$/.test(number)) {
         return 'Ration card number must be 8 to 20 letters/digits.'
+      }
+      return null
+    case DocumentTypeCode.PASSPORT:
+      if (!/^[A-Z][0-9]{7}$/.test(number)) {
+        return 'Passport must follow format A1234567.'
+      }
+      return null
+    case DocumentTypeCode.BIRTH_CERTIFICATE:
+      if (!/^[A-Z0-9]{6,30}$/.test(number)) {
+        return 'Birth certificate number must be 6 to 30 letters/digits.'
+      }
+      return null
+    case DocumentTypeCode.VEHICLE_RC:
+      if (!/^[A-Z0-9]{8,20}$/.test(number)) {
+        return 'Vehicle RC number must be 8 to 20 letters/digits.'
+      }
+      return null
+    case DocumentTypeCode.OTHERS:
+      if (!/^[A-Z0-9]{4,40}$/.test(number)) {
+        return 'Document number must be 4 to 40 letters/digits.'
       }
       return null
     default:

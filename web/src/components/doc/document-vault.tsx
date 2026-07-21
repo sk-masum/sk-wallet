@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Pencil, Trash2 } from 'lucide-react'
 
 import NoDocIcon from '@/components/icons/nodoc-icon'
+import { DeleteConfirmDialog } from '@/components/shared/delete-confirm-dialog'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -59,6 +60,7 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
   const searchParams = useSearchParams()
   const [documents, setDocuments] = useState<UserDocument[]>(initialDocuments)
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null)
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
   const [selectedDocumentDetail, setSelectedDocumentDetail] = useState<
     (UserDocument & { document_number?: string }) | null
   >(null)
@@ -123,6 +125,10 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
     }
   }, [selectedDocumentId])
 
+  useEffect(() => {
+    setConfirmDeleteOpen(false)
+  }, [selectedDocumentId])
+
   const sortedDocuments = useMemo(
     () => [...documents].sort((a, b) => {
       if (selectedSort === 'name-asc' || selectedSort === 'name-desc') {
@@ -174,9 +180,6 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
   const handleDelete = async () => {
     if (!selectedDocument || isDeleting) return
 
-    const shouldDelete = window.confirm('Delete this document record? This action cannot be undone.')
-    if (!shouldDelete) return
-
     setIsDeleting(true)
     try {
       const { response, data } = await clientApiDelete<{ success?: boolean; error?: string }>(
@@ -196,6 +199,7 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
         variant: 'success',
       })
 
+      setConfirmDeleteOpen(false)
       setSelectedDocumentId(null)
       router.refresh()
     } finally {
@@ -434,7 +438,7 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
                       type="button"
                       variant="destructive"
                       size="sm"
-                      onClick={handleDelete}
+                      onClick={() => setConfirmDeleteOpen(true)}
                       disabled={isDeleting}
                     >
                       <Trash2 className="mr-1 h-4 w-4" />
@@ -447,6 +451,17 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
           </DetailDialogContent>
         ) : null}
       </Dialog>
+
+      <DeleteConfirmDialog
+        open={confirmDeleteOpen}
+        onOpenChange={(open) => !isDeleting && setConfirmDeleteOpen(open)}
+        title="Delete document?"
+        description="This action cannot be undone."
+        confirmLabel="Delete"
+        processingLabel="Deleting..."
+        isProcessing={isDeleting}
+        onConfirm={handleDelete}
+      />
     </section>
   )
 }

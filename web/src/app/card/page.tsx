@@ -105,11 +105,19 @@ export default async function CardPage({ searchParams }: CardPageProps) {
   const queryLower = query.toLowerCase()
   const queryDigits = query.replace(/\D/g, '')
 
-  const { response, data: result } = await serverApiGet<{ data?: WalletCard[]; error?: string }>(
-    '/api/card',
-  )
+  const [cardResult, providerResult] = await Promise.all([
+    serverApiGet<{ data?: WalletCard[]; error?: string }>('/api/card'),
+    serverApiGet<{ data?: string[]; error?: string }>('/api/card-provider'),
+  ])
+
+  const { response, data: result } = cardResult
+  const { response: providerResponse, data: providerResponseData } = providerResult
 
   if (response.status === 401) {
+    redirect('/auth?next=/card')
+  }
+
+  if (providerResponse.status === 401) {
     redirect('/auth?next=/card')
   }
 
@@ -118,9 +126,12 @@ export default async function CardPage({ searchParams }: CardPageProps) {
   const networkOptions = CARD_NETWORK_FILTER_OPTIONS
   const providerOptions = Array.from(
     new Set(
-      allCards
-        .map((card) => card.provider?.trim() ?? '')
-        .filter((provider) => provider.length > 0)
+      [
+        ...((providerResponse.ok ? providerResponseData?.data : []) ?? []),
+        ...allCards
+          .map((card) => card.provider?.trim() ?? '')
+          .filter((provider) => provider.length > 0),
+      ]
     )
   ).sort((a, b) => a.localeCompare(b))
   const tagOptions = Array.from(

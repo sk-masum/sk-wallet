@@ -4,10 +4,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { CardFace } from '@/components/card/card-face'
+import { DeleteConfirmDialog } from '@/components/shared/delete-confirm-dialog'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog } from '@/components/ui/dialog'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { ChevronDown, ChevronRight, Eye, EyeOff, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react'
 import { CARD_STATUS_OPTIONS, isCardStatus } from '@/constants/card/status'
 import type { WalletCard } from '@/models/card'
 import { clientApiDelete, clientApiPatch } from '@/lib/api/client'
@@ -29,7 +30,7 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
   const [showFullNumber, setShowFullNumber] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
-  const [mobileActionsOpen, setMobileActionsOpen] = useState(false)
+  const [statusActionsOpen, setStatusActionsOpen] = useState(false)
   const [selectedStatus, setSelectedStatus] = useState<'active' | 'inactive' | 'blocked' | 'replaced'>('active')
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
 
@@ -45,7 +46,7 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
     setShowCvv(false)
     setShowFullNumber(false)
     setConfirmDeleteOpen(false)
-    setMobileActionsOpen(false)
+    setStatusActionsOpen(false)
   }, [selectedCardId])
 
   const selectedCard = useMemo(
@@ -232,10 +233,8 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
         {selectedCard ? (
           <DetailDialogContent
             className={cn(
-              'max-h-[90dvh] w-[calc(100vw-2rem)] max-w-120 overflow-visible border-0 bg-transparent p-0 shadow-none',
               'motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-3 motion-safe:duration-300',
-              isMobile &&
-              'top-auto bottom-0 left-0 right-0 w-full max-w-none translate-x-0 translate-y-0 rounded-none'
+              isMobile && 'rounded-none'
             )}
           >
             <div>
@@ -253,247 +252,114 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
               />
 
               <div className="-mt-px rounded-b-2xl border border-t-0 border-border/65 bg-linear-to-b from-background/94 to-muted/35 px-3 pb-3 pt-2.5 backdrop-blur-md sm:px-4 sm:pb-4 sm:pt-3">
-                {isMobile ? (
-                  <>
-                    <div className="grid grid-cols-2 gap-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
-                        onClick={() => router.push(`/card/${selectedCard.id}`)}
-                      >
-                        <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                          <Pencil className="h-3.5 w-3.5" />
-                        </span>
-                        Edit card
-                      </Button>
+                <div className="grid grid-cols-2 gap-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
+                    onClick={() => setShowCvv((prev) => !prev)}
+                    disabled={isUpdatingStatus || isDeleting}
+                  >
+                    <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                      {showCvv ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    </span>
+                    {showCvv ? 'Hide CVV' : 'Show CVV'}
+                  </Button>
 
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
-                        onClick={() => setMobileActionsOpen(true)}
-                      >
-                        <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                          <MoreHorizontal className="h-3.5 w-3.5" />
-                        </span>
-                        More actions
-                      </Button>
-                    </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
+                    onClick={() => router.push(`/card/${selectedCard.id}`)}
+                  >
+                    <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                      <Pencil className="h-3.5 w-3.5" />
+                    </span>
+                    Edit card
+                  </Button>
 
-                    <Dialog open={mobileActionsOpen} onOpenChange={(open) => !isDeleting && setMobileActionsOpen(open)}>
-                      <DialogContent className="top-auto bottom-0 left-0 right-0 max-h-[85dvh] w-full max-w-none translate-x-0 translate-y-0 overflow-y-auto rounded-t-3xl rounded-b-none border-x-0 border-t border-border/55 bg-background p-4 sm:hidden">
-                        <div className="space-y-3">
-                          <p className="text-sm font-semibold">Card actions</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
+                    onClick={() => setConfirmDeleteOpen(true)}
+                    disabled={isDeleting || isUpdatingStatus}
+                  >
+                    <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </span>
+                    {isDeleting ? 'Archiving...' : 'Archive card'}
+                  </Button>
 
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="h-11 w-full justify-start rounded-xl border-border/70 bg-background/90"
-                            onClick={() => setShowCvv((prev) => !prev)}
-                            disabled={isUpdatingStatus || isDeleting}
-                          >
-                            <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                              {showCvv ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                            </span>
-                            {showCvv ? 'Hide CVV' : 'Show CVV'}
-                          </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
+                    onClick={() => setStatusActionsOpen((prev) => !prev)}
+                    disabled={isDeleting}
+                  >
+                    <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                      {statusActionsOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                    </span>
+                    Change status
+                  </Button>
+                </div>
 
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="h-11 w-full justify-start rounded-xl border-border/70 bg-background/90"
-                            onClick={() => setShowFullNumber((prev) => !prev)}
-                            disabled={isUpdatingStatus || isDeleting}
-                          >
-                            <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                              {showFullNumber ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                            </span>
-                            {showFullNumber ? 'Hide full number' : 'Show full number'}
-                          </Button>
-
-                          <div className="space-y-2 rounded-xl border border-border/60 bg-background/75 p-2.5">
-                            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">Card status</p>
-                            <div className="flex flex-col gap-2">
-                              <select
-                                value={selectedStatus}
-                                onChange={(event) => {
-                                  const value = event.target.value
-                                  if (isCardStatus(value)) {
-                                    setSelectedStatus(value)
-                                  }
-                                }}
-                                className="h-10 w-full rounded-lg border border-border/65 bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                disabled={isUpdatingStatus || isDeleting}
-                              >
-                                {CARD_STATUS_OPTIONS.map((statusOption) => (
-                                  <option key={statusOption.value} value={statusOption.value}>
-                                    {statusOption.label}
-                                  </option>
-                                ))}
-                              </select>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                className="h-10 w-full rounded-lg border-border/70 bg-background/90"
-                                onClick={handleStatusUpdate}
-                                disabled={isUpdatingStatus || isDeleting}
-                              >
-                                {isUpdatingStatus ? 'Updating...' : 'Update status'}
-                              </Button>
-                            </div>
-                          </div>
-
-                          <div className="pt-1">
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              className="h-11 w-full justify-start rounded-xl border border-destructive/45 bg-linear-to-r from-rose-600 to-red-600 px-3 text-white"
-                              onClick={() => {
-                                setMobileActionsOpen(false)
-                                setConfirmDeleteOpen(true)
-                              }}
-                              disabled={isDeleting || isUpdatingStatus}
-                            >
-                              <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/15">
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </span>
-                              {isDeleting ? 'Archiving...' : 'Archive card'}
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </>
-                ) : (
-                  <>
-                    <div className="grid grid-cols-2 gap-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
-                        onClick={() => setShowCvv((prev) => !prev)}
-                      >
-                        <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                          {showCvv ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                        </span>
-                        {showCvv ? 'Hide CVV' : 'Show CVV'}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]"
-                        onClick={() => router.push(`/card/${selectedCard.id}`)}
-                      >
-                        <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                          <Pencil className="h-3.5 w-3.5" />
-                        </span>
-                        Edit card
-                      </Button>
-                    </div>
-
-                    <div className="mt-2.5 border-t border-border/55 pt-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 sm:mt-3 sm:pt-3">
-                      <div className="mb-2.5 space-y-2 rounded-xl border border-border/60 bg-background/75 p-2.5">
-                        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">Card status</p>
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                          <select
-                            value={selectedStatus}
-                            onChange={(event) => {
-                              const value = event.target.value
-                              if (isCardStatus(value)) {
-                                setSelectedStatus(value)
-                              }
-                            }}
-                            className="h-10 flex-1 rounded-lg border border-border/65 bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                            disabled={isUpdatingStatus || isDeleting}
-                          >
-                            {CARD_STATUS_OPTIONS.map((statusOption) => (
-                              <option key={statusOption.value} value={statusOption.value}>
-                                {statusOption.label}
-                              </option>
-                            ))}
-                          </select>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="h-10 rounded-lg border-border/70 bg-background/90 px-4"
-                            onClick={handleStatusUpdate}
-                            disabled={isUpdatingStatus || isDeleting}
-                          >
-                            {isUpdatingStatus ? 'Updating...' : 'Update status'}
-                          </Button>
-                        </div>
+                {statusActionsOpen ? (
+                  <div className="mt-2.5 border-t border-border/55 pt-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 sm:mt-3 sm:pt-3">
+                    <div className="space-y-2 rounded-xl border border-border/60 bg-background/75 p-2.5">
+                      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">Card status</p>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <select
+                          value={selectedStatus}
+                          onChange={(event) => {
+                            const value = event.target.value
+                            if (isCardStatus(value)) {
+                              setSelectedStatus(value)
+                            }
+                          }}
+                          className="h-10 flex-1 rounded-lg border border-border/65 bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          disabled={isUpdatingStatus || isDeleting}
+                        >
+                          {CARD_STATUS_OPTIONS.map((statusOption) => (
+                            <option key={statusOption.value} value={statusOption.value}>
+                              {statusOption.label}
+                            </option>
+                          ))}
+                        </select>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-10 rounded-lg border-border/70 bg-background/90 px-4"
+                          onClick={handleStatusUpdate}
+                          disabled={isUpdatingStatus || isDeleting}
+                        >
+                          {isUpdatingStatus ? 'Updating...' : 'Update status'}
+                        </Button>
                       </div>
-
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        className="h-11 w-full justify-start rounded-xl border border-destructive/45 bg-linear-to-r from-rose-600 to-red-600 px-3 text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:from-rose-500 hover:to-red-500 hover:shadow-md active:scale-[0.98]"
-                        onClick={() => setConfirmDeleteOpen(true)}
-                        disabled={isDeleting}
-                      >
-                        <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/15">
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </span>
-                        {isDeleting ? 'Archiving...' : 'Archive card'}
-                      </Button>
                     </div>
-                  </>
-                )}
+                  </div>
+                ) : null}
               </div>
             </div>
           </DetailDialogContent>
         ) : null}
       </Dialog>
 
-      <Dialog open={confirmDeleteOpen} onOpenChange={(open) => !isDeleting && setConfirmDeleteOpen(open)}>
-        <DialogContent className="w-[calc(100vw-2rem)] max-w-sm p-5">
-          <div className="relative space-y-3">
-            {isDeleting ? (
-              <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-background/75 backdrop-blur-[1px]">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="relative h-20 w-32">
-                    <div className="absolute left-2 top-3 h-16 w-24 rounded-lg border border-border/50 bg-muted/50" />
-                    <div className="absolute left-4 top-1 h-16 w-24 rounded-lg border border-red-300/70 bg-linear-to-br from-rose-700 via-red-700 to-orange-800 shadow-lg animate-pulse" />
-                    <div className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-destructive text-destructive-foreground">
-                      <span className="absolute inline-flex h-full w-full rounded-full bg-destructive opacity-40 animate-ping" />
-                      <span className="relative text-sm font-bold">-</span>
-                    </div>
-                  </div>
-                  <p className="text-sm font-medium">Archiving card...</p>
-                </div>
-              </div>
-            ) : null}
-            <h3 className="text-lg font-semibold">Archive card?</h3>
-            <p className="text-sm text-muted-foreground">
-              This marks the card as Replaced and keeps it in history.
-            </p>
-            <div className="flex justify-end gap-2 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setConfirmDeleteOpen(false)}
-                disabled={isDeleting}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isDeleting}
-              >
-                {isDeleting ? 'Archiving...' : 'Archive'}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <DeleteConfirmDialog
+        open={confirmDeleteOpen}
+        onOpenChange={(open) => !isDeleting && setConfirmDeleteOpen(open)}
+        title="Archive card?"
+        description="This marks the card as Replaced and keeps it in history."
+        confirmLabel="Archive"
+        processingLabel="Archiving..."
+        isProcessing={isDeleting}
+        onConfirm={handleDelete}
+      />
     </>
   )
 }

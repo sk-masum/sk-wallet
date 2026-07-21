@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { CreditCard } from 'lucide-react'
 
 import {
+    ListingFilterDesktopActions,
     ListingFilterDesktopPanel,
     ListingFilterDesktopSection,
     ListingFilterMobileActions,
@@ -72,9 +73,9 @@ export function CredentialMobileFilters({ query, selectedType }: CredentialMobil
                 resetHref={clearAllHref}
                 desktopFilterOpen={desktopOpen}
                 onToggleDesktopFilters={() => setDesktopOpen((prev) => !prev)}
-                desktopExpandedClassName="max-h-80"
+                desktopExpandedClassName="max-h-[700px]"
                 desktopPanel={
-                    <ListingFilterDesktopPanel className="space-y-0">
+                    <ListingFilterDesktopPanel>
                         <ListingFilterDesktopSection label="Credential type">
                             <Select value={selectedType} onValueChange={handleTypeChange}>
                                 <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by credential type">
@@ -90,6 +91,12 @@ export function CredentialMobileFilters({ query, selectedType }: CredentialMobil
                                 </SelectContent>
                             </Select>
                         </ListingFilterDesktopSection>
+
+                        <ListingFilterDesktopActions
+                            hasActiveControls={hasActiveControls}
+                            resetHref={clearAllHref}
+                            onCollapse={() => setDesktopOpen(false)}
+                        />
                     </ListingFilterDesktopPanel>
                 }
             />

@@ -4,6 +4,10 @@ export enum DocumentTypeCode {
   VOTER = 'VOTER',
   DRIVING_LICENSE = 'DRIVING_LICENSE',
   RATION = 'RATION',
+  PASSPORT = 'PASSPORT',
+  BIRTH_CERTIFICATE = 'BIRTH_CERTIFICATE',
+  VEHICLE_RC = 'VEHICLE_RC',
+  OTHERS = 'OTHERS',
 }
 
 export enum DocumentCategory {

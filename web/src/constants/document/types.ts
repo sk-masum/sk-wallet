@@ -41,6 +41,38 @@ export const DOCUMENT_TYPE_OPTIONS: DocumentTypeFieldConfig[] = [
     minLength: 8,
     maxLength: 20,
   },
+  {
+    code: DocumentTypeCode.PASSPORT,
+    label: 'Passport',
+    placeholder: 'A1234567',
+    hint: '1 letter + 7 digits',
+    minLength: 8,
+    maxLength: 8,
+  },
+  {
+    code: DocumentTypeCode.BIRTH_CERTIFICATE,
+    label: 'Birth Certificate',
+    placeholder: 'BC20240012345',
+    hint: 'Authority format varies; 6-30 letters/digits accepted',
+    minLength: 6,
+    maxLength: 30,
+  },
+  {
+    code: DocumentTypeCode.VEHICLE_RC,
+    label: 'Vehicle RC',
+    placeholder: 'MH12AB1234',
+    hint: 'State format varies; 8-20 letters/digits accepted',
+    minLength: 8,
+    maxLength: 20,
+  },
+  {
+    code: DocumentTypeCode.OTHERS,
+    label: 'Others',
+    placeholder: 'DOC123456',
+    hint: 'General documents; 4-40 letters/digits accepted',
+    minLength: 4,
+    maxLength: 40,
+  },
 ]
 
 const DOCUMENT_TYPE_SET = new Set(DOCUMENT_TYPE_OPTIONS.map((item) => item.code))
