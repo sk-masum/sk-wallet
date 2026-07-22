@@ -8,6 +8,10 @@ export type ParsedCardFormData = {
   provider: string
   creditLimitRaw: string
   creditLimit: number | null
+  billingDateRaw: string
+  billingDate: number | null
+  paymentDateRaw: string
+  paymentDate: number | null
   number: string
   normalizedNumber: string
   holderName: string
@@ -32,6 +36,10 @@ export function parseCardFormData(formData: FormData): ParsedCardFormData {
   const creditLimitRaw = String(formData.get('credit_limit') ?? '').trim()
   const normalizedCreditLimit = creditLimitRaw.replace(/,/g, '')
   const creditLimit = normalizedCreditLimit.length > 0 ? Number(normalizedCreditLimit) : null
+  const billingDateRaw = String(formData.get('billing_date') ?? '').trim()
+  const paymentDateRaw = String(formData.get('payment_date') ?? '').trim()
+  const billingDate = billingDateRaw ? Number(billingDateRaw) : null
+  const paymentDate = paymentDateRaw ? Number(paymentDateRaw) : null
   const number = String(formData.get('number') ?? '').trim()
   const normalizedNumber = number.replace(/\D/g, '')
   const holderName = String(formData.get('holder_name') ?? '').trim()
@@ -49,6 +57,10 @@ export function parseCardFormData(formData: FormData): ParsedCardFormData {
     provider,
     creditLimitRaw,
     creditLimit: Number.isFinite(creditLimit) ? creditLimit : null,
+    billingDateRaw,
+    billingDate: Number.isInteger(billingDate) ? billingDate : null,
+    paymentDateRaw,
+    paymentDate: Number.isInteger(paymentDate) ? paymentDate : null,
     number,
     normalizedNumber,
     holderName,

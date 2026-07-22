@@ -41,6 +41,12 @@ const SORT_LABELS: Record<string, string> = {
   'name-desc': 'Name (Z-A)',
   'expiry-asc': 'Expiry (Soonest)',
   'expiry-desc': 'Expiry (Latest)',
+  'credit-limit-asc': 'Credit limit (Low-High)',
+  'credit-limit-desc': 'Credit limit (High-Low)',
+  'billing-date-asc': 'Billing date (Earliest)',
+  'billing-date-desc': 'Billing date (Latest)',
+  'payment-date-asc': 'Payment date (Earliest)',
+  'payment-date-desc': 'Payment date (Latest)',
 }
 
 const EXPIRING_SOON_WINDOW_DAYS = 60
@@ -85,13 +91,23 @@ export default async function CardPage({ searchParams }: CardPageProps) {
   const typeParam = params.type?.trim().toLowerCase() ?? 'all'
   const sortParam = params.sort?.trim().toLowerCase() ?? 'newest'
   const groupParam = params.group?.trim().toLowerCase() ?? 'none'
+  const creditLimitMinParam = params.credit_limit_min?.trim() ?? ''
+  const creditLimitMaxParam = params.credit_limit_max?.trim() ?? ''
+  const billingDateParam = params.billing_date?.trim() ?? ''
+  const paymentDateParam = params.payment_date?.trim() ?? ''
   const selectedType = typeParam === 'credit' || typeParam === 'debit' ? typeParam : 'all'
   const selectedSort =
     sortParam === 'oldest' ||
       sortParam === 'name-asc' ||
       sortParam === 'name-desc' ||
       sortParam === 'expiry-asc' ||
-      sortParam === 'expiry-desc'
+      sortParam === 'expiry-desc' ||
+      sortParam === 'credit-limit-asc' ||
+      sortParam === 'credit-limit-desc' ||
+      sortParam === 'billing-date-asc' ||
+      sortParam === 'billing-date-desc' ||
+      sortParam === 'payment-date-asc' ||
+      sortParam === 'payment-date-desc'
       ? sortParam
       : 'newest'
   const selectedGroup =
@@ -102,6 +118,10 @@ export default async function CardPage({ searchParams }: CardPageProps) {
   const selectedProvider = providerParam === 'ALL' ? '' : providerParam
   const selectedTag = tagParam === 'ALL' ? '' : tagParam
   const selectedExpiry = expiryParam === 'soon' ? 'soon' : 'all'
+  const billingDateValue = Number.parseInt(billingDateParam, 10)
+  const paymentDateValue = Number.parseInt(paymentDateParam, 10)
+  const selectedBillingDate = Number.isInteger(billingDateValue) && billingDateValue >= 1 && billingDateValue <= 31 ? String(billingDateValue) : ''
+  const selectedPaymentDate = Number.isInteger(paymentDateValue) && paymentDateValue >= 1 && paymentDateValue <= 31 ? String(paymentDateValue) : ''
   const queryLower = query.toLowerCase()
   const queryDigits = query.replace(/\D/g, '')
 
@@ -142,19 +162,58 @@ export default async function CardPage({ searchParams }: CardPageProps) {
         .filter((tag) => tag.length > 0)
     )
   ).sort((a, b) => a.localeCompare(b))
+  const creditLimitValues = allCards
+    .map((card) => Number(card.credit_limit))
+    .filter((limit) => Number.isFinite(limit) && limit > 0)
+
+  const minCreditLimitBound = creditLimitValues.length > 0 ? Math.floor(Math.min(...creditLimitValues)) : 0
+  const maxCreditLimitBound = creditLimitValues.length > 0 ? Math.ceil(Math.max(...creditLimitValues)) : 100000
+
+  const parsedCreditLimitMin = Number.parseInt(creditLimitMinParam, 10)
+  const parsedCreditLimitMax = Number.parseInt(creditLimitMaxParam, 10)
+  const selectedCreditLimitMin = Number.isFinite(parsedCreditLimitMin)
+    ? Math.min(Math.max(parsedCreditLimitMin, minCreditLimitBound), maxCreditLimitBound)
+    : minCreditLimitBound
+  const selectedCreditLimitMax = Number.isFinite(parsedCreditLimitMax)
+    ? Math.min(Math.max(parsedCreditLimitMax, minCreditLimitBound), maxCreditLimitBound)
+    : maxCreditLimitBound
+
+  const normalizedCreditLimitMin = Math.min(selectedCreditLimitMin, selectedCreditLimitMax)
+  const normalizedCreditLimitMax = Math.max(selectedCreditLimitMin, selectedCreditLimitMax)
   const hasTextQuery = query.length > 0
   const hasNetworkFilter = selectedNetwork.length > 0
   const hasProviderFilter = selectedProvider.length > 0
   const hasTagFilter = selectedTag.length > 0
   const hasExpiryFilter = selectedExpiry === 'soon'
+  const hasCreditLimitFilter = creditLimitValues.length > 0 && (
+    normalizedCreditLimitMin > minCreditLimitBound ||
+    normalizedCreditLimitMax < maxCreditLimitBound
+  )
+  const hasBillingDateFilter = selectedBillingDate.length > 0
+  const hasPaymentDateFilter = selectedPaymentDate.length > 0
   const hasTypeFilter = selectedType !== 'all'
   const hasSortSelection = selectedSort !== 'newest'
   const hasGrouping = selectedGroup !== 'none'
-  const hasFilters = hasTextQuery || hasNetworkFilter || hasProviderFilter || hasTagFilter || hasExpiryFilter || hasTypeFilter
+  const hasFilters = hasTextQuery || hasNetworkFilter || hasProviderFilter || hasTagFilter || hasExpiryFilter || hasTypeFilter || hasCreditLimitFilter || hasBillingDateFilter || hasPaymentDateFilter
   const hasActiveControls = hasFilters || hasSortSelection || hasGrouping
-  const activeFilterCount = Number(hasTypeFilter) + Number(hasNetworkFilter) + Number(hasProviderFilter) + Number(hasTagFilter) + Number(hasExpiryFilter) + Number(hasGrouping)
+  const activeFilterCount = Number(hasTypeFilter) + Number(hasNetworkFilter) + Number(hasProviderFilter) + Number(hasTagFilter) + Number(hasExpiryFilter) + Number(hasCreditLimitFilter) + Number(hasBillingDateFilter) + Number(hasPaymentDateFilter) + Number(hasGrouping)
 
-  const buildFilterHref = (next: { network?: string; provider?: string; tag?: string; expiry?: string; type?: string; sort?: string; group?: string; q?: string }) =>
+  const buildFilterHref = (next: {
+    network?: string
+    provider?: string
+    tag?: string
+    expiry?: string
+    type?: string
+    sort?: string
+    group?: string
+    credit_limit?: string
+    credit_limit_min?: string
+    credit_limit_max?: string
+    billing_date?: string
+    payment_date?: string
+    q?: string
+    [key: string]: string | undefined
+  }) =>
     buildCardFilterHref(
       {
         selectedNetwork,
@@ -164,6 +223,10 @@ export default async function CardPage({ searchParams }: CardPageProps) {
         selectedType,
         selectedSort,
         selectedGroup,
+        selectedCreditLimitMin: String(normalizedCreditLimitMin),
+        selectedCreditLimitMax: String(normalizedCreditLimitMax),
+        selectedBillingDate,
+        selectedPaymentDate,
         query,
       },
       next
@@ -190,8 +253,17 @@ export default async function CardPage({ searchParams }: CardPageProps) {
     const matchesProvider = !hasProviderFilter || provider === selectedProvider.toLowerCase()
     const matchesTag = !hasTagFilter || (Array.isArray(card.tags) && card.tags.some((tag) => String(tag).trim().toLowerCase() === selectedTag.toLowerCase()))
     const matchesExpiry = !hasExpiryFilter || isCardExpiringSoon(card, EXPIRING_SOON_WINDOW_DAYS)
+    const cardCreditLimit = Number(card.credit_limit)
+    const hasCreditLimitValue = Number.isFinite(cardCreditLimit) && cardCreditLimit > 0
+    const matchesCreditLimit =
+      !hasCreditLimitFilter ||
+      (hasCreditLimitValue && cardCreditLimit >= normalizedCreditLimitMin && cardCreditLimit <= normalizedCreditLimitMax)
+    const cardBillingDate = Number.parseInt(String(card.billing_date ?? ''), 10)
+    const cardPaymentDate = Number.parseInt(String(card.payment_date ?? ''), 10)
+    const matchesBillingDate = !hasBillingDateFilter || cardBillingDate === Number(selectedBillingDate)
+    const matchesPaymentDate = !hasPaymentDateFilter || cardPaymentDate === Number(selectedPaymentDate)
 
-    return matchesText && matchesNetwork && matchesProvider && matchesTag && matchesExpiry && matchesType
+    return matchesText && matchesNetwork && matchesProvider && matchesTag && matchesExpiry && matchesType && matchesCreditLimit && matchesBillingDate && matchesPaymentDate
   })
 
   const sortedCards = [...filteredCards].sort((a, b) => {
@@ -212,6 +284,45 @@ export default async function CardPage({ searchParams }: CardPageProps) {
       return selectedSort === 'expiry-asc' ? aExpiry - bExpiry : bExpiry - aExpiry
     }
 
+    if (selectedSort === 'credit-limit-asc' || selectedSort === 'credit-limit-desc') {
+      const aLimit = Number(a.credit_limit)
+      const bLimit = Number(b.credit_limit)
+      const aHasLimit = Number.isFinite(aLimit) && aLimit > 0
+      const bHasLimit = Number.isFinite(bLimit) && bLimit > 0
+
+      if (!aHasLimit && !bHasLimit) return 0
+      if (!aHasLimit) return 1
+      if (!bHasLimit) return -1
+
+      return selectedSort === 'credit-limit-asc' ? aLimit - bLimit : bLimit - aLimit
+    }
+
+    if (selectedSort === 'billing-date-asc' || selectedSort === 'billing-date-desc') {
+      const aBilling = Number.parseInt(String(a.billing_date ?? ''), 10)
+      const bBilling = Number.parseInt(String(b.billing_date ?? ''), 10)
+      const aValid = Number.isInteger(aBilling) && aBilling >= 1 && aBilling <= 31
+      const bValid = Number.isInteger(bBilling) && bBilling >= 1 && bBilling <= 31
+
+      if (!aValid && !bValid) return 0
+      if (!aValid) return 1
+      if (!bValid) return -1
+
+      return selectedSort === 'billing-date-asc' ? aBilling - bBilling : bBilling - aBilling
+    }
+
+    if (selectedSort === 'payment-date-asc' || selectedSort === 'payment-date-desc') {
+      const aPayment = Number.parseInt(String(a.payment_date ?? ''), 10)
+      const bPayment = Number.parseInt(String(b.payment_date ?? ''), 10)
+      const aValid = Number.isInteger(aPayment) && aPayment >= 1 && aPayment <= 31
+      const bValid = Number.isInteger(bPayment) && bPayment >= 1 && bPayment <= 31
+
+      if (!aValid && !bValid) return 0
+      if (!aValid) return 1
+      if (!bValid) return -1
+
+      return selectedSort === 'payment-date-asc' ? aPayment - bPayment : bPayment - aPayment
+    }
+
     const aDateRaw = a.updated_at ?? a.created_at ?? ''
     const bDateRaw = b.updated_at ?? b.created_at ?? ''
     const aTime = Number.isNaN(Date.parse(aDateRaw)) ? 0 : Date.parse(aDateRaw)
@@ -226,7 +337,6 @@ export default async function CardPage({ searchParams }: CardPageProps) {
         className="pt-6"
         description={`${sortedCards.length} ${sortedCards.length === 1 ? 'card' : 'cards'}${activeFilterCount > 0 ? ` • ${activeFilterCount} filter${activeFilterCount === 1 ? '' : 's'}` : ''
           }`}
-        addHref="/card/new"
         addLabel="Add card"
         mobileStickyHeader
         mobileFilters={
@@ -237,6 +347,12 @@ export default async function CardPage({ searchParams }: CardPageProps) {
             selectedProvider={selectedProvider}
             selectedTag={selectedTag}
             selectedExpiry={selectedExpiry}
+            selectedCreditLimitMin={normalizedCreditLimitMin}
+            selectedCreditLimitMax={normalizedCreditLimitMax}
+            minCreditLimitBound={minCreditLimitBound}
+            maxCreditLimitBound={maxCreditLimitBound}
+            selectedBillingDate={selectedBillingDate}
+            selectedPaymentDate={selectedPaymentDate}
             selectedSort={selectedSort}
             selectedGroup={selectedGroup}
             networkOptions={networkOptions}
@@ -244,7 +360,7 @@ export default async function CardPage({ searchParams }: CardPageProps) {
             tagOptions={tagOptions}
             activeFilterCount={activeFilterCount}
             clearSearchHref={buildFilterHref({ q: '' })}
-            clearAllHref={buildFilterHref({ q: '', network: '', provider: '', tag: '', expiry: 'all', type: 'all', sort: 'newest', group: 'none' })}
+            clearAllHref={buildFilterHref({ q: '', network: '', provider: '', tag: '', expiry: 'all', type: 'all', sort: 'newest', group: 'none', credit_limit_min: '', credit_limit_max: '', billing_date: '', payment_date: '' })}
             typeHrefs={{
               all: buildFilterHref({ type: 'all' }),
               credit: buildFilterHref({ type: 'credit' }),
@@ -286,6 +402,21 @@ export default async function CardPage({ searchParams }: CardPageProps) {
                     Expiry: Next {EXPIRING_SOON_WINDOW_DAYS} days
                   </span>
                 ) : null}
+                {hasCreditLimitFilter ? (
+                  <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">
+                    Credit limit: {normalizedCreditLimitMin} - {normalizedCreditLimitMax}
+                  </span>
+                ) : null}
+                {hasBillingDateFilter ? (
+                  <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">
+                    Billing date: Day {selectedBillingDate}
+                  </span>
+                ) : null}
+                {hasPaymentDateFilter ? (
+                  <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">
+                    Payment date: Day {selectedPaymentDate}
+                  </span>
+                ) : null}
                 {hasSortSelection ? (
                   <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">
                     Sort: {SORT_LABELS[selectedSort]}
@@ -299,7 +430,7 @@ export default async function CardPage({ searchParams }: CardPageProps) {
               </div>
 
               <Link
-                href={buildFilterHref({ q: '', network: '', provider: '', tag: '', expiry: 'all', type: 'all', sort: 'newest', group: 'none' })}
+                href={buildFilterHref({ q: '', network: '', provider: '', tag: '', expiry: 'all', type: 'all', sort: 'newest', group: 'none', credit_limit_min: '', credit_limit_max: '', billing_date: '', payment_date: '' })}
                 className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-8 rounded-full border border-border/60 bg-background/80 px-3 text-xs')}
               >
                 Reset filters
@@ -364,7 +495,7 @@ export default async function CardPage({ searchParams }: CardPageProps) {
               </div>
 
               <Link
-                href={buildFilterHref({ q: '', network: '', provider: '', tag: '', expiry: 'all', type: 'all', sort: 'newest', group: 'none' })}
+                href={buildFilterHref({ q: '', network: '', provider: '', tag: '', expiry: 'all', type: 'all', sort: 'newest', group: 'none', credit_limit_min: '', credit_limit_max: '', billing_date: '', payment_date: '' })}
                 className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'rounded-full px-4')}
               >
                 Clear filters
@@ -376,7 +507,7 @@ export default async function CardPage({ searchParams }: CardPageProps) {
         <CardGrid cards={sortedCards} groupBy={selectedGroup} />
       )}
 
-      <BottomTabBar />
+      <BottomTabBar addHref="/card/new" addLabel="Add card" />
     </ListingPageLayout>
   )
 }

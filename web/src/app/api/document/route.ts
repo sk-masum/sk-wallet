@@ -22,6 +22,20 @@ function toMetadata(value: unknown) {
   return value as Record<string, unknown>
 }
 
+function normalizeCustomFields(value: unknown) {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .map((item) => {
+      const key = String((item as { key?: unknown })?.key ?? '').trim().slice(0, 60)
+      const fieldValue = String((item as { value?: unknown })?.value ?? '').trim().slice(0, 240)
+      if (!key || !fieldValue) return null
+      return { key, value: fieldValue }
+    })
+    .filter((item): item is { key: string; value: string } => Boolean(item))
+    .slice(0, 12)
+}
+
 function getDocumentWriteErrorMessage(error: { code?: string; message: string }) {
   if (error.code === '23505') {
     return 'This document number is already registered.'
@@ -105,32 +119,34 @@ export async function POST(request: Request) {
   const address = String(payload.address ?? '').trim()
   const guardianName = String(payload.guardianName ?? '').trim()
   const otherDetails = String(payload.otherDetails ?? '').trim()
+  const customFields = normalizeCustomFields(payload.customFields)
+  const baseMetadata = { ...(toMetadata(payload.metadata) ?? {}) }
+  delete baseMetadata.custom_fields
+  const customFieldMetadata = Object.fromEntries(customFields.map((item) => [item.key, item.value]))
   const metadata = {
-    ...(toMetadata(payload.metadata) ?? {}),
+    ...baseMetadata,
     ...(issuedDate ? { issued_date: issuedDate } : {}),
     ...(expiryDate ? { expiry_date: expiryDate } : {}),
     ...(address ? { address } : {}),
     ...(guardianName ? { guardian_name: guardianName } : {}),
     ...(otherDetails ? { other_details: otherDetails } : {}),
+    ...customFieldMetadata,
   }
 
   const { data, error } = await supabase
     .from('document_record')
-    .upsert(
-      {
-        user_id: user.id,
-        document_type: type,
-        document_number_token: tokenizedNumber,
-        document_number_last4: last4,
-        document_number_hash: documentHash,
-        masked_number: maskedNumber,
-        name_on_document: nameOnDocument || null,
-        category,
-        metadata: Object.keys(metadata).length > 0 ? metadata : null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id,document_type' }
-    )
+    .insert({
+      user_id: user.id,
+      document_type: type,
+      document_number_token: tokenizedNumber,
+      document_number_last4: last4,
+      document_number_hash: documentHash,
+      masked_number: maskedNumber,
+      name_on_document: nameOnDocument || null,
+      category,
+      metadata: Object.keys(metadata).length > 0 ? metadata : null,
+      updated_at: new Date().toISOString(),
+    })
     .select('id, document_type, masked_number, category, updated_at')
     .single()
 

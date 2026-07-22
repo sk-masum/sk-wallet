@@ -14,7 +14,6 @@ type PageHeaderProps = {
   backHref?: string
   backButtonLabel?: string
   showAddButton?: boolean
-  addHref?: string
   addButtonLabel?: string
 }
 
@@ -22,13 +21,9 @@ export function PageHeader({
   title,
   description,
   className,
-  addButtonClassName,
   showBackButton = false,
   backHref = '/',
   backButtonLabel = 'Go back',
-  showAddButton = false,
-  addHref = '/card/new',
-  addButtonLabel = 'Add',
 }: PageHeaderProps) {
   return (
     <header className={cn('mb-8 flex items-start justify-between gap-3', className)}>
@@ -49,21 +44,6 @@ export function PageHeader({
           {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
         </div>
       </div>
-
-      {showAddButton ? (
-        <Link
-          href={addHref}
-          className={cn(
-            buttonVariants({ variant: 'default', size: 'icon' }),
-            'h-10 w-10 rounded-full shadow-sm',
-            addButtonClassName
-          )}
-          aria-label={addButtonLabel}
-          title={addButtonLabel}
-        >
-          <Plus className="h-5 w-5" />
-        </Link>
-      ) : null}
     </header>
   )
 }

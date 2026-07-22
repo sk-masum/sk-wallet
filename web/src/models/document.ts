@@ -12,11 +12,17 @@ export enum DocumentTypeCode {
 
 export enum DocumentCategory {
   PERSONAL = 'personal',
+  FAMILY = 'family',
   HEALTH = 'health',
   EDUCATION = 'education',
   PROFESSIONAL = 'professional',
   FINANCIAL = 'financial',
   LEGAL = 'legal',
+  TRAVEL = 'travel',
+  PROPERTY = 'property',
+  INSURANCE = 'insurance',
+  VEHICLE = 'vehicle',
+  GOVERNMENT = 'government',
   OTHER = 'other',
 }
 
@@ -54,6 +60,10 @@ export type DocumentFormPayload = {
   address?: string
   guardianName?: string
   otherDetails?: string
+  customFields?: Array<{
+    key: string
+    value: string
+  }>
   metadata?: Record<string, unknown>
 }
 
@@ -67,4 +77,5 @@ export type DocumentFormFieldErrors = Partial<{
   address: string
   guardianName: string
   otherDetails: string
+  customFields: string
 }>

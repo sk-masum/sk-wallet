@@ -12,5 +12,7 @@ export const CARD_VALIDATION_ORDERED_FIELDS: Array<keyof CardFormFieldErrors> = 
   'holder_name',
   'expiry_month',
   'expiry_year',
+  'billing_date',
+  'payment_date',
   'cvv',
 ]

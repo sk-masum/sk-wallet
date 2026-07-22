@@ -5,10 +5,14 @@ const TOKEN_PREFIX = `${TOKEN_VERSION}:`
 const IV_LENGTH_BYTES = 12
 
 function getTokenSecret() {
-  const secret = process.env.NEXT_PUBLIC_CARD_TOKEN_SECRET?.trim()
+  const secret =
+    process.env.CARD_TOKEN_SECRET?.trim() ||
+    process.env.DOC_TOKEN_SECRET?.trim() ||
+    process.env.CREDENTIAL_TOKEN_SECRET?.trim() ||
+    process.env.NEXT_PUBLIC_CARD_TOKEN_SECRET?.trim()
 
   if (!secret) {
-    throw new Error('NEXT_PUBLIC_CARD_TOKEN_SECRET is not configured')
+    throw new Error('CARD_TOKEN_SECRET is not configured')
   }
 
   return secret

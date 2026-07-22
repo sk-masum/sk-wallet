@@ -11,6 +11,8 @@ export interface WalletCard {
   provider: string | null
   provider_id?: string | number | null
   credit_limit?: string | number | null
+  billing_date?: string | number | null
+  payment_date?: string | number | null
   number: string | number | null
   cvv: string | null
   holder_name: string | null
@@ -45,5 +47,10 @@ export interface CardPageProps {
     type?: string
     sort?: string
     group?: string
+    credit_limit?: string
+    credit_limit_min?: string
+    credit_limit_max?: string
+    billing_date?: string
+    payment_date?: string
   }>
 }

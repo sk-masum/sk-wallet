@@ -160,5 +160,41 @@ export function validateDocumentFormFields(payload: DocumentFormPayload) {
     errors.otherDetails = 'Other details must be at most 500 characters.'
   }
 
+  const customFields = Array.isArray(payload.customFields) ? payload.customFields : []
+  if (customFields.length > 12) {
+    errors.customFields = 'You can add up to 12 custom fields.'
+    return errors
+  }
+
+  const seenKeys = new Set<string>()
+  for (const item of customFields) {
+    const key = String(item?.key ?? '').trim()
+    const value = String(item?.value ?? '').trim()
+
+    if (!key && !value) continue
+
+    if (!key || !value) {
+      errors.customFields = 'Each custom field must include both key and value.'
+      return errors
+    }
+
+    if (key.length > 60) {
+      errors.customFields = 'Custom field key must be at most 60 characters.'
+      return errors
+    }
+
+    if (value.length > 240) {
+      errors.customFields = 'Custom field value must be at most 240 characters.'
+      return errors
+    }
+
+    const normalizedKey = key.toLowerCase()
+    if (seenKeys.has(normalizedKey)) {
+      errors.customFields = 'Custom field keys must be unique.'
+      return errors
+    }
+    seenKeys.add(normalizedKey)
+  }
+
   return errors
 }

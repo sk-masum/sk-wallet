@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState, type FormEvent } from 'react'
-import { CalendarIcon } from 'lucide-react'
+import { CalendarIcon, Plus, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 
 import { Button } from '@/components/ui/button'
@@ -46,14 +46,41 @@ type DocumentFormValues = {
   otherDetails: string
 }
 
+type DocumentCustomFieldInput = {
+  id: string
+  key: string
+  value: string
+}
+
+type DocumentFormInitialValues = Partial<DocumentFormValues> & {
+  customFields?: Array<{
+    key: string
+    value: string
+  }>
+}
+
 type DocumentFormProps = {
   submitLabel?: string
-  initialValues?: Partial<DocumentFormValues>
+  initialValues?: DocumentFormInitialValues
   showReset?: boolean
   lockTypeField?: boolean
   lockNumberField?: boolean
   validateIdentityFields?: boolean
   onSubmit?: (payload: DocumentFormPayload) => Promise<void> | void
+}
+
+function createCustomFieldId() {
+  return `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+function toInitialCustomFields(value: DocumentFormInitialValues['customFields']): DocumentCustomFieldInput[] {
+  if (!Array.isArray(value)) return []
+
+  return value.map((item) => ({
+    id: createCustomFieldId(),
+    key: String(item?.key ?? ''),
+    value: String(item?.value ?? ''),
+  }))
 }
 
 export function DocumentForm({
@@ -76,6 +103,7 @@ export function DocumentForm({
     guardianName: initialValues?.guardianName ?? '',
     otherDetails: initialValues?.otherDetails ?? '',
   })
+  const [customFields, setCustomFields] = useState<DocumentCustomFieldInput[]>(toInitialCustomFields(initialValues?.customFields))
   const [fieldErrors, setFieldErrors] = useState<DocumentFormFieldErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -106,6 +134,10 @@ export function DocumentForm({
       address: values.address,
       guardianName: values.guardianName,
       otherDetails: values.otherDetails,
+      customFields: customFields.map((item) => ({
+        key: item.key.trim(),
+        value: item.value.trim(),
+      })),
     }
 
     const errors = validateDocumentFormFields(payload)
@@ -332,6 +364,76 @@ export function DocumentForm({
           aria-invalid={Boolean(fieldErrors.otherDetails)}
           maxLength={500}
         />
+      </FormField>
+
+      <FormField
+        id="doc-custom-fields"
+        label="Custom fields (optional)"
+        hint="Add your own key/value metadata entries for this document."
+        error={fieldErrors.customFields}
+        className={cn(entityFormFieldCardClass, 'sm:col-span-2')}
+        labelClassName={entityFormLabelClass}
+      >
+        <div className="space-y-3">
+          {customFields.length === 0 ? (
+            <p className="text-xs text-muted-foreground">No custom fields added yet.</p>
+          ) : (
+            customFields.map((item, index) => (
+              <div key={item.id} className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_40px]">
+                <Input
+                  id={`doc-custom-key-${item.id}`}
+                  value={item.key}
+                  onChange={(event) => {
+                    const nextValue = event.target.value
+                    setCustomFields((prev) => prev.map((field) => (field.id === item.id ? { ...field, key: nextValue } : field)))
+                    setFieldErrors((prev) => ({ ...prev, customFields: undefined }))
+                  }}
+                  placeholder={`Field name ${index + 1}`}
+                  className={entityFormControlClass}
+                  maxLength={60}
+                />
+                <Input
+                  id={`doc-custom-value-${item.id}`}
+                  value={item.value}
+                  onChange={(event) => {
+                    const nextValue = event.target.value
+                    setCustomFields((prev) => prev.map((field) => (field.id === item.id ? { ...field, value: nextValue } : field)))
+                    setFieldErrors((prev) => ({ ...prev, customFields: undefined }))
+                  }}
+                  placeholder={`Field value ${index + 1}`}
+                  className={entityFormControlClass}
+                  maxLength={240}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10 rounded-xl text-muted-foreground hover:text-destructive"
+                  onClick={() => {
+                    setCustomFields((prev) => prev.filter((field) => field.id !== item.id))
+                    setFieldErrors((prev) => ({ ...prev, customFields: undefined }))
+                  }}
+                  aria-label={`Remove custom field ${index + 1}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))
+          )}
+
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 rounded-xl"
+            onClick={() => {
+              setCustomFields((prev) => [...prev, { id: createCustomFieldId(), key: '', value: '' }])
+              setFieldErrors((prev) => ({ ...prev, customFields: undefined }))
+            }}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add custom field
+          </Button>
+        </div>
       </FormField>
 
       <div className={entityFormActionsDividerClass}>

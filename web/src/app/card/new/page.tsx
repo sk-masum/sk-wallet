@@ -13,7 +13,26 @@ type NewCardPageProps = {
 async function createCard(formData: FormData) {
   'use server'
 
-  const { colorName, status, tags, cardName, provider, creditLimitRaw, creditLimit, normalizedNumber, holderName, cardType, network, expiryMonth, expiryYearRaw, cvv } =
+  const {
+    colorName,
+    status,
+    tags,
+    cardName,
+    provider,
+    creditLimitRaw,
+    creditLimit,
+    billingDateRaw,
+    billingDate,
+    paymentDateRaw,
+    paymentDate,
+    normalizedNumber,
+    holderName,
+    cardType,
+    network,
+    expiryMonth,
+    expiryYearRaw,
+    cvv,
+  } =
     parseCardFormData(formData)
 
   const validationError = validateCardForm({
@@ -22,6 +41,8 @@ async function createCard(formData: FormData) {
     tags,
     provider,
     creditLimitRaw,
+    billingDateRaw,
+    paymentDateRaw,
     number: normalizedNumber,
     holderName,
     cardType,
@@ -51,6 +72,8 @@ async function createCard(formData: FormData) {
     card_name: cardName,
     provider: provider || null,
     credit_limit: isCredit ? creditLimit : null,
+    billing_date: Number.isInteger(billingDate) ? billingDate : null,
+    payment_date: Number.isInteger(paymentDate) ? paymentDate : null,
     number: normalizedCardNumber,
     holder_name: holderName,
     expiry_month: normalizedExpiryMonth,

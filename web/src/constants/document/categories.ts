@@ -2,11 +2,17 @@ import { DocumentCategory } from '@/models/document'
 
 export const DOCUMENT_CATEGORY_OPTIONS: Array<{ value: DocumentCategory; label: string }> = [
   { value: DocumentCategory.PERSONAL, label: 'Personal' },
+  { value: DocumentCategory.FAMILY, label: 'Family' },
   { value: DocumentCategory.HEALTH, label: 'Health' },
   { value: DocumentCategory.EDUCATION, label: 'Education' },
   { value: DocumentCategory.PROFESSIONAL, label: 'Professional' },
   { value: DocumentCategory.FINANCIAL, label: 'Financial' },
   { value: DocumentCategory.LEGAL, label: 'Legal' },
+  { value: DocumentCategory.TRAVEL, label: 'Travel' },
+  { value: DocumentCategory.PROPERTY, label: 'Property' },
+  { value: DocumentCategory.INSURANCE, label: 'Insurance' },
+  { value: DocumentCategory.VEHICLE, label: 'Vehicle' },
+  { value: DocumentCategory.GOVERNMENT, label: 'Government' },
   { value: DocumentCategory.OTHER, label: 'Other' },
 ]
 

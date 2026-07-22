@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ArrowUpDown, CreditCard, Layers3, Network } from 'lucide-react'
 
@@ -30,7 +30,25 @@ type CardMobileFiltersProps = {
     selectedProvider: string
     selectedTag: string
     selectedExpiry: CardExpiryFilter
-    selectedSort: 'newest' | 'oldest' | 'name-asc' | 'name-desc' | 'expiry-asc' | 'expiry-desc'
+    selectedCreditLimitMin: number
+    selectedCreditLimitMax: number
+    minCreditLimitBound: number
+    maxCreditLimitBound: number
+    selectedBillingDate: string
+    selectedPaymentDate: string
+    selectedSort:
+    | 'newest'
+    | 'oldest'
+    | 'name-asc'
+    | 'name-desc'
+    | 'expiry-asc'
+    | 'expiry-desc'
+    | 'credit-limit-asc'
+    | 'credit-limit-desc'
+    | 'billing-date-asc'
+    | 'billing-date-desc'
+    | 'payment-date-asc'
+    | 'payment-date-desc'
     selectedGroup: 'none' | 'provider' | 'network' | 'tags'
     networkOptions: string[]
     providerOptions: string[]
@@ -53,6 +71,12 @@ export function CardMobileFilters({
     selectedProvider,
     selectedTag,
     selectedExpiry,
+    selectedCreditLimitMin,
+    selectedCreditLimitMax,
+    minCreditLimitBound,
+    maxCreditLimitBound,
+    selectedBillingDate,
+    selectedPaymentDate,
     selectedSort,
     selectedGroup,
     networkOptions,
@@ -64,11 +88,26 @@ export function CardMobileFilters({
     clearAllHref,
     typeHrefs,
 }: CardMobileFiltersProps) {
+    const billingDate = selectedBillingDate ?? ''
+    const paymentDate = selectedPaymentDate ?? ''
     const [mobileOpen, setMobileOpen] = useState(false)
     const [desktopOpen, setDesktopOpen] = useState(false)
+    const [creditLimitRange, setCreditLimitRange] = useState<[number, number]>([
+        selectedCreditLimitMin,
+        selectedCreditLimitMax,
+    ])
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
+
+    useEffect(() => {
+        setCreditLimitRange([selectedCreditLimitMin, selectedCreditLimitMax])
+    }, [selectedCreditLimitMin, selectedCreditLimitMax])
+
+    const hasCreditLimitFilter =
+        minCreditLimitBound < maxCreditLimitBound &&
+        (selectedCreditLimitMin > minCreditLimitBound || selectedCreditLimitMax < maxCreditLimitBound)
+
     const hasActiveControls =
         query.length > 0 ||
         selectedType !== 'all' ||
@@ -76,6 +115,9 @@ export function CardMobileFilters({
         selectedProvider.length > 0 ||
         selectedTag.length > 0 ||
         selectedExpiry !== 'all' ||
+        hasCreditLimitFilter ||
+        billingDate.length > 0 ||
+        paymentDate.length > 0 ||
         selectedSort !== 'newest' ||
         selectedGroup !== 'none'
 
@@ -85,6 +127,10 @@ export function CardMobileFilters({
             {selectedProvider ? <input type="hidden" name="provider" value={selectedProvider} /> : null}
             {selectedTag ? <input type="hidden" name="tag" value={selectedTag} /> : null}
             {selectedExpiry !== 'all' ? <input type="hidden" name="expiry" value={selectedExpiry} /> : null}
+            {hasCreditLimitFilter ? <input type="hidden" name="credit_limit_min" value={String(selectedCreditLimitMin)} /> : null}
+            {hasCreditLimitFilter ? <input type="hidden" name="credit_limit_max" value={String(selectedCreditLimitMax)} /> : null}
+            {billingDate ? <input type="hidden" name="billing_date" value={billingDate} /> : null}
+            {paymentDate ? <input type="hidden" name="payment_date" value={paymentDate} /> : null}
             {selectedType !== 'all' ? <input type="hidden" name="type" value={selectedType} /> : null}
             {selectedSort !== 'newest' ? <input type="hidden" name="sort" value={selectedSort} /> : null}
             {selectedGroup !== 'none' ? <input type="hidden" name="group" value={selectedGroup} /> : null}
@@ -99,6 +145,57 @@ export function CardMobileFilters({
             params.delete('expiry')
         } else {
             params.set('expiry', value)
+        }
+
+        const serialized = params.toString()
+        router.push(serialized ? `${pathname}?${serialized}` : pathname)
+    }
+
+    const commitCreditLimitRange = (minLimit: number, maxLimit: number) => {
+        const params = new URLSearchParams(searchParams.toString())
+
+        if (minCreditLimitBound >= maxCreditLimitBound) {
+            params.delete('credit_limit_min')
+            params.delete('credit_limit_max')
+        } else {
+            const normalizedMin = Math.min(minLimit, maxLimit)
+            const normalizedMax = Math.max(minLimit, maxLimit)
+
+            if (normalizedMin <= minCreditLimitBound) {
+                params.delete('credit_limit_min')
+            } else {
+                params.set('credit_limit_min', String(normalizedMin))
+            }
+
+            if (normalizedMax >= maxCreditLimitBound) {
+                params.delete('credit_limit_max')
+            } else {
+                params.set('credit_limit_max', String(normalizedMax))
+            }
+        }
+
+        const serialized = params.toString()
+        router.push(serialized ? `${pathname}?${serialized}` : pathname)
+    }
+
+    const handleBillingDateChange = (value: string) => {
+        const params = new URLSearchParams(searchParams.toString())
+        if (value === 'ALL') {
+            params.delete('billing_date')
+        } else {
+            params.set('billing_date', value)
+        }
+
+        const serialized = params.toString()
+        router.push(serialized ? `${pathname}?${serialized}` : pathname)
+    }
+
+    const handlePaymentDateChange = (value: string) => {
+        const params = new URLSearchParams(searchParams.toString())
+        if (value === 'ALL') {
+            params.delete('payment_date')
+        } else {
+            params.set('payment_date', value)
         }
 
         const serialized = params.toString()
@@ -125,11 +222,11 @@ export function CardMobileFilters({
                 resetHref={clearAllHref}
                 desktopFilterOpen={desktopOpen}
                 onToggleDesktopFilters={() => setDesktopOpen((prev) => !prev)}
-                desktopExpandedClassName="max-h-[700px]"
+                desktopExpandedClassName=""
                 desktopPanel={
-                    <ListingFilterDesktopPanel>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-12">
-                            <ListingFilterDesktopSection label="Card type" className="space-y-2 md:col-span-2 2xl:col-span-4">
+                    <ListingFilterDesktopPanel className="mt-0 rounded-none bg-transparent p-0 shadow-none ring-0 sm:p-0">
+                        <div className="grid grid-cols-1 gap-4">
+                            <ListingFilterDesktopSection label="Card type" className="space-y-2">
                                 <CardTypeButtonGroup
                                     selectedType={selectedType}
                                     className="h-10 w-full max-w-none rounded-xl border-border/60 bg-background/90"
@@ -137,7 +234,7 @@ export function CardMobileFilters({
                                 />
                             </ListingFilterDesktopSection>
 
-                            <ListingFilterDesktopSection label="Network" className="2xl:col-span-2">
+                            <ListingFilterDesktopSection label="Network">
                                 <NetworkFilterDropdown
                                     options={networkOptions}
                                     selectedNetwork={selectedNetwork}
@@ -147,7 +244,7 @@ export function CardMobileFilters({
                                 />
                             </ListingFilterDesktopSection>
 
-                            <ListingFilterDesktopSection label="Provider" className="2xl:col-span-2">
+                            <ListingFilterDesktopSection label="Provider">
                                 <ProviderFilterDropdown
                                     options={providerOptions}
                                     selectedProvider={selectedProvider}
@@ -155,7 +252,7 @@ export function CardMobileFilters({
                                 />
                             </ListingFilterDesktopSection>
 
-                            <ListingFilterDesktopSection label="Tag" className="2xl:col-span-2">
+                            <ListingFilterDesktopSection label="Tag">
                                 <TagFilterDropdown
                                     options={tagOptions}
                                     selectedTag={selectedTag}
@@ -163,7 +260,7 @@ export function CardMobileFilters({
                                 />
                             </ListingFilterDesktopSection>
 
-                            <ListingFilterDesktopSection label="Expiry" className="2xl:col-span-2">
+                            <ListingFilterDesktopSection label="Expiry">
                                 <Select value={selectedExpiry} onValueChange={handleExpiryChange}>
                                     <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by expiry">
                                         <SelectValue placeholder="All cards" />
@@ -175,11 +272,90 @@ export function CardMobileFilters({
                                 </Select>
                             </ListingFilterDesktopSection>
 
-                            <ListingFilterDesktopSection label="Sort" className="2xl:col-span-3">
+                            <ListingFilterDesktopSection label="Credit limit">
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                        <span>Min: {creditLimitRange[0]}</span>
+                                        <span>Max: {creditLimitRange[1]}</span>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        min={minCreditLimitBound}
+                                        max={maxCreditLimitBound}
+                                        step={100}
+                                        value={creditLimitRange[0]}
+                                        onChange={(event) => {
+                                            const nextMin = Number(event.target.value)
+                                            setCreditLimitRange(([_, currentMax]) => [Math.min(nextMin, currentMax), currentMax])
+                                        }}
+                                        onMouseUp={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
+                                        onTouchEnd={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
+                                        className="w-full accent-primary"
+                                        aria-label="Minimum credit limit"
+                                        disabled={minCreditLimitBound >= maxCreditLimitBound}
+                                    />
+                                    <input
+                                        type="range"
+                                        min={minCreditLimitBound}
+                                        max={maxCreditLimitBound}
+                                        step={100}
+                                        value={creditLimitRange[1]}
+                                        onChange={(event) => {
+                                            const nextMax = Number(event.target.value)
+                                            setCreditLimitRange(([currentMin]) => [currentMin, Math.max(currentMin, nextMax)])
+                                        }}
+                                        onMouseUp={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
+                                        onTouchEnd={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
+                                        className="w-full accent-primary"
+                                        aria-label="Maximum credit limit"
+                                        disabled={minCreditLimitBound >= maxCreditLimitBound}
+                                    />
+                                </div>
+                            </ListingFilterDesktopSection>
+
+                            <ListingFilterDesktopSection label="Billing date">
+                                <Select value={billingDate || 'ALL'} onValueChange={handleBillingDateChange}>
+                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by billing date">
+                                        <SelectValue placeholder="All dates" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="ALL">All dates</SelectItem>
+                                        {Array.from({ length: 31 }, (_, index) => {
+                                            const day = String(index + 1)
+                                            return (
+                                                <SelectItem key={day} value={day}>
+                                                    Day {day}
+                                                </SelectItem>
+                                            )
+                                        })}
+                                    </SelectContent>
+                                </Select>
+                            </ListingFilterDesktopSection>
+
+                            <ListingFilterDesktopSection label="Payment date">
+                                <Select value={paymentDate || 'ALL'} onValueChange={handlePaymentDateChange}>
+                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by payment date">
+                                        <SelectValue placeholder="All dates" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="ALL">All dates</SelectItem>
+                                        {Array.from({ length: 31 }, (_, index) => {
+                                            const day = String(index + 1)
+                                            return (
+                                                <SelectItem key={day} value={day}>
+                                                    Day {day}
+                                                </SelectItem>
+                                            )
+                                        })}
+                                    </SelectContent>
+                                </Select>
+                            </ListingFilterDesktopSection>
+
+                            <ListingFilterDesktopSection label="Sort">
                                 <CardSortDropdown selectedSort={selectedSort} className="h-10 w-full rounded-xl border-border/60 bg-background/95" />
                             </ListingFilterDesktopSection>
 
-                            <ListingFilterDesktopSection label="Group" className="2xl:col-span-3">
+                            <ListingFilterDesktopSection label="Group">
                                 <CardGroupDropdown selectedGroup={selectedGroup} className="h-10 w-full rounded-xl border-border/60 bg-background/95" />
                             </ListingFilterDesktopSection>
                         </div>
@@ -187,6 +363,8 @@ export function CardMobileFilters({
                         <ListingFilterDesktopActions
                             hasActiveControls={hasActiveControls}
                             resetHref={clearAllHref}
+                            collapseLabel="Save"
+                            className="sticky bottom-0 z-10 -mx-1 mt-1 rounded-xl border border-border/45 bg-background/92 p-2 backdrop-blur-sm"
                             onCollapse={() => setDesktopOpen(false)}
                         />
                     </ListingFilterDesktopPanel>
@@ -241,6 +419,85 @@ export function CardMobileFilters({
                     </Select>
                 </ListingFilterMobileSection>
 
+                <ListingFilterMobileSection label="Credit limit" icon={<CreditCard className="h-3.5 w-3.5" />}>
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>Min: {creditLimitRange[0]}</span>
+                            <span>Max: {creditLimitRange[1]}</span>
+                        </div>
+                        <input
+                            type="range"
+                            min={minCreditLimitBound}
+                            max={maxCreditLimitBound}
+                            step={100}
+                            value={creditLimitRange[0]}
+                            onChange={(event) => {
+                                const nextMin = Number(event.target.value)
+                                setCreditLimitRange(([_, currentMax]) => [Math.min(nextMin, currentMax), currentMax])
+                            }}
+                            onMouseUp={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
+                            onTouchEnd={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
+                            className="w-full accent-primary"
+                            aria-label="Minimum credit limit"
+                            disabled={minCreditLimitBound >= maxCreditLimitBound}
+                        />
+                        <input
+                            type="range"
+                            min={minCreditLimitBound}
+                            max={maxCreditLimitBound}
+                            step={100}
+                            value={creditLimitRange[1]}
+                            onChange={(event) => {
+                                const nextMax = Number(event.target.value)
+                                setCreditLimitRange(([currentMin]) => [currentMin, Math.max(currentMin, nextMax)])
+                            }}
+                            onMouseUp={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
+                            onTouchEnd={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
+                            className="w-full accent-primary"
+                            aria-label="Maximum credit limit"
+                            disabled={minCreditLimitBound >= maxCreditLimitBound}
+                        />
+                    </div>
+                </ListingFilterMobileSection>
+
+                <ListingFilterMobileSection label="Billing date" icon={<CreditCard className="h-3.5 w-3.5" />}>
+                    <Select value={billingDate || 'ALL'} onValueChange={handleBillingDateChange}>
+                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by billing date">
+                            <SelectValue placeholder="All dates" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="ALL">All dates</SelectItem>
+                            {Array.from({ length: 31 }, (_, index) => {
+                                const day = String(index + 1)
+                                return (
+                                    <SelectItem key={day} value={day}>
+                                        Day {day}
+                                    </SelectItem>
+                                )
+                            })}
+                        </SelectContent>
+                    </Select>
+                </ListingFilterMobileSection>
+
+                <ListingFilterMobileSection label="Payment date" icon={<CreditCard className="h-3.5 w-3.5" />}>
+                    <Select value={paymentDate || 'ALL'} onValueChange={handlePaymentDateChange}>
+                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by payment date">
+                            <SelectValue placeholder="All dates" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="ALL">All dates</SelectItem>
+                            {Array.from({ length: 31 }, (_, index) => {
+                                const day = String(index + 1)
+                                return (
+                                    <SelectItem key={day} value={day}>
+                                        Day {day}
+                                    </SelectItem>
+                                )
+                            })}
+                        </SelectContent>
+                    </Select>
+                </ListingFilterMobileSection>
+
                 <ListingFilterMobileSection label="Sort" icon={<ArrowUpDown className="h-3.5 w-3.5" />}>
                     <CardSortDropdown selectedSort={selectedSort} className="h-10 w-full rounded-xl border-border/60 bg-background/95" />
                 </ListingFilterMobileSection>
@@ -252,6 +509,7 @@ export function CardMobileFilters({
                 <ListingFilterMobileActions
                     hasActiveControls={hasActiveControls}
                     resetHref={clearAllHref}
+                    doneLabel="Save"
                     onDone={() => setMobileOpen(false)}
                 />
             </ListingFilterMobileSheet>

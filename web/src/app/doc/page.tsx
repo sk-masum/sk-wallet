@@ -66,7 +66,6 @@ export default async function DocPage({ searchParams }: DocPageProps) {
         title="Documents"
         className="pt-6"
         description={`${documents.length} ${documents.length === 1 ? 'document' : 'documents'}${activeControlCount > 0 ? ` • ${activeControlCount} filter${activeControlCount === 1 ? '' : 's'}` : ''}`}
-        addHref="/doc/new"
         addLabel="Add document"
         mobileStickyHeader
         mobileFilters={
@@ -118,7 +117,7 @@ export default async function DocPage({ searchParams }: DocPageProps) {
         <DocumentVault initialDocuments={documents} initialError={documentFetchError} />
       </section>
 
-      <BottomTabBar />
+      <BottomTabBar addHref="/doc/new" addLabel="Add document" />
     </ListingPageLayout>
   )
 }

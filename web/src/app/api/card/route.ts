@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
+import { Prisma } from '@/generated/prisma';
 
 import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
+import { getPrismaClient } from '@/lib/prisma';
 import { isCardStatus } from '@/constants/card/status';
 import { detokenizeCardCvv, detokenizeCardNumber, tokenizeCardCvv, tokenizeCardNumber } from '@/lib/security/card-token';
 
@@ -25,6 +27,13 @@ function isProviderSchemaUnavailable(error: { code?: string; message?: string } 
   );
 }
 
+function isBillingSchemaUnavailable(error: { code?: string; message?: string } | null | undefined) {
+  if (!error) return false;
+
+  const message = String(error.message ?? '').toLowerCase();
+  return error.code === '42703' && (message.includes('billing_date') || message.includes('payment_date'));
+}
+
 async function resolveOrCreateProvider(
   supabase: Awaited<ReturnType<typeof getRouteSupabaseContext>>['supabase'],
   rawProvider?: string | null,
@@ -35,7 +44,6 @@ async function resolveOrCreateProvider(
     return {
       provider,
       providerId: null as number | null,
-      usesProviderTable: true,
       error: null as string | null,
     };
   }
@@ -47,14 +55,9 @@ async function resolveOrCreateProvider(
     .maybeSingle();
 
   if (existingProviderError) {
-    if (isProviderSchemaUnavailable(existingProviderError)) {
-      return { provider, providerId: null, usesProviderTable: false, error: null };
-    }
-
     return {
       provider,
       providerId: null,
-      usesProviderTable: true,
       error: `Failed to lookup provider: ${existingProviderError.message}`,
     };
   }
@@ -63,7 +66,6 @@ async function resolveOrCreateProvider(
     return {
       provider: existingProvider.name,
       providerId: Number(existingProvider.id),
-      usesProviderTable: true,
       error: null,
     };
   }
@@ -75,14 +77,9 @@ async function resolveOrCreateProvider(
     .single();
 
   if (createdProviderError && createdProviderError.code !== '23505') {
-    if (isProviderSchemaUnavailable(createdProviderError)) {
-      return { provider, providerId: null, usesProviderTable: false, error: null };
-    }
-
     return {
       provider,
       providerId: null,
-      usesProviderTable: true,
       error: `Failed to create provider: ${createdProviderError.message}`,
     };
   }
@@ -91,7 +88,6 @@ async function resolveOrCreateProvider(
     return {
       provider: createdProvider.name,
       providerId: Number(createdProvider.id),
-      usesProviderTable: true,
       error: null,
     };
   }
@@ -103,14 +99,9 @@ async function resolveOrCreateProvider(
     .maybeSingle();
 
   if (resolvedProviderError || !resolvedProvider) {
-    if (isProviderSchemaUnavailable(resolvedProviderError)) {
-      return { provider, providerId: null, usesProviderTable: false, error: null };
-    }
-
     return {
       provider,
       providerId: null,
-      usesProviderTable: true,
       error: `Failed to resolve provider after create: ${resolvedProviderError?.message ?? 'Provider not found'}`,
     };
   }
@@ -118,7 +109,6 @@ async function resolveOrCreateProvider(
   return {
     provider: resolvedProvider.name,
     providerId: Number(resolvedProvider.id),
-    usesProviderTable: true,
     error: null,
   };
 }
@@ -144,47 +134,67 @@ export async function GET(request: Request) {
     return unauthorizedResponse;
   }
 
+  const ids = idsParam
+    ? idsParam
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean)
+    : [];
+
+  const idsFilter =
+    ids.length > 0
+      ? Prisma.sql`AND c.id::text IN (${Prisma.join(ids)})`
+      : Prisma.empty;
+
+  const prismaClient = getPrismaClient();
+
+  if (prismaClient) {
+    try {
+      const data = await prismaClient.$queryRaw<Array<Record<string, unknown> & { provider: string | null }>>(
+        Prisma.sql`
+          SELECT c.*, p.name AS provider
+          FROM card c
+          LEFT JOIN card_provider p ON p.id = c.provider_id
+          WHERE c.owner_id = ${user.id}
+          ${idsFilter}
+          ORDER BY c.id ASC
+        `,
+      );
+
+      let detokenizedData: typeof data;
+
+      try {
+        detokenizedData = (data ?? []).map((card: Record<string, unknown> & { provider: string | null }) => {
+          const cardData = card as Record<string, unknown>;
+
+          return {
+            ...cardData,
+            provider: typeof card.provider === 'string' ? card.provider : null,
+            number: detokenizeCardNumber(String(cardData.number ?? '')),
+            cvv: detokenizeCardCvv(String(cardData.cvv ?? '')),
+          };
+        });
+      } catch {
+        return NextResponse.json({ error: 'Failed to decode stored card token' }, { status: 500 });
+      }
+
+      return NextResponse.json({ data: detokenizedData });
+    } catch {
+      // Fall through to Supabase query for compatibility if Prisma query fails.
+    }
+  }
+
   let query = supabase
     .from('card')
     .select('*, card_provider:card_provider!card_provider_id_fkey(id,name)')
     .eq('owner_id', user.id)
     .order('id', { ascending: true });
 
-  if (idsParam) {
-    const ids = idsParam
-      .split(',')
-      .map((value) => value.trim())
-      .filter(Boolean);
-
-    if (ids.length > 0) {
-      query = query.in('id', ids);
-    }
+  if (ids.length > 0) {
+    query = query.in('id', ids);
   }
 
-  let { data, error } = await query;
-
-  if (error && isProviderSchemaUnavailable(error)) {
-    let fallbackQuery = supabase
-      .from('card')
-      .select('*')
-      .eq('owner_id', user.id)
-      .order('id', { ascending: true });
-
-    if (idsParam) {
-      const ids = idsParam
-        .split(',')
-        .map((value) => value.trim())
-        .filter(Boolean);
-
-      if (ids.length > 0) {
-        fallbackQuery = fallbackQuery.in('id', ids);
-      }
-    }
-
-    const fallbackResult = await fallbackQuery;
-    data = fallbackResult.data;
-    error = fallbackResult.error;
-  }
+  const { data, error } = await query;
 
   if (error) {
     return NextResponse.json({ error: getCardWriteErrorMessage(error) }, { status: 500 });
@@ -199,7 +209,7 @@ export async function GET(request: Request) {
 
       return {
         ...cardData,
-        provider: providerName ?? cardData.provider ?? null,
+        provider: providerName ?? null,
         number: detokenizeCardNumber(cardData.number),
         cvv: detokenizeCardCvv(cardData.cvv),
       };
@@ -225,6 +235,8 @@ export async function POST(request: Request) {
     card_name?: string;
     provider?: string | null;
     credit_limit?: number | null;
+    billing_date?: number | null;
+    payment_date?: number | null;
     number?: string;
     holder_name?: string;
     expiry_month?: number | null;
@@ -251,9 +263,7 @@ export async function POST(request: Request) {
   }
 
   const {
-    provider,
     providerId,
-    usesProviderTable,
     error: providerError,
   } = await resolveOrCreateProvider(supabase, payload.provider);
 
@@ -261,9 +271,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: providerError }, { status: 500 });
   }
 
-  const providerPayload = usesProviderTable
-    ? { provider: null, provider_id: providerId }
-    : { provider: provider || null };
+  const providerPayload = { provider_id: providerId };
 
   const { error } = await supabase.from('card').insert({
     owner_id: user.id,
@@ -283,6 +291,14 @@ export async function POST(request: Request) {
       Boolean(payload.isCredit) && typeof payload.credit_limit === 'number' && Number.isFinite(payload.credit_limit)
         ? payload.credit_limit
         : null,
+    billing_date:
+      typeof payload.billing_date === 'number' && Number.isInteger(payload.billing_date) && payload.billing_date >= 1 && payload.billing_date <= 31
+        ? payload.billing_date
+        : null,
+    payment_date:
+      typeof payload.payment_date === 'number' && Number.isInteger(payload.payment_date) && payload.payment_date >= 1 && payload.payment_date <= 31
+        ? payload.payment_date
+        : null,
     number: tokenizedNumber,
     holder_name: payload.holder_name?.trim() || null,
     expiry_month: payload.expiry_month ?? null,
@@ -293,8 +309,8 @@ export async function POST(request: Request) {
   });
 
   if (error) {
-    if (usesProviderTable && isProviderSchemaUnavailable(error)) {
-      const fallbackInsert = await supabase.from('card').insert({
+    if (isBillingSchemaUnavailable(error)) {
+      const fallbackInsertWithoutBilling = await supabase.from('card').insert({
         owner_id: user.id,
         color_name: payload.color_name?.trim() || null,
         status: isCardStatus(String(payload.status ?? '').trim().toLowerCase())
@@ -307,7 +323,7 @@ export async function POST(request: Request) {
               .slice(0, 8)
           : [],
         card_name: payload.card_name?.trim() || null,
-        provider: provider || null,
+        ...providerPayload,
         credit_limit:
           Boolean(payload.isCredit) && typeof payload.credit_limit === 'number' && Number.isFinite(payload.credit_limit)
             ? payload.credit_limit
@@ -321,7 +337,7 @@ export async function POST(request: Request) {
         isCredit: Boolean(payload.isCredit),
       });
 
-      if (!fallbackInsert.error) {
+      if (!fallbackInsertWithoutBilling.error) {
         return NextResponse.json({ success: true });
       }
     }

@@ -1,0 +1,13 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../web/src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Run `npm run prisma:pull` to introspect your Supabase schema into Prisma models.
+// Then run `npm run prisma:generate` to generate the Prisma client.

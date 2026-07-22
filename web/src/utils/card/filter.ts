@@ -6,6 +6,10 @@ type BuildCardFilterHrefParams = {
   selectedType: string
   selectedSort: string
   selectedGroup: string
+  selectedCreditLimitMin: string
+  selectedCreditLimitMax: string
+  selectedBillingDate: string
+  selectedPaymentDate: string
   query: string
 }
 
@@ -17,6 +21,11 @@ type CardFilterOverride = {
   type?: string
   sort?: string
   group?: string
+  credit_limit?: string
+  credit_limit_min?: string
+  credit_limit_max?: string
+  billing_date?: string
+  payment_date?: string
   q?: string
 }
 
@@ -31,6 +40,10 @@ export function buildCardFilterHref(
   const nextType = next.type ?? current.selectedType
   const nextSort = next.sort ?? current.selectedSort
   const nextGroup = next.group ?? current.selectedGroup
+  const nextCreditLimitMin = next.credit_limit_min ?? current.selectedCreditLimitMin
+  const nextCreditLimitMax = next.credit_limit_max ?? current.selectedCreditLimitMax
+  const nextBillingDate = next.billing_date ?? current.selectedBillingDate
+  const nextPaymentDate = next.payment_date ?? current.selectedPaymentDate
   const nextQuery = next.q ?? current.query
   const nextParams = new URLSearchParams()
 
@@ -64,6 +77,22 @@ export function buildCardFilterHref(
 
   if (nextGroup && nextGroup !== 'none') {
     nextParams.set('group', nextGroup)
+  }
+
+  if (nextCreditLimitMin) {
+    nextParams.set('credit_limit_min', nextCreditLimitMin)
+  }
+
+  if (nextCreditLimitMax) {
+    nextParams.set('credit_limit_max', nextCreditLimitMax)
+  }
+
+  if (nextBillingDate) {
+    nextParams.set('billing_date', nextBillingDate)
+  }
+
+  if (nextPaymentDate) {
+    nextParams.set('payment_date', nextPaymentDate)
   }
 
   const serialized = nextParams.toString()

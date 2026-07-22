@@ -252,6 +252,23 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
               />
 
               <div className="-mt-px rounded-b-2xl border border-t-0 border-border/65 bg-linear-to-b from-background/94 to-muted/35 px-3 pb-3 pt-2.5 backdrop-blur-md sm:px-4 sm:pb-4 sm:pt-3">
+                {(selectedCard.billing_date != null || selectedCard.payment_date != null) ? (
+                  <div className="mb-2.5 grid grid-cols-2 gap-2 rounded-xl border border-border/60 bg-background/80 px-3 py-2 text-xs">
+                    <div>
+                      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">Billing date</p>
+                      <p className="mt-0.5 text-sm font-medium text-foreground">
+                        {selectedCard.billing_date != null ? `${selectedCard.billing_date}` : 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">Payment date</p>
+                      <p className="mt-0.5 text-sm font-medium text-foreground">
+                        {selectedCard.payment_date != null ? `${selectedCard.payment_date}` : 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="grid grid-cols-2 gap-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
                   <Button
                     type="button"

@@ -1,19 +1,14 @@
 import Link from 'next/link'
-import { Plus } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 import { PageHeader } from '@/components/ui/page-header'
-import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 type ListingPageHeaderProps = {
     title: ReactNode
     description?: ReactNode
-    addHref: string
     addLabel: string
     className?: string
-    addButtonClassName?: string
-    mobileFabClassName?: string
     mobileFilters?: ReactNode
     desktopFilters?: ReactNode
     activeFilters?: ReactNode
@@ -23,17 +18,11 @@ type ListingPageHeaderProps = {
 const sharedDesktopAddButtonClass =
     'hidden sm:inline-flex ring-2 ring-primary/25 shadow-[0_10px_25px_-10px_rgba(0,0,0,0.6)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_30px_-12px_rgba(0,0,0,0.7)]'
 
-const sharedMobileFabButtonClass =
-    'fixed bottom-22 right-4 z-40 h-13 w-13 rounded-full ring-2 ring-primary/30 shadow-[0_14px_34px_-14px_rgba(0,0,0,0.68)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_40px_-18px_rgba(0,0,0,0.78)] sm:hidden'
-
 export function ListingPageHeader({
     title,
     description,
-    addHref,
     addLabel,
     className,
-    addButtonClassName,
-    mobileFabClassName,
     mobileFilters,
     desktopFilters,
     activeFilters,
@@ -52,9 +41,8 @@ export function ListingPageHeader({
                         title={title}
                         description={description}
                         showAddButton
-                        addHref={addHref}
                         addButtonLabel={addLabel}
-                        addButtonClassName={cn(sharedDesktopAddButtonClass, addButtonClassName)}
+                        addButtonClassName={sharedDesktopAddButtonClass}
                         className={cn('mb-3 sm:mb-4', className)}
                     />
                     {mobileFilters}
@@ -65,9 +53,8 @@ export function ListingPageHeader({
                         title={title}
                         description={description}
                         showAddButton
-                        addHref={addHref}
                         addButtonLabel={addLabel}
-                        addButtonClassName={cn(sharedDesktopAddButtonClass, addButtonClassName)}
+                        addButtonClassName={sharedDesktopAddButtonClass}
                         className={cn('mb-6', className)}
                     />
                     {mobileFilters}
@@ -76,15 +63,6 @@ export function ListingPageHeader({
 
             {desktopFilters}
             {activeFilters}
-
-            <Link
-                href={addHref}
-                className={cn(buttonVariants({ variant: 'default', size: 'icon' }), sharedMobileFabButtonClass, mobileFabClassName)}
-                aria-label={addLabel}
-                title={addLabel}
-            >
-                <Plus className="h-5 w-5" />
-            </Link>
         </>
     )
 }

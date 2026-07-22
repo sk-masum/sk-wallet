@@ -4,6 +4,15 @@ import { isDocumentCategory } from '@/constants/document/categories'
 import { detokenizeDocumentNumber } from '@/lib/security/doc-token'
 import { getRouteSupabaseContext } from '@/lib/supabase/route-auth'
 
+const RESERVED_METADATA_KEYS = new Set([
+  'issued_date',
+  'expiry_date',
+  'address',
+  'guardian_name',
+  'other_details',
+  'custom_fields',
+])
+
 type DocumentUpdatePayload = {
   category?: string
   nameOnDocument?: string
@@ -12,6 +21,10 @@ type DocumentUpdatePayload = {
   address?: string
   guardianName?: string
   otherDetails?: string
+  customFields?: Array<{
+    key: string
+    value: string
+  }>
 }
 
 function getDocumentWriteErrorMessage(error: { code?: string; message: string }) {
@@ -40,6 +53,20 @@ function isValidDateString(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
   const parsed = new Date(`${value}T00:00:00Z`)
   return !Number.isNaN(parsed.getTime())
+}
+
+function normalizeCustomFields(value: unknown) {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .map((item) => {
+      const key = String((item as { key?: unknown })?.key ?? '').trim().slice(0, 60)
+      const fieldValue = String((item as { value?: unknown })?.value ?? '').trim().slice(0, 240)
+      if (!key || !fieldValue) return null
+      return { key, value: fieldValue }
+    })
+    .filter((item): item is { key: string; value: string } => Boolean(item))
+    .slice(0, 12)
 }
 
 function withMetadataField(
@@ -143,10 +170,15 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
   const address = normalizeOptionalText(payload.address, 240)
   const guardianName = normalizeOptionalText(payload.guardianName, 120)
   const otherDetails = normalizeOptionalText(payload.otherDetails, 500)
+  const hasCustomFields = Object.prototype.hasOwnProperty.call(payload, 'customFields')
+  const customFields = normalizeCustomFields(payload.customFields)
+
+  const baseMetadata = toMetadataObject(existing.metadata)
+  delete baseMetadata.custom_fields
 
   const mergedMetadata = withMetadataField(
     withMetadataField(
-      withMetadataField(toMetadataObject(existing.metadata), 'address', address),
+      withMetadataField(baseMetadata, 'address', address),
       'guardian_name',
       guardianName
     ),
@@ -160,7 +192,20 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     expiryDate
   )
 
-  const metadata = Object.keys(metadataWithDates).length > 0 ? metadataWithDates : null
+  const metadataFromCustomField = { ...metadataWithDates }
+  if (hasCustomFields) {
+    for (const key of Object.keys(metadataFromCustomField)) {
+      if (!RESERVED_METADATA_KEYS.has(key)) {
+        delete metadataFromCustomField[key]
+      }
+    }
+
+    for (const item of customFields) {
+      metadataFromCustomField[item.key] = item.value
+    }
+  }
+
+  const metadata = Object.keys(metadataFromCustomField).length > 0 ? metadataFromCustomField : null
 
   const { data, error } = await supabase
     .from('document_record')

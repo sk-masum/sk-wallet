@@ -9,6 +9,14 @@
     "vercel-dev": "next dev web",
     "vercel-build": "next build web",
     "vercel-start": "next start web",
+    "prisma:generate": "prisma generate",
+    "prisma:pull": "prisma db pull",
+    "prisma:sync": "prisma db pull && prisma generate",
+    "prisma:push": "prisma db push",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:validate": "prisma validate",
+    "prisma:format": "prisma format",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -44,6 +52,7 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
+    "@prisma/client": "^6.15.0",
     "@radix-ui/react-dialog": "^1.1.19",
     "@radix-ui/react-popover": "^1.1.19",
     "@radix-ui/react-select": "^2.2.6",
@@ -55,6 +64,7 @@
     "lucide-react": "^1.24.0",
     "next": "~16.1.6",
     "next-themes": "^0.4.6",
+    "prisma": "^6.15.0",
     "react": "^19.0.0",
     "react-day-picker": "^10.0.1",
     "react-dom": "^19.0.0",

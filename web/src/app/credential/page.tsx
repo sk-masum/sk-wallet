@@ -47,7 +47,6 @@ export default async function CredentialPage({ searchParams }: CredentialPagePro
                 title="Credentials"
                 className="pt-6"
                 description={`${credentials.length} ${credentials.length === 1 ? 'credential' : 'credentials'}${activeControlCount > 0 ? ` • ${activeControlCount} filter${activeControlCount === 1 ? '' : 's'}` : ''}`}
-                addHref="/credential/new"
                 addLabel="Add credential"
                 mobileStickyHeader
                 mobileFilters={<CredentialMobileFilters query={query} selectedType={selectedType} />}
@@ -82,7 +81,7 @@ export default async function CredentialPage({ searchParams }: CredentialPagePro
                 <CredentialVault initialCredentials={credentials} initialError={credentialFetchError} />
             </section>
 
-            <BottomTabBar />
+            <BottomTabBar addHref="/credential/new" addLabel="Add credential" />
         </ListingPageLayout>
     )
 }

@@ -29,6 +29,15 @@ type DocumentVaultProps = {
   initialError?: string
 }
 
+const RESERVED_METADATA_KEYS = new Set([
+  'issued_date',
+  'expiry_date',
+  'address',
+  'guardian_name',
+  'other_details',
+  'custom_fields',
+])
+
 function formatDateTime(value: string | null | undefined) {
   if (!value) return 'N/A'
 
@@ -53,6 +62,22 @@ function getMetadataText(metadata: Record<string, unknown> | null | undefined, k
   const value = metadata[key]
   if (typeof value !== 'string') return ''
   return value.trim()
+}
+
+function getCustomMetadataEntries(metadata: Record<string, unknown> | null | undefined) {
+  if (!metadata) return []
+
+  return Object.entries(metadata)
+    .filter(([key, value]) => {
+      if (RESERVED_METADATA_KEYS.has(key)) return false
+      return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+    })
+    .map(([key, value]) => ({
+      key,
+      label: key.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()),
+      value: String(value).trim(),
+    }))
+    .filter((item) => item.value.length > 0)
 }
 
 export function DocumentVault({ initialDocuments, initialError = '' }: DocumentVaultProps) {
@@ -175,6 +200,11 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
   const selectedDocument = useMemo(
     () => filteredDocuments.find((doc) => doc.id === selectedDocumentId) ?? null,
     [filteredDocuments, selectedDocumentId]
+  )
+
+  const detailCustomMetadata = useMemo(
+    () => getCustomMetadataEntries(selectedDocument?.metadata),
+    [selectedDocument?.metadata]
   )
 
   const handleDelete = async () => {
@@ -418,6 +448,30 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
                         />
                       </div>
                       <p className="whitespace-pre-wrap">{getMetadataText(selectedDocument.metadata, 'other_details')}</p>
+                    </div>
+                  ) : null}
+
+                  {detailCustomMetadata.length > 0 ? (
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground">Custom fields</p>
+                      <div className="space-y-2">
+                        {detailCustomMetadata.map((item) => (
+                          <div key={item.key}>
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-xs text-muted-foreground">{item.label}</p>
+                              <CopyButton
+                                value={item.value}
+                                label={item.label}
+                                className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
+                                showStatusIcon
+                                copyIconClassName="h-3.5 w-3.5"
+                                checkIconClassName="h-3.5 w-3.5 text-green-600"
+                              />
+                            </div>
+                            <p className="whitespace-pre-wrap">{item.value}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ) : null}
 

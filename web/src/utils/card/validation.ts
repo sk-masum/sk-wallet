@@ -8,6 +8,8 @@ export type CardFormValidationInput = {
   tags?: string[]
   provider: string
   creditLimitRaw?: string
+  billingDateRaw?: string
+  paymentDateRaw?: string
   number: string
   holderName: string
   cardType: string
@@ -21,6 +23,8 @@ export type CardFormValidationInput = {
 export type CardFormFieldErrors = Partial<{
   card_type: string
   credit_limit: string
+  billing_date: string
+  payment_date: string
   status: string
   card_name: string
   tags: string
@@ -180,6 +184,22 @@ export function validateCardFormFields(input: CardFormValidationInput): CardForm
       } else if (normalizedCreditLimit > 99999999) {
         errors.credit_limit = 'Credit limit is too large.'
       }
+    }
+  }
+
+  const billingDateRaw = String(input.billingDateRaw ?? '').trim()
+  if (billingDateRaw.length > 0) {
+    const billingDate = Number(billingDateRaw)
+    if (!Number.isInteger(billingDate) || billingDate < 1 || billingDate > 31) {
+      errors.billing_date = 'Billing date must be a day between 1 and 31.'
+    }
+  }
+
+  const paymentDateRaw = String(input.paymentDateRaw ?? '').trim()
+  if (paymentDateRaw.length > 0) {
+    const paymentDate = Number(paymentDateRaw)
+    if (!Number.isInteger(paymentDate) || paymentDate < 1 || paymentDate > 31) {
+      errors.payment_date = 'Payment date must be a day between 1 and 31.'
     }
   }
 

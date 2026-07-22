@@ -64,9 +64,22 @@ create table if not exists public.document_record (
     char_length(document_number_last4) between 1 and 4
   ),
   constraint document_record_category_check check (
-    category in ('personal', 'health', 'education', 'professional', 'financial', 'legal', 'other')
+    category in (
+      'personal',
+      'family',
+      'health',
+      'education',
+      'professional',
+      'financial',
+      'legal',
+      'travel',
+      'property',
+      'insurance',
+      'vehicle',
+      'government',
+      'other'
+    )
   ),
-  constraint document_record_user_type_unique unique (user_id, document_type),
   constraint document_record_type_hash_unique unique (document_type, document_number_hash)
 );
 
@@ -98,7 +111,21 @@ begin
   ) then
     alter table public.document_record
       add constraint document_record_category_check check (
-        category in ('personal', 'health', 'education', 'professional', 'financial', 'legal', 'other')
+        category in (
+          'personal',
+          'family',
+          'health',
+          'education',
+          'professional',
+          'financial',
+          'legal',
+          'travel',
+          'property',
+          'insurance',
+          'vehicle',
+          'government',
+          'other'
+        )
       );
   end if;
 

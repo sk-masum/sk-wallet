@@ -206,16 +206,38 @@ export function ListingFilterTopBar({
                         </Button>
                     )
                 ) : null}
-
-                <div
-                    className={cn(
-                        'w-full overflow-hidden transition-all duration-300 ease-out',
-                        desktopFilterOpen ? `${desktopExpandedClassName} opacity-100` : 'max-h-0 opacity-0'
-                    )}
-                >
-                    {desktopPanel}
-                </div>
             </div>
+
+            {desktopFilterOpen ? (
+                <div className="fixed inset-0 z-50 hidden sm:block" aria-hidden={false}>
+                    <button
+                        type="button"
+                        aria-label="Close filters"
+                        className="absolute inset-0 bg-black/15 backdrop-blur-[1px]"
+                        onClick={onToggleDesktopFilters}
+                    />
+
+                    <aside className="fixed left-0 top-0 flex h-dvh w-[35vw] flex-col border-r border-border/45 bg-background shadow-2xl">
+                        <div className="flex items-start justify-between border-b border-border/45 px-4 py-3">
+                            <div>
+                                <p className="text-lg font-semibold">Filters</p>
+                                <p className="text-sm text-muted-foreground">Refine, sort, and group your cards.</p>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-lg"
+                                onClick={onToggleDesktopFilters}
+                                aria-label="Close filters"
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+                        <div className={cn('flex-1 overflow-y-auto p-0', desktopExpandedClassName)}>{desktopPanel}</div>
+                    </aside>
+                </div>
+            ) : null}
         </>
     )
 }

@@ -115,7 +115,7 @@ export function DocumentMobileFilters({ query, selectedType, selectedCategory, s
                 resetHref={clearAllHref}
                 desktopFilterOpen={desktopOpen}
                 onToggleDesktopFilters={() => setDesktopOpen((prev) => !prev)}
-                desktopExpandedClassName="max-h-[700px]"
+                desktopExpandedClassName=""
                 desktopPanel={
                     <ListingFilterDesktopPanel>
                         <div className="grid grid-cols-2 gap-4">

@@ -17,7 +17,7 @@ export function ListingFilterDesktopPanel({ children, className }: ListingFilter
     return (
         <div
             className={cn(
-                'mt-3 space-y-4 rounded-2xl bg-background/95 p-3 sm:p-4 shadow-[0_18px_36px_-28px_rgba(0,0,0,0.55)] ring-1 ring-border/20 dark:bg-background/90 dark:ring-border/45',
+                'mt-2 space-y-4 rounded-none bg-transparent p-6 shadow-none ring-0',
                 className,
             )}
         >
@@ -73,29 +73,35 @@ export function ListingFilterDesktopActions({
 }: ListingFilterDesktopActionsProps) {
     return (
         <div className={cn('mt-1 flex items-center justify-end gap-2 pt-1', className)}>
-            {hasActiveControls ? (
-                resetHref ? (
-                    <Link
-                        href={resetHref}
-                        className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-10 rounded-xl bg-muted/55 px-4')}
-                        onClick={onCollapse}
-                    >
-                        Reset all
-                    </Link>
-                ) : (
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-10 rounded-xl bg-muted/55 px-4"
-                        onClick={() => {
-                            onReset?.()
-                            onCollapse()
-                        }}
-                    >
-                        Reset all
-                    </Button>
-                )
+            {resetHref && hasActiveControls ? (
+                <Link
+                    href={resetHref}
+                    className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-10 rounded-xl bg-muted/55 px-4')}
+                    onClick={onCollapse}
+                >
+                    Reset all
+                </Link>
+            ) : null}
+            {!resetHref ? (
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-10 rounded-xl bg-muted/55 px-4"
+                    disabled={!hasActiveControls}
+                    onClick={() => {
+                        if (!hasActiveControls) return
+                        onReset?.()
+                        onCollapse()
+                    }}
+                >
+                    Reset all
+                </Button>
+            ) : null}
+            {resetHref && !hasActiveControls ? (
+                <Button type="button" variant="ghost" size="sm" className="h-10 rounded-xl bg-muted/55 px-4" disabled>
+                    Reset all
+                </Button>
             ) : null}
             <Button type="button" className="h-10 rounded-xl px-5" onClick={onCollapse}>
                 {collapseLabel}
@@ -123,15 +129,18 @@ export function ListingFilterMobileSheet({
 }: ListingFilterMobileSheetProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DetailDialogContent className={cn('sm:hidden', className)} scrollClassName="max-h-[calc(88dvh-2rem)] px-0 pb-0">
-                <div className="space-y-3 rounded-t-2xl bg-linear-to-b from-background via-background to-card/50 px-3 pb-4 pt-4 shadow-[0_-32px_80px_-30px_rgba(0,0,0,0.58)] dark:from-background dark:via-background/95 dark:to-card/70">
-                    <div className="sticky top-0 z-20 -mx-1 rounded-t-2xl border-b border-border/45 bg-linear-to-b from-background/98 via-background/95 to-background/88 px-1 pb-3 pt-1 shadow-[0_14px_24px_-20px_rgba(0,0,0,0.5)] backdrop-blur-xl dark:border-border/60 dark:from-background/95 dark:via-background/92 dark:to-background/80">
+            <DetailDialogContent
+                className={cn('sm:hidden max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:h-[88dvh] max-sm:w-screen max-sm:max-w-screen max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-0 bg-background', className)}
+                scrollClassName="h-[88dvh] max-h-[88dvh] px-0 pb-0"
+            >
+                <div className="flex h-full flex-col bg-background pb-4 dark:bg-background">
+                    <div className="sticky top-0 z-20 border-b border-border/45 bg-background px-3 pb-3 -pt-3 shadow-[0_14px_24px_-20px_rgba(0,0,0,0.5)] dark:border-border/60 dark:bg-background">
                         <DialogHeader>
                             <DialogTitle className="text-left text-2xl">{title}</DialogTitle>
                         </DialogHeader>
                     </div>
 
-                    <div className="space-y-4 overflow-y-auto pr-1">{children}</div>
+                    <div className="flex-1 space-y-4 overflow-y-auto py-8 mt-2">{children}</div>
                 </div>
             </DetailDialogContent>
         </Dialog>
@@ -178,29 +187,40 @@ export function ListingFilterMobileActions({
     onDone,
 }: ListingFilterMobileActionsProps) {
     return (
-        <div className="sticky bottom-0 z-10 -mx-1 mt-1 flex items-center gap-2 rounded-xl border border-border/45 bg-background/92 p-2 backdrop-blur-sm dark:border-border/60 dark:bg-background/86">
-            {hasActiveControls ? (
-                resetHref ? (
-                    <Link
-                        href={resetHref}
-                        className={cn(buttonVariants({ variant: 'ghost' }), 'h-10 flex-1 justify-center rounded-xl border border-border/60 bg-background/80 hover:bg-background')}
-                        onClick={onDone}
-                    >
-                        Reset all
-                    </Link>
-                ) : (
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        className="h-10 flex-1 justify-center rounded-xl border border-border/60 bg-background/80 hover:bg-background"
-                        onClick={() => {
-                            onReset?.()
-                            onDone()
-                        }}
-                    >
-                        Reset all
-                    </Button>
-                )
+        <div className="fixed inset-x-0 bottom-0 z-50 flex items-center gap-2 border-t border-border/45 bg-background p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] dark:border-border/60 dark:bg-background sm:hidden">
+            {resetHref && hasActiveControls ? (
+                <Link
+                    href={resetHref}
+                    className={cn(buttonVariants({ variant: 'ghost' }), 'h-10 flex-1 justify-center rounded-xl border border-border/60 bg-background/80 hover:bg-background')}
+                    onClick={onDone}
+                >
+                    Reset all
+                </Link>
+            ) : null}
+            {!resetHref ? (
+                <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-10 flex-1 justify-center rounded-xl border border-border/60 bg-background/80 hover:bg-background"
+                    disabled={!hasActiveControls}
+                    onClick={() => {
+                        if (!hasActiveControls) return
+                        onReset?.()
+                        onDone()
+                    }}
+                >
+                    Reset all
+                </Button>
+            ) : null}
+            {resetHref && !hasActiveControls ? (
+                <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-10 flex-1 justify-center rounded-xl border border-border/60 bg-background/80 hover:bg-background"
+                    disabled
+                >
+                    Reset all
+                </Button>
             ) : null}
             <Button type="button" className="h-10 flex-1 rounded-xl shadow-[0_10px_20px_-14px_hsl(var(--primary))]" onClick={onDone}>
                 {doneLabel}

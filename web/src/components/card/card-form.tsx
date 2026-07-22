@@ -78,6 +78,8 @@ type CardFormValues = {
   cardName: string
   provider: string
   creditLimit: string
+  billingDate: string
+  paymentDate: string
   network: string
   number: string
   holderName: string
@@ -150,6 +152,8 @@ export function CardForm({
     cardName: initialValues?.cardName ?? '',
     provider: initialValues?.provider ?? '',
     creditLimit: initialValues?.creditLimit ?? '',
+    billingDate: initialValues?.billingDate ?? '',
+    paymentDate: initialValues?.paymentDate ?? '',
     network: initialValues?.network ?? '',
     number: initialValues?.number ?? '',
     holderName: initialValues?.holderName ?? '',
@@ -286,6 +290,8 @@ export function CardForm({
       tags: parseCardTags(String(formData.get('tags') ?? '')),
       provider: String(formData.get('provider') ?? '').trim(),
       creditLimitRaw: String(formData.get('credit_limit') ?? '').trim(),
+      billingDateRaw: String(formData.get('billing_date') ?? '').trim(),
+      paymentDateRaw: String(formData.get('payment_date') ?? '').trim(),
       number: String(formData.get('number') ?? '').trim(),
       holderName: String(formData.get('holder_name') ?? '').trim(),
       cardType: String(formData.get('card_type') ?? '').trim().toLowerCase(),
@@ -738,6 +744,52 @@ export function CardForm({
           maxLength={4}
           defaultValue={values.expiryYear}
           required
+        />
+      </FormField>
+
+      <FormField
+        id="billing_date"
+        label="BILLING DATE"
+        error={fieldErrors.billing_date}
+        className={entityFormFieldCardClass}
+        labelClassName={entityFormLabelClass}
+        hint="Optional day of month (1-31) when statement is generated."
+      >
+        <Input
+          id="billing_date"
+          name="billing_date"
+          placeholder="e.g. 5"
+          onChange={() => validateFields(['billing_date'])}
+          className={cn(entityFormControlClass, fieldErrors.billing_date && 'border-destructive focus-visible:ring-destructive')}
+          aria-invalid={Boolean(fieldErrors.billing_date)}
+          inputMode="numeric"
+          pattern="[0-9]{1,2}"
+          min={1}
+          max={31}
+          defaultValue={values.billingDate}
+        />
+      </FormField>
+
+      <FormField
+        id="payment_date"
+        label="PAYMENT DATE"
+        error={fieldErrors.payment_date}
+        className={entityFormFieldCardClass}
+        labelClassName={entityFormLabelClass}
+        hint="Optional day of month (1-31) when payment is due."
+      >
+        <Input
+          id="payment_date"
+          name="payment_date"
+          placeholder="e.g. 20"
+          onChange={() => validateFields(['payment_date'])}
+          className={cn(entityFormControlClass, fieldErrors.payment_date && 'border-destructive focus-visible:ring-destructive')}
+          aria-invalid={Boolean(fieldErrors.payment_date)}
+          inputMode="numeric"
+          pattern="[0-9]{1,2}"
+          min={1}
+          max={31}
+          defaultValue={values.paymentDate}
         />
       </FormField>
 

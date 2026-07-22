@@ -73,7 +73,7 @@ export function CredentialMobileFilters({ query, selectedType }: CredentialMobil
                 resetHref={clearAllHref}
                 desktopFilterOpen={desktopOpen}
                 onToggleDesktopFilters={() => setDesktopOpen((prev) => !prev)}
-                desktopExpandedClassName="max-h-[700px]"
+                desktopExpandedClassName=""
                 desktopPanel={
                     <ListingFilterDesktopPanel>
                         <ListingFilterDesktopSection label="Credential type">
