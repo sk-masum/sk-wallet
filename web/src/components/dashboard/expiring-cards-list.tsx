@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ArrowUpRight, Clock3, ShieldAlert } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -28,38 +29,57 @@ function formatDate(value: string) {
     })
 }
 
+function getDaysLeftClass(daysLeft: number) {
+    if (daysLeft <= 7) {
+        return 'border-rose-300/65 bg-rose-500/20 text-rose-100'
+    }
+
+    if (daysLeft <= 15) {
+        return 'border-amber-300/60 bg-amber-500/20 text-amber-100'
+    }
+
+    return 'border-emerald-300/60 bg-emerald-500/20 text-emerald-100'
+}
+
 export function ExpiringCardsList({ cards }: ExpiringCardsListProps) {
     return (
-        <Card className="border-border/70 bg-card/95 shadow-[0_16px_38px_-34px_rgba(0,0,0,0.8)]">
+        <Card className="relative overflow-hidden border-border/70 bg-[radial-gradient(circle_at_14%_8%,hsl(var(--primary)/0.11),transparent_44%),radial-gradient(circle_at_88%_86%,hsl(var(--accent)/0.08),transparent_46%),hsl(var(--background))] shadow-[0_18px_42px_-34px_rgba(0,0,0,0.82)]">
+            <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-white/7 via-transparent to-transparent" />
             <CardHeader className="flex-row items-end justify-between gap-3 space-y-0">
-                <div>
+                <div className="space-y-1.5">
+                    <p className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background/75 px-2 py-0.5 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+                        <ShieldAlert className="h-3 w-3" />
+                        Expiry Watch
+                    </p>
                     <CardTitle>Expiring Cards</CardTitle>
-                    <CardDescription>Cards expiring within the next 45 days.</CardDescription>
                 </div>
-                <Link href="/card" className="rounded-full border border-border/70 px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground">
-                    All Cards
+                <Link href="/card" className="inline-flex items-center rounded-full border border-border/70 px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground">
+                    <ArrowUpRight className="mr-1 h-3.5 w-3.5" /> All Cards
                 </Link>
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative">
                 {cards.length === 0 ? (
                     <p className="text-sm text-muted-foreground">No cards are expiring in the next 45 days.</p>
                 ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                         {cards.map((card) => {
                             const statusClass = statusClassMap[card.status] ?? statusClassMap.active
+                            const daysLeftClass = getDaysLeftClass(card.daysLeft)
 
                             return (
                                 <Link
                                     key={card.id}
                                     href={card.href}
-                                    className="flex items-center justify-between gap-3 rounded-lg border border-border/70 bg-muted/15 px-3 py-2 transition-colors hover:bg-muted/35"
+                                    className="group flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background/55 px-3.5 py-3 transition-all hover:-translate-y-0.5 hover:bg-background/75 hover:shadow-[0_10px_22px_-18px_rgba(0,0,0,0.78)]"
                                 >
-                                    <div>
+                                    <div className="min-w-0">
                                         <p className="text-sm font-semibold text-foreground">{card.name}</p>
                                         <p className="text-xs text-muted-foreground">Expires on {formatDate(card.expiryDate)}</p>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">{card.daysLeft}d left</span>
+                                    <div className="flex shrink-0 items-center gap-2">
+                                        <span className={cn('inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-semibold tracking-wide', daysLeftClass)}>
+                                            <Clock3 className="mr-1 h-3 w-3" /> {card.daysLeft}d left
+                                        </span>
                                         <span className={cn('inline-flex rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-wide', statusClass)}>
                                             {getStatusLabel(card.status)}
                                         </span>

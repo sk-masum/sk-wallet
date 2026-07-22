@@ -28,10 +28,11 @@ export function MiniVerticalCarouselCard({
         <Link
             href={href}
             className={cn(
-                'group relative flex min-h-56 min-w-44 flex-col justify-between overflow-hidden rounded-2xl border border-border/70 bg-linear-to-b from-background to-muted/25 p-3.5 transition-colors hover:bg-muted/35',
+                'group relative flex min-h-56 min-w-44 flex-col justify-between overflow-hidden rounded-2xl border border-border/70 bg-background/55 p-3.5 transition-all hover:-translate-y-0.5 hover:bg-background/75 hover:shadow-[0_10px_22px_-18px_rgba(0,0,0,0.78)]',
                 className
             )}
         >
+            <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-white/8 via-transparent to-transparent" />
             <div className="space-y-3">
                 <div className="flex h-10 items-start justify-between gap-2">
                     <div>{leadingMedia}</div>
@@ -39,7 +40,7 @@ export function MiniVerticalCarouselCard({
                 </div>
             </div>
 
-            <div className="space-y-1">
+            <div className="relative space-y-1">
                 <p className={cn('line-clamp-2 text-base font-semibold leading-tight text-foreground', titleClassName)}>{title}</p>
                 {subtitle ? <p className={cn('line-clamp-1 text-xs text-muted-foreground', subtitleClassName)}>{subtitle}</p> : null}
             </div>

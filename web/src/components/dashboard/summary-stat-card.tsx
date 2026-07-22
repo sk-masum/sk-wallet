@@ -1,8 +1,8 @@
-import { CreditCard, FileText, OctagonAlert, Settings } from 'lucide-react'
+import { Ban, CalendarClock, CreditCard, FileText, OctagonAlert, Settings } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
-type SummaryStatIconKey = 'cards' | 'credentials' | 'documents' | 'expiring'
+type SummaryStatIconKey = 'cards' | 'credentials' | 'documents' | 'expiring' | 'blocked' | 'billing'
 
 type SummaryStatCardProps = {
     label: string
@@ -16,6 +16,8 @@ const iconMap = {
     credentials: Settings,
     documents: FileText,
     expiring: OctagonAlert,
+    blocked: Ban,
+    billing: CalendarClock,
 } as const
 
 export function SummaryStatCard({ label, value, icon, toneClassName }: SummaryStatCardProps) {

@@ -65,6 +65,9 @@ export default async function DocPage({ searchParams }: DocPageProps) {
       <ListingPageHeader
         title="Documents"
         className="pt-6"
+        showBackButton
+        backHref="/"
+        backButtonLabel="Back to dashboard"
         description={`${documents.length} ${documents.length === 1 ? 'document' : 'documents'}${activeControlCount > 0 ? ` • ${activeControlCount} filter${activeControlCount === 1 ? '' : 's'}` : ''}`}
         addLabel="Add document"
         mobileStickyHeader

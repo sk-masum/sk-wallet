@@ -9,6 +9,9 @@ type ListingPageHeaderProps = {
     description?: ReactNode
     addLabel: string
     className?: string
+    showBackButton?: boolean
+    backHref?: string
+    backButtonLabel?: string
     mobileFilters?: ReactNode
     desktopFilters?: ReactNode
     activeFilters?: ReactNode
@@ -23,6 +26,9 @@ export function ListingPageHeader({
     description,
     addLabel,
     className,
+    showBackButton = false,
+    backHref = '/',
+    backButtonLabel,
     mobileFilters,
     desktopFilters,
     activeFilters,
@@ -40,6 +46,9 @@ export function ListingPageHeader({
                     <PageHeader
                         title={title}
                         description={description}
+                        showBackButton={showBackButton}
+                        backHref={backHref}
+                        backButtonLabel={backButtonLabel}
                         showAddButton
                         addButtonLabel={addLabel}
                         addButtonClassName={sharedDesktopAddButtonClass}
@@ -52,6 +61,9 @@ export function ListingPageHeader({
                     <PageHeader
                         title={title}
                         description={description}
+                        showBackButton={showBackButton}
+                        backHref={backHref}
+                        backButtonLabel={backButtonLabel}
                         showAddButton
                         addButtonLabel={addLabel}
                         addButtonClassName={sharedDesktopAddButtonClass}

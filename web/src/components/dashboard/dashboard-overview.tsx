@@ -96,10 +96,6 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
                 />
             </section>
 
-            <section className="grid grid-cols-1 gap-4">
-                <RecentBillingCards cards={data.visual.recentBillingCards} />
-            </section>
-
 
             <section className="grid grid-cols-1 gap-4">
                 <CreditLimitChart

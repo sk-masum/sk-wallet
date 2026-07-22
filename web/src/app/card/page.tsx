@@ -335,6 +335,9 @@ export default async function CardPage({ searchParams }: CardPageProps) {
       <ListingPageHeader
         title="Cards"
         className="pt-6"
+        showBackButton
+        backHref="/"
+        backButtonLabel="Back to dashboard"
         description={`${sortedCards.length} ${sortedCards.length === 1 ? 'card' : 'cards'}${activeFilterCount > 0 ? ` • ${activeFilterCount} filter${activeFilterCount === 1 ? '' : 's'}` : ''
           }`}
         addLabel="Add card"

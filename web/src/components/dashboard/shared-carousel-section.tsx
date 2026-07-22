@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { ArrowRightIcon } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
@@ -28,14 +28,14 @@ export function SharedCarouselSection<T>({
     trackClassName,
 }: SharedCarouselSectionProps<T>) {
     return (
-        <section className={cn('relative overflow-hidden rounded-2xl p-4 sm:p-5', className)}>
-            <div className="pointer-events-none absolute inset-0" />
+        <section className={cn('relative overflow-hidden rounded-2xl py-4 sm:py-5', className)}>
+            <div className="pointer-events-none absolute inset-0 " />
             <div className="relative mb-4 flex items-end justify-between gap-3">
                 <div>
-                    <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+                    <h3 className="text-lg font-semibold text-foreground sm:text-2xl">{title}</h3>
                 </div>
                 <Link href={actionHref} className="inline-flex items-center rounded-full border border-border/70 px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground">
-                    <ArrowRightIcon className="mr-1 h-4 w-4" /> {actionLabel}
+                    <ArrowUpRight className="mr-1 h-4 w-4" /> {actionLabel}
                 </Link>
             </div>
 

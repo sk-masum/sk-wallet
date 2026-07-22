@@ -46,6 +46,9 @@ export default async function CredentialPage({ searchParams }: CredentialPagePro
             <ListingPageHeader
                 title="Credentials"
                 className="pt-6"
+                showBackButton
+                backHref="/"
+                backButtonLabel="Back to dashboard"
                 description={`${credentials.length} ${credentials.length === 1 ? 'credential' : 'credentials'}${activeControlCount > 0 ? ` • ${activeControlCount} filter${activeControlCount === 1 ? '' : 's'}` : ''}`}
                 addLabel="Add credential"
                 mobileStickyHeader
