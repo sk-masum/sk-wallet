@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
+import { Prisma } from '@/generated/prisma'
 
 import { getRouteSupabaseContext } from '@/lib/supabase/route-auth'
+import { getRequiredPrismaClient } from '@/lib/prisma'
 import { type DocumentFormPayload, type DocumentTypeCode } from '@/models/document'
 import { hashDocumentIdentity } from '@/lib/security/doc-hash'
 import { tokenizeDocumentNumber } from '@/lib/security/doc-token'
@@ -37,7 +39,7 @@ function normalizeCustomFields(value: unknown) {
 }
 
 function getDocumentWriteErrorMessage(error: { code?: string; message: string }) {
-  if (error.code === '23505') {
+  if (error.code === 'P2002') {
     return 'This document number is already registered.'
   }
 
@@ -45,7 +47,7 @@ function getDocumentWriteErrorMessage(error: { code?: string; message: string })
 }
 
 export async function GET(request: Request) {
-  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext()
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext()
   const { searchParams } = new URL(request.url)
   const requestedType = searchParams.get('type')?.trim().toUpperCase() ?? ''
 
@@ -53,31 +55,43 @@ export async function GET(request: Request) {
     return unauthorizedResponse
   }
 
-  let query = supabase
-    .from('document_record')
-    .select('id, user_id, document_type, masked_number, document_number_last4, name_on_document, category, metadata, verified_at, expires_at, created_at, updated_at')
-    .eq('user_id', user.id)
-    .order('updated_at', { ascending: false })
+  const prisma = getRequiredPrismaClient()
 
-  if (requestedType && isDocumentTypeCode(requestedType)) {
-    query = query.eq('document_type', requestedType)
-  }
-
-  const { data, error } = await query
-
-  if (error) {
-    return NextResponse.json({ error: getDocumentWriteErrorMessage(error) }, { status: 500 })
-  }
+  const data = await prisma.document_record.findMany({
+    where: {
+      user_id: user.id,
+      ...(requestedType && isDocumentTypeCode(requestedType)
+        ? { document_type: requestedType }
+        : {}),
+    },
+    select: {
+      id: true,
+      user_id: true,
+      document_type: true,
+      masked_number: true,
+      document_number_last4: true,
+      name_on_document: true,
+      category: true,
+      metadata: true,
+      verified_at: true,
+      expires_at: true,
+      created_at: true,
+      updated_at: true,
+    },
+    orderBy: { updated_at: 'desc' },
+  })
 
   return NextResponse.json({ data: data ?? [] })
 }
 
 export async function POST(request: Request) {
-  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext()
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext()
 
   if (unauthorizedResponse || !user) {
     return unauthorizedResponse
   }
+
+  const prisma = getRequiredPrismaClient()
 
   let payload: DocumentFormPayload
 
@@ -133,9 +147,9 @@ export async function POST(request: Request) {
     ...customFieldMetadata,
   }
 
-  const { data, error } = await supabase
-    .from('document_record')
-    .insert({
+  try {
+    const data = await prisma.document_record.create({
+      data: {
       user_id: user.id,
       document_type: type,
       document_number_token: tokenizedNumber,
@@ -144,15 +158,20 @@ export async function POST(request: Request) {
       masked_number: maskedNumber,
       name_on_document: nameOnDocument || null,
       category,
-      metadata: Object.keys(metadata).length > 0 ? metadata : null,
-      updated_at: new Date().toISOString(),
+      metadata: Object.keys(metadata).length > 0 ? (metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
+      },
+      select: {
+        id: true,
+        document_type: true,
+        masked_number: true,
+        category: true,
+        updated_at: true,
+      },
     })
-    .select('id, document_type, masked_number, category, updated_at')
-    .single()
 
-  if (error) {
-    return NextResponse.json({ error: getDocumentWriteErrorMessage(error) }, { status: 500 })
+    return NextResponse.json({ success: true, data })
+  } catch (error) {
+    const message = getDocumentWriteErrorMessage(error as { code?: string; message: string })
+    return NextResponse.json({ error: message }, { status: 500 })
   }
-
-  return NextResponse.json({ success: true, data })
 }

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
+import { Prisma } from '@/generated/prisma'
 
 import { getRouteSupabaseContext } from '@/lib/supabase/route-auth'
+import { getRequiredPrismaClient } from '@/lib/prisma'
 import { hashCredentialSecret } from '@/lib/security/credential-hash'
 import { tokenizeCredentialSecret } from '@/lib/security/credential-token'
 import { isCredentialTypeCode } from '@/constants/credential/types'
@@ -26,7 +28,7 @@ function normalizeText(value: unknown, maxLength: number) {
 }
 
 function getCredentialWriteErrorMessage(error: { code?: string; message: string }) {
-  if (error.code === '23505') {
+  if (error.code === 'P2002') {
     return 'A credential with the same type, service, and identifier already exists.'
   }
 
@@ -34,7 +36,7 @@ function getCredentialWriteErrorMessage(error: { code?: string; message: string 
 }
 
 export async function GET(request: Request) {
-  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext()
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext()
   const { searchParams } = new URL(request.url)
   const requestedType = searchParams.get('type')?.trim().toUpperCase() ?? ''
 
@@ -42,31 +44,43 @@ export async function GET(request: Request) {
     return unauthorizedResponse
   }
 
-  let query = supabase
-    .from('credential_record')
-    .select('id, user_id, credential_type, service_name, identifier, masked_secret, secret_last4, url, notes, metadata, created_at, updated_at')
-    .eq('user_id', user.id)
-    .order('updated_at', { ascending: false })
+  const prisma = getRequiredPrismaClient()
 
-  if (requestedType && isCredentialTypeCode(requestedType)) {
-    query = query.eq('credential_type', requestedType)
-  }
-
-  const { data, error } = await query
-
-  if (error) {
-    return NextResponse.json({ error: getCredentialWriteErrorMessage(error) }, { status: 500 })
-  }
+  const data = await prisma.credential_record.findMany({
+    where: {
+      user_id: user.id,
+      ...(requestedType && isCredentialTypeCode(requestedType)
+        ? { credential_type: requestedType }
+        : {}),
+    },
+    select: {
+      id: true,
+      user_id: true,
+      credential_type: true,
+      service_name: true,
+      identifier: true,
+      masked_secret: true,
+      secret_last4: true,
+      url: true,
+      notes: true,
+      metadata: true,
+      created_at: true,
+      updated_at: true,
+    },
+    orderBy: { updated_at: 'desc' },
+  })
 
   return NextResponse.json({ data: data ?? [] })
 }
 
 export async function POST(request: Request) {
-  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext()
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext()
 
   if (unauthorizedResponse || !user) {
     return unauthorizedResponse
   }
+
+  const prisma = getRequiredPrismaClient()
 
   let payload: CredentialFormPayload
 
@@ -103,9 +117,9 @@ export async function POST(request: Request) {
   const secretLast4 = normalizedSecret.slice(-4)
   const secretHash = hashCredentialSecret(type as CredentialTypeCode, serviceName.toLowerCase(), identifier.toLowerCase(), normalizedSecret)
 
-  const { data, error } = await supabase
-    .from('credential_record')
-    .insert({
+  try {
+    const data = await prisma.credential_record.create({
+      data: {
       user_id: user.id,
       credential_type: type,
       service_name: serviceName,
@@ -116,15 +130,29 @@ export async function POST(request: Request) {
       masked_secret: maskedSecret,
       url: url || null,
       notes: notes || null,
-      metadata: toMetadata(payload.metadata),
-      updated_at: new Date().toISOString(),
+      metadata: toMetadata(payload.metadata)
+        ? (toMetadata(payload.metadata) as Prisma.InputJsonValue)
+        : Prisma.JsonNull,
+      },
+      select: {
+        id: true,
+        user_id: true,
+        credential_type: true,
+        service_name: true,
+        identifier: true,
+        masked_secret: true,
+        secret_last4: true,
+        url: true,
+        notes: true,
+        metadata: true,
+        created_at: true,
+        updated_at: true,
+      },
     })
-    .select('id, user_id, credential_type, service_name, identifier, masked_secret, secret_last4, url, notes, metadata, created_at, updated_at')
-    .single()
 
-  if (error) {
-    return NextResponse.json({ error: getCredentialWriteErrorMessage(error) }, { status: 500 })
+    return NextResponse.json({ success: true, data })
+  } catch (error) {
+    const message = getCredentialWriteErrorMessage(error as { code?: string; message: string })
+    return NextResponse.json({ error: message }, { status: 500 })
   }
-
-  return NextResponse.json({ success: true, data })
 }

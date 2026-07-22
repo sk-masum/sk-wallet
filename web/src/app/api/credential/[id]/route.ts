@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 
 import { isCredentialTypeCode } from '@/constants/credential/types'
 import { getRouteSupabaseContext } from '@/lib/supabase/route-auth'
+import { getRequiredPrismaClient } from '@/lib/prisma'
 import { hashCredentialSecret } from '@/lib/security/credential-hash'
 import { tokenizeCredentialSecret } from '@/lib/security/credential-token'
 import type { CredentialFormPayload, CredentialTypeCode } from '@/models/credential'
@@ -12,11 +13,11 @@ import {
 } from '@/utils/credential/validation'
 
 function getCredentialWriteErrorMessage(error: { code?: string; message: string }) {
-  if (error.code === 'PGRST116') {
+  if (error.code === 'P2025') {
     return 'Credential not found'
   }
 
-  if (error.code === '23505') {
+  if (error.code === 'P2002') {
     return 'A credential with the same type, service, and identifier already exists.'
   }
 
@@ -31,21 +32,34 @@ function normalizeText(value: unknown, maxLength: number) {
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params
-  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext()
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext()
 
   if (unauthorizedResponse || !user) {
     return unauthorizedResponse
   }
 
-  const { data, error } = await supabase
-    .from('credential_record')
-    .select('id, user_id, credential_type, service_name, identifier, masked_secret, secret_last4, url, notes, metadata, created_at, updated_at')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single()
+  const prisma = getRequiredPrismaClient()
 
-  if (error) {
-    return NextResponse.json({ error: getCredentialWriteErrorMessage(error) }, { status: 404 })
+  const data = await prisma.credential_record.findFirst({
+    where: { id, user_id: user.id },
+    select: {
+      id: true,
+      user_id: true,
+      credential_type: true,
+      service_name: true,
+      identifier: true,
+      masked_secret: true,
+      secret_last4: true,
+      url: true,
+      notes: true,
+      metadata: true,
+      created_at: true,
+      updated_at: true,
+    },
+  })
+
+  if (!data) {
+    return NextResponse.json({ error: 'Credential not found' }, { status: 404 })
   }
 
   return NextResponse.json({ data })
@@ -53,11 +67,13 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
 
 export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params
-  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext()
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext()
 
   if (unauthorizedResponse || !user) {
     return unauthorizedResponse
   }
+
+  const prisma = getRequiredPrismaClient()
 
   let payload: CredentialFormPayload
 
@@ -77,14 +93,18 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     return NextResponse.json({ error: 'Unsupported credential type' }, { status: 400 })
   }
 
-  const { data: existing, error: existingError } = await supabase
-    .from('credential_record')
-    .select('id, secret_token, secret_hash, secret_last4, masked_secret')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single()
+  const existing = await prisma.credential_record.findFirst({
+    where: { id, user_id: user.id },
+    select: {
+      id: true,
+      secret_token: true,
+      secret_hash: true,
+      secret_last4: true,
+      masked_secret: true,
+    },
+  })
 
-  if (existingError || !existing) {
+  if (!existing) {
     return NextResponse.json({ error: 'Credential not found' }, { status: 404 })
   }
 
@@ -116,9 +136,10 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     maskedSecret = maskCredentialSecret(normalizedSecret)
   }
 
-  const { data, error } = await supabase
-    .from('credential_record')
-    .update({
+  try {
+    const data = await prisma.credential_record.update({
+      where: { id },
+      data: {
       credential_type: type,
       service_name: serviceName,
       identifier: identifier || null,
@@ -128,37 +149,54 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
       masked_secret: maskedSecret,
       url: url || null,
       notes: notes || null,
-      updated_at: new Date().toISOString(),
+      },
+      select: {
+        id: true,
+        user_id: true,
+        credential_type: true,
+        service_name: true,
+        identifier: true,
+        masked_secret: true,
+        secret_last4: true,
+        url: true,
+        notes: true,
+        metadata: true,
+        created_at: true,
+        updated_at: true,
+      },
     })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select('id, user_id, credential_type, service_name, identifier, masked_secret, secret_last4, url, notes, metadata, created_at, updated_at')
-    .single()
 
-  if (error) {
-    return NextResponse.json({ error: getCredentialWriteErrorMessage(error) }, { status: 500 })
+    if (data.user_id !== user.id) {
+      return NextResponse.json({ error: 'Credential not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true, data })
+  } catch (error) {
+    const message = getCredentialWriteErrorMessage(error as { code?: string; message: string })
+    const status = (error as { code?: string }).code === 'P2025' ? 404 : 500
+    return NextResponse.json({ error: message }, { status })
   }
-
-  return NextResponse.json({ success: true, data })
 }
 
 export async function DELETE(_request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params
-  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext()
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext()
 
   if (unauthorizedResponse || !user) {
     return unauthorizedResponse
   }
 
-  const { error } = await supabase
-    .from('credential_record')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', user.id)
+  const prisma = getRequiredPrismaClient()
+  const existing = await prisma.credential_record.findFirst({
+    where: { id, user_id: user.id },
+    select: { id: true },
+  })
 
-  if (error) {
-    return NextResponse.json({ error: getCredentialWriteErrorMessage(error) }, { status: 500 })
+  if (!existing) {
+    return NextResponse.json({ error: 'Credential not found' }, { status: 404 })
   }
+
+  await prisma.credential_record.delete({ where: { id } })
 
   return NextResponse.json({ success: true })
 }

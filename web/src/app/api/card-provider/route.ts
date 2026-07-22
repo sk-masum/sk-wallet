@@ -1,22 +1,20 @@
 import { NextResponse } from 'next/server';
 
 import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
+import { getRequiredPrismaClient } from '@/lib/prisma';
 
 export async function GET() {
-  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext();
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
 
   if (unauthorizedResponse || !user) {
     return unauthorizedResponse;
   }
 
-  const { data, error } = await supabase
-    .from('card_provider')
-    .select('name')
-    .order('name', { ascending: true });
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  const prisma = getRequiredPrismaClient();
+  const data = await prisma.card_provider.findMany({
+    select: { name: true },
+    orderBy: { name: 'asc' },
+  });
 
   const names = Array.from(
     new Set(

@@ -1,39 +1,33 @@
 import { NextResponse } from 'next/server';
 
 import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
+import { getRequiredPrismaClient } from '@/lib/prisma';
 import { isCardStatus } from '@/constants/card/status';
 import { detokenizeCardCvv, detokenizeCardNumber, tokenizeCardCvv, tokenizeCardNumber } from '@/lib/security/card-token';
 
-function getCardWriteErrorMessage(error: { code?: string; message: string }) {
-  if (error.code === '22P02' && error.message.includes('invalid input syntax for type bigint')) {
-    return 'Database schema mismatch: change public.card.number and public.card.cvv column types to text before saving tokenized values.';
+function toSafeNumber(value: bigint | number | null | undefined) {
+  if (value === null || value === undefined) return null;
+  return typeof value === 'bigint' ? Number(value) : value;
+}
+
+function decodeCardFieldOrEmpty(value: string) {
+  try {
+    return detokenizeCardNumber(value);
+  } catch {
+    return '';
   }
-
-  return error.message;
 }
 
-function isProviderSchemaUnavailable(error: { code?: string; message?: string } | null | undefined) {
-  if (!error) return false;
-
-  const message = String(error.message ?? '').toLowerCase();
-  return (
-    error.code === '42P01' ||
-    error.code === '42703' ||
-    error.code === 'PGRST200' ||
-    message.includes('card_provider') ||
-    message.includes('provider_id')
-  );
-}
-
-function isBillingSchemaUnavailable(error: { code?: string; message?: string } | null | undefined) {
-  if (!error) return false;
-
-  const message = String(error.message ?? '').toLowerCase();
-  return error.code === '42703' && (message.includes('billing_date') || message.includes('payment_date'));
+function decodeCvvFieldOrEmpty(value: string) {
+  try {
+    return detokenizeCardCvv(value);
+  } catch {
+    return '';
+  }
 }
 
 async function resolveOrCreateProvider(
-  supabase: Awaited<ReturnType<typeof getRouteSupabaseContext>>['supabase'],
+  prisma: ReturnType<typeof getRequiredPrismaClient>,
   rawProvider?: string | null,
 ) {
   const provider = String(rawProvider ?? '').trim().replace(/\s+/g, ' ');
@@ -41,86 +35,65 @@ async function resolveOrCreateProvider(
   if (!provider) {
     return {
       provider,
-      providerId: null as number | null,
+      providerId: null as bigint | null,
       error: null as string | null,
     };
   }
 
-  const { data: existingProvider, error: existingProviderError } = await supabase
-    .from('card_provider')
-    .select('id, name')
-    .ilike('name', provider)
-    .maybeSingle();
-
-  if (existingProviderError) {
-    return {
-      provider,
-      providerId: null,
-      error: `Failed to lookup provider: ${existingProviderError.message}`,
-    };
-  }
+  const existingProvider = await prisma.card_provider.findFirst({
+    where: {
+      name: {
+        equals: provider,
+        mode: 'insensitive',
+      },
+    },
+    select: { id: true, name: true },
+  });
 
   if (existingProvider) {
     return {
       provider: existingProvider.name,
-      providerId: Number(existingProvider.id),
+      providerId: existingProvider.id,
       error: null,
     };
   }
 
-  const { data: createdProvider, error: createdProviderError } = await supabase
-    .from('card_provider')
-    .insert({ name: provider })
-    .select('id, name')
-    .single();
+  try {
+    const createdProvider = await prisma.card_provider.create({
+      data: { name: provider },
+      select: { id: true, name: true },
+    });
 
-  if (createdProviderError && createdProviderError.code !== '23505') {
-    return {
-      provider,
-      providerId: null,
-      error: `Failed to create provider: ${createdProviderError.message}`,
-    };
-  }
-
-  if (createdProvider) {
     return {
       provider: createdProvider.name,
-      providerId: Number(createdProvider.id),
+      providerId: createdProvider.id,
+      error: null,
+    };
+  } catch {
+    const resolvedProvider = await prisma.card_provider.findFirst({
+      where: {
+        name: {
+          equals: provider,
+          mode: 'insensitive',
+        },
+      },
+      select: { id: true, name: true },
+    });
+
+    if (!resolvedProvider) {
+      return {
+        provider,
+        providerId: null,
+        error: 'Failed to resolve provider after create',
+      };
+    }
+
+    return {
+      provider: resolvedProvider.name,
+      providerId: resolvedProvider.id,
       error: null,
     };
   }
-
-  const { data: resolvedProvider, error: resolvedProviderError } = await supabase
-    .from('card_provider')
-    .select('id, name')
-    .ilike('name', provider)
-    .maybeSingle();
-
-  if (resolvedProviderError || !resolvedProvider) {
-    return {
-      provider,
-      providerId: null,
-      error: `Failed to resolve provider after create: ${resolvedProviderError?.message ?? 'Provider not found'}`,
-    };
-  }
-
-  return {
-    provider: resolvedProvider.name,
-    providerId: Number(resolvedProvider.id),
-    error: null,
-  };
-}
-
-function extractProviderName(cardProvider: unknown) {
-  if (!cardProvider) return null;
-
-  if (Array.isArray(cardProvider)) {
-    const first = cardProvider[0] as { name?: string } | undefined;
-    return typeof first?.name === 'string' ? first.name : null;
-  }
-
-  const single = cardProvider as { name?: string };
-  return typeof single.name === 'string' ? single.name : null;
 }
 
 type Params = {
@@ -129,50 +102,74 @@ type Params = {
 
 export async function GET(_request: Request, { params }: Params) {
   const { id } = await params;
-  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext();
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
 
   if (unauthorizedResponse || !user) {
     return unauthorizedResponse;
   }
 
-  let { data, error } = await supabase
-    .from('card')
-    .select('*, card_provider:card_provider!card_provider_id_fkey(id,name)')
-    .eq('id', id)
-    .eq('owner_id', user.id)
-    .maybeSingle();
+  let cardId: bigint;
 
-  if (error) {
-    return NextResponse.json({ error: getCardWriteErrorMessage(error) }, { status: 500 });
+  try {
+    cardId = BigInt(id);
+  } catch {
+    return NextResponse.json({ error: 'Card not found' }, { status: 404 });
   }
+
+  const prisma = getRequiredPrismaClient();
+
+  const data = await prisma.card.findFirst({
+    where: { id: cardId, owner_id: user.id },
+    include: {
+      card_provider: {
+        select: { name: true },
+      },
+    },
+  });
 
   if (!data) {
     return NextResponse.json({ error: 'Card not found' }, { status: 404 });
   }
 
-  try {
-    const { card_provider, ...cardData } = data as typeof data & { card_provider?: unknown };
-    const providerName = extractProviderName(card_provider);
-
-    return NextResponse.json({
-      data: {
-        ...cardData,
-        provider: providerName ?? null,
-        number: detokenizeCardNumber(cardData.number),
-        cvv: detokenizeCardCvv(cardData.cvv),
-      },
-    });
-  } catch {
-    return NextResponse.json({ error: 'Failed to decode stored card token' }, { status: 500 });
-  }
+  return NextResponse.json({
+    data: {
+      ...data,
+      id: toSafeNumber(data.id),
+      provider_id: toSafeNumber(data.provider_id),
+      provider: data.card_provider?.name ?? null,
+      credit_limit: data.credit_limit ? data.credit_limit.toNumber() : null,
+      number: decodeCardFieldOrEmpty(data.number),
+      cvv: decodeCvvFieldOrEmpty(data.cvv),
+      card_provider: undefined,
+    },
+  });
 }
 
 export async function PUT(request: Request, { params }: Params) {
   const { id } = await params;
-  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext();
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
 
   if (unauthorizedResponse || !user) {
     return unauthorizedResponse;
+  }
+
+  let cardId: bigint;
+
+  try {
+    cardId = BigInt(id);
+  } catch {
+    return NextResponse.json({ error: 'Card not found' }, { status: 404 });
+  }
+
+  const prisma = getRequiredPrismaClient();
+
+  const existingCard = await prisma.card.findFirst({
+    where: { id: cardId, owner_id: user.id },
+    select: { id: true },
+  });
+
+  if (!existingCard) {
+    return NextResponse.json({ error: 'Card not found' }, { status: 404 });
   }
 
   let payload: {
@@ -212,17 +209,15 @@ export async function PUT(request: Request, { params }: Params) {
   const {
     providerId,
     error: providerError,
-  } = await resolveOrCreateProvider(supabase, payload.provider);
+  } = await resolveOrCreateProvider(prisma, payload.provider);
 
   if (providerError) {
     return NextResponse.json({ error: providerError }, { status: 500 });
   }
 
-  const providerPayload = { provider_id: providerId };
-
-  const { error } = await supabase
-    .from('card')
-    .update({
+  await prisma.card.update({
+    where: { id: cardId },
+    data: {
       color_name: payload.color_name?.trim() || null,
       ...(payload.status !== undefined && isCardStatus(String(payload.status).trim().toLowerCase())
         ? { status: String(payload.status).trim().toLowerCase() }
@@ -234,7 +229,7 @@ export async function PUT(request: Request, { params }: Params) {
             .slice(0, 8)
         : [],
       card_name: payload.card_name?.trim() || null,
-      ...providerPayload,
+      provider_id: providerId,
       credit_limit:
         Boolean(payload.isCredit) && typeof payload.credit_limit === 'number' && Number.isFinite(payload.credit_limit)
           ? payload.credit_limit
@@ -249,65 +244,34 @@ export async function PUT(request: Request, { params }: Params) {
           : null,
       number: tokenizedNumber,
       holder_name: payload.holder_name?.trim() || null,
-      expiry_month: payload.expiry_month ?? null,
-      expiry_year: payload.expiry_year ?? null,
+      expiry_month: payload.expiry_month ?? undefined,
+      expiry_year: payload.expiry_year ?? undefined,
       cvv: tokenizedCvv,
-      network: payload.network ?? null,
+      network: payload.network ?? 0,
       isCredit: Boolean(payload.isCredit),
-    })
-    .eq('id', id)
-    .eq('owner_id', user.id);
-
-  if (error) {
-    if (isBillingSchemaUnavailable(error)) {
-      const fallbackUpdateWithoutBilling = await supabase
-        .from('card')
-        .update({
-          color_name: payload.color_name?.trim() || null,
-          ...(payload.status !== undefined && isCardStatus(String(payload.status).trim().toLowerCase())
-            ? { status: String(payload.status).trim().toLowerCase() }
-            : {}),
-          tags: Array.isArray(payload.tags)
-            ? payload.tags
-                .map((tag) => String(tag).trim())
-                .filter(Boolean)
-                .slice(0, 8)
-            : [],
-          card_name: payload.card_name?.trim() || null,
-          ...providerPayload,
-          credit_limit:
-            Boolean(payload.isCredit) && typeof payload.credit_limit === 'number' && Number.isFinite(payload.credit_limit)
-              ? payload.credit_limit
-              : null,
-          number: tokenizedNumber,
-          holder_name: payload.holder_name?.trim() || null,
-          expiry_month: payload.expiry_month ?? null,
-          expiry_year: payload.expiry_year ?? null,
-          cvv: tokenizedCvv,
-          network: payload.network ?? null,
-          isCredit: Boolean(payload.isCredit),
-        })
-        .eq('id', id)
-        .eq('owner_id', user.id);
-
-      if (!fallbackUpdateWithoutBilling.error) {
-        return NextResponse.json({ success: true });
-      }
-    }
-
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+    },
+  });
 
   return NextResponse.json({ success: true });
 }
 
 export async function PATCH(request: Request, { params }: Params) {
   const { id } = await params;
-  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext();
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
 
   if (unauthorizedResponse || !user) {
     return unauthorizedResponse;
   }
+
+  let cardId: bigint;
+
+  try {
+    cardId = BigInt(id);
+  } catch {
+    return NextResponse.json({ error: 'Card not found' }, { status: 404 });
+  }
+
+  const prisma = getRequiredPrismaClient();
 
   let payload: {
     status?: string;
@@ -325,36 +289,51 @@ export async function PATCH(request: Request, { params }: Params) {
     return NextResponse.json({ error: 'Invalid card status' }, { status: 400 });
   }
 
-  const { error } = await supabase
-    .from('card')
-    .update({ status: normalizedStatus })
-    .eq('id', id)
-    .eq('owner_id', user.id);
+  const existingCard = await prisma.card.findFirst({
+    where: { id: cardId, owner_id: user.id },
+    select: { id: true },
+  });
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!existingCard) {
+    return NextResponse.json({ error: 'Card not found' }, { status: 404 });
   }
+
+  await prisma.card.update({
+    where: { id: cardId },
+    data: { status: normalizedStatus },
+  });
 
   return NextResponse.json({ success: true });
 }
 
 export async function DELETE(_request: Request, { params }: Params) {
   const { id } = await params;
-  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext();
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
 
   if (unauthorizedResponse || !user) {
     return unauthorizedResponse;
   }
 
-  const { error } = await supabase
-    .from('card')
-    .update({ status: 'replaced' })
-    .eq('id', id)
-    .eq('owner_id', user.id);
+  let cardId: bigint;
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    cardId = BigInt(id);
+  } catch {
+    return NextResponse.json({ error: 'Card not found' }, { status: 404 });
   }
+
+  const prisma = getRequiredPrismaClient();
+
+  const existingCard = await prisma.card.findFirst({
+    where: { id: cardId, owner_id: user.id },
+    select: { id: true },
+  });
+
+  if (!existingCard) {
+    return NextResponse.json({ error: 'Card not found' }, { status: 404 });
+  }
+
+  await prisma.card.update({ where: { id: cardId }, data: { status: 'replaced' } });
 
   return NextResponse.json({ success: true });
 }

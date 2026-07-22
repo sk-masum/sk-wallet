@@ -20,3 +20,13 @@ export function getPrismaClient() {
 
   return globalThis.__prisma
 }
+
+export function getRequiredPrismaClient() {
+  const prisma = getPrismaClient()
+
+  if (!prisma) {
+    throw new Error('DATABASE_URL is not configured')
+  }
+
+  return prisma
+}

@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
+import { Prisma } from '@/generated/prisma'
 
 import { isDocumentCategory } from '@/constants/document/categories'
 import { detokenizeDocumentNumber } from '@/lib/security/doc-token'
 import { getRouteSupabaseContext } from '@/lib/supabase/route-auth'
+import { getRequiredPrismaClient } from '@/lib/prisma'
 
 const RESERVED_METADATA_KEYS = new Set([
   'issued_date',
@@ -28,7 +30,7 @@ type DocumentUpdatePayload = {
 }
 
 function getDocumentWriteErrorMessage(error: { code?: string; message: string }) {
-  if (error.code === 'PGRST116') {
+  if (error.code === 'P2025') {
     return 'Document not found'
   }
 
@@ -87,21 +89,35 @@ function withMetadataField(
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params
-  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext()
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext()
 
   if (unauthorizedResponse || !user) {
     return unauthorizedResponse
   }
 
-  const { data, error } = await supabase
-    .from('document_record')
-    .select('id, user_id, document_type, document_number_token, masked_number, document_number_last4, name_on_document, category, metadata, verified_at, expires_at, created_at, updated_at')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single()
+  const prisma = getRequiredPrismaClient()
 
-  if (error) {
-    return NextResponse.json({ error: getDocumentWriteErrorMessage(error) }, { status: 404 })
+  const data = await prisma.document_record.findFirst({
+    where: { id, user_id: user.id },
+    select: {
+      id: true,
+      user_id: true,
+      document_type: true,
+      document_number_token: true,
+      masked_number: true,
+      document_number_last4: true,
+      name_on_document: true,
+      category: true,
+      metadata: true,
+      verified_at: true,
+      expires_at: true,
+      created_at: true,
+      updated_at: true,
+    },
+  })
+
+  if (!data) {
+    return NextResponse.json({ error: 'Document not found' }, { status: 404 })
   }
 
   let documentNumber = ''
@@ -122,11 +138,13 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
 
 export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params
-  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext()
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext()
 
   if (unauthorizedResponse || !user) {
     return unauthorizedResponse
   }
+
+  const prisma = getRequiredPrismaClient()
 
   let payload: DocumentUpdatePayload
 
@@ -136,14 +154,12 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { data: existing, error: existingError } = await supabase
-    .from('document_record')
-    .select('id, metadata')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single()
+  const existing = await prisma.document_record.findFirst({
+    where: { id, user_id: user.id },
+    select: { id: true, metadata: true },
+  })
 
-  if (existingError || !existing) {
+  if (!existing) {
     return NextResponse.json({ error: 'Document not found' }, { status: 404 })
   }
 
@@ -207,43 +223,61 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
 
   const metadata = Object.keys(metadataFromCustomField).length > 0 ? metadataFromCustomField : null
 
-  const { data, error } = await supabase
-    .from('document_record')
-    .update({
+  try {
+    const data = await prisma.document_record.update({
+      where: { id },
+      data: {
       name_on_document: nameOnDocument || null,
       ...(category ? { category } : {}),
-      metadata,
-      updated_at: new Date().toISOString(),
+      metadata: metadata ? (metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
+      },
+      select: {
+        id: true,
+        user_id: true,
+        document_type: true,
+        masked_number: true,
+        document_number_last4: true,
+        name_on_document: true,
+        category: true,
+        metadata: true,
+        verified_at: true,
+        expires_at: true,
+        created_at: true,
+        updated_at: true,
+      },
     })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select('id, user_id, document_type, masked_number, document_number_last4, name_on_document, category, metadata, verified_at, expires_at, created_at, updated_at')
-    .single()
 
-  if (error) {
-    return NextResponse.json({ error: getDocumentWriteErrorMessage(error) }, { status: 500 })
+    if (data.user_id !== user.id) {
+      return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true, data })
+  } catch (error) {
+    const message = getDocumentWriteErrorMessage(error as { code?: string; message: string })
+    const status = (error as { code?: string }).code === 'P2025' ? 404 : 500
+    return NextResponse.json({ error: message }, { status })
   }
-
-  return NextResponse.json({ success: true, data })
 }
 
 export async function DELETE(_request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params
-  const { supabase, user, unauthorizedResponse } = await getRouteSupabaseContext()
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext()
 
   if (unauthorizedResponse || !user) {
     return unauthorizedResponse
   }
 
-  const { error } = await supabase
-    .from('document_record')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', user.id)
+  const prisma = getRequiredPrismaClient()
+  const existing = await prisma.document_record.findFirst({
+    where: { id, user_id: user.id },
+    select: { id: true },
+  })
 
-  if (error) {
-    return NextResponse.json({ error: getDocumentWriteErrorMessage(error) }, { status: 500 })
+  if (!existing) {
+    return NextResponse.json({ error: 'Document not found' }, { status: 404 })
   }
+
+  await prisma.document_record.delete({ where: { id } })
 
   return NextResponse.json({ success: true })
 }
