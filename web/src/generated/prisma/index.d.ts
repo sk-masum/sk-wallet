@@ -190,6 +190,11 @@ export type document_file = $Result.DefaultSelection<Prisma.$document_filePayloa
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */
 export type document_record = $Result.DefaultSelection<Prisma.$document_recordPayload>
+/**
+ * Model dashboard_favorite
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type dashboard_favorite = $Result.DefaultSelection<Prisma.$dashboard_favoritePayload>
 
 /**
  * Enums
@@ -718,6 +723,16 @@ export class PrismaClient<
     * ```
     */
   get document_record(): Prisma.document_recordDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.dashboard_favorite`: Exposes CRUD operations for the **dashboard_favorite** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Dashboard_favorites
+    * const dashboard_favorites = await prisma.dashboard_favorite.findMany()
+    * ```
+    */
+  get dashboard_favorite(): Prisma.dashboard_favoriteDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1186,7 +1201,8 @@ export namespace Prisma {
     credential_record: 'credential_record',
     document_access_audit: 'document_access_audit',
     document_file: 'document_file',
-    document_record: 'document_record'
+    document_record: 'document_record',
+    dashboard_favorite: 'dashboard_favorite'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1205,7 +1221,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "sessions" | "sso_domains" | "sso_providers" | "users" | "webauthn_challenges" | "webauthn_credentials" | "card" | "card_provider" | "credential_record" | "document_access_audit" | "document_file" | "document_record"
+      modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "sessions" | "sso_domains" | "sso_providers" | "users" | "webauthn_challenges" | "webauthn_credentials" | "card" | "card_provider" | "credential_record" | "document_access_audit" | "document_file" | "document_record" | "dashboard_favorite"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3355,6 +3371,80 @@ export namespace Prisma {
           }
         }
       }
+      dashboard_favorite: {
+        payload: Prisma.$dashboard_favoritePayload<ExtArgs>
+        fields: Prisma.dashboard_favoriteFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.dashboard_favoriteFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$dashboard_favoritePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.dashboard_favoriteFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$dashboard_favoritePayload>
+          }
+          findFirst: {
+            args: Prisma.dashboard_favoriteFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$dashboard_favoritePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.dashboard_favoriteFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$dashboard_favoritePayload>
+          }
+          findMany: {
+            args: Prisma.dashboard_favoriteFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$dashboard_favoritePayload>[]
+          }
+          create: {
+            args: Prisma.dashboard_favoriteCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$dashboard_favoritePayload>
+          }
+          createMany: {
+            args: Prisma.dashboard_favoriteCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.dashboard_favoriteCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$dashboard_favoritePayload>[]
+          }
+          delete: {
+            args: Prisma.dashboard_favoriteDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$dashboard_favoritePayload>
+          }
+          update: {
+            args: Prisma.dashboard_favoriteUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$dashboard_favoritePayload>
+          }
+          deleteMany: {
+            args: Prisma.dashboard_favoriteDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.dashboard_favoriteUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.dashboard_favoriteUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$dashboard_favoritePayload>[]
+          }
+          upsert: {
+            args: Prisma.dashboard_favoriteUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$dashboard_favoritePayload>
+          }
+          aggregate: {
+            args: Prisma.Dashboard_favoriteAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDashboard_favorite>
+          }
+          groupBy: {
+            args: Prisma.dashboard_favoriteGroupByArgs<ExtArgs>
+            result: $Utils.Optional<Dashboard_favoriteGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.dashboard_favoriteCountArgs<ExtArgs>
+            result: $Utils.Optional<Dashboard_favoriteCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -3476,6 +3566,7 @@ export namespace Prisma {
     document_access_audit?: document_access_auditOmit
     document_file?: document_fileOmit
     document_record?: document_recordOmit
+    dashboard_favorite?: dashboard_favoriteOmit
   }
 
   /* Types for Logging */
@@ -3766,6 +3857,7 @@ export namespace Prisma {
     webauthn_credentials: number
     card: number
     credential_record: number
+    dashboard_favorite: number
     document_access_audit: number
     document_record: number
   }
@@ -3781,6 +3873,7 @@ export namespace Prisma {
     webauthn_credentials?: boolean | UsersCountOutputTypeCountWebauthn_credentialsArgs
     card?: boolean | UsersCountOutputTypeCountCardArgs
     credential_record?: boolean | UsersCountOutputTypeCountCredential_recordArgs
+    dashboard_favorite?: boolean | UsersCountOutputTypeCountDashboard_favoriteArgs
     document_access_audit?: boolean | UsersCountOutputTypeCountDocument_access_auditArgs
     document_record?: boolean | UsersCountOutputTypeCountDocument_recordArgs
   }
@@ -3864,6 +3957,13 @@ export namespace Prisma {
    */
   export type UsersCountOutputTypeCountCredential_recordArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: credential_recordWhereInput
+  }
+
+  /**
+   * UsersCountOutputType without action
+   */
+  export type UsersCountOutputTypeCountDashboard_favoriteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: dashboard_favoriteWhereInput
   }
 
   /**
@@ -26710,6 +26810,7 @@ export namespace Prisma {
     webauthn_credentials?: boolean | users$webauthn_credentialsArgs<ExtArgs>
     card?: boolean | users$cardArgs<ExtArgs>
     credential_record?: boolean | users$credential_recordArgs<ExtArgs>
+    dashboard_favorite?: boolean | users$dashboard_favoriteArgs<ExtArgs>
     document_access_audit?: boolean | users$document_access_auditArgs<ExtArgs>
     document_record?: boolean | users$document_recordArgs<ExtArgs>
     _count?: boolean | UsersCountOutputTypeDefaultArgs<ExtArgs>
@@ -26841,6 +26942,7 @@ export namespace Prisma {
     webauthn_credentials?: boolean | users$webauthn_credentialsArgs<ExtArgs>
     card?: boolean | users$cardArgs<ExtArgs>
     credential_record?: boolean | users$credential_recordArgs<ExtArgs>
+    dashboard_favorite?: boolean | users$dashboard_favoriteArgs<ExtArgs>
     document_access_audit?: boolean | users$document_access_auditArgs<ExtArgs>
     document_record?: boolean | users$document_recordArgs<ExtArgs>
     _count?: boolean | UsersCountOutputTypeDefaultArgs<ExtArgs>
@@ -26861,6 +26963,7 @@ export namespace Prisma {
       webauthn_credentials: Prisma.$webauthn_credentialsPayload<ExtArgs>[]
       card: Prisma.$cardPayload<ExtArgs>[]
       credential_record: Prisma.$credential_recordPayload<ExtArgs>[]
+      dashboard_favorite: Prisma.$dashboard_favoritePayload<ExtArgs>[]
       document_access_audit: Prisma.$document_access_auditPayload<ExtArgs>[]
       document_record: Prisma.$document_recordPayload<ExtArgs>[]
     }
@@ -27304,6 +27407,7 @@ export namespace Prisma {
     webauthn_credentials<T extends users$webauthn_credentialsArgs<ExtArgs> = {}>(args?: Subset<T, users$webauthn_credentialsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$webauthn_credentialsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     card<T extends users$cardArgs<ExtArgs> = {}>(args?: Subset<T, users$cardArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$cardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     credential_record<T extends users$credential_recordArgs<ExtArgs> = {}>(args?: Subset<T, users$credential_recordArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$credential_recordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    dashboard_favorite<T extends users$dashboard_favoriteArgs<ExtArgs> = {}>(args?: Subset<T, users$dashboard_favoriteArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$dashboard_favoritePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     document_access_audit<T extends users$document_access_auditArgs<ExtArgs> = {}>(args?: Subset<T, users$document_access_auditArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$document_access_auditPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     document_record<T extends users$document_recordArgs<ExtArgs> = {}>(args?: Subset<T, users$document_recordArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$document_recordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -27995,6 +28099,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: Credential_recordScalarFieldEnum | Credential_recordScalarFieldEnum[]
+  }
+
+  /**
+   * users.dashboard_favorite
+   */
+  export type users$dashboard_favoriteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the dashboard_favorite
+     */
+    select?: dashboard_favoriteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the dashboard_favorite
+     */
+    omit?: dashboard_favoriteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: dashboard_favoriteInclude<ExtArgs> | null
+    where?: dashboard_favoriteWhereInput
+    orderBy?: dashboard_favoriteOrderByWithRelationInput | dashboard_favoriteOrderByWithRelationInput[]
+    cursor?: dashboard_favoriteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Dashboard_favoriteScalarFieldEnum | Dashboard_favoriteScalarFieldEnum[]
   }
 
   /**
@@ -37424,6 +37552,1098 @@ export namespace Prisma {
 
 
   /**
+   * Model dashboard_favorite
+   */
+
+  export type AggregateDashboard_favorite = {
+    _count: Dashboard_favoriteCountAggregateOutputType | null
+    _avg: Dashboard_favoriteAvgAggregateOutputType | null
+    _sum: Dashboard_favoriteSumAggregateOutputType | null
+    _min: Dashboard_favoriteMinAggregateOutputType | null
+    _max: Dashboard_favoriteMaxAggregateOutputType | null
+  }
+
+  export type Dashboard_favoriteAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type Dashboard_favoriteSumAggregateOutputType = {
+    id: bigint | null
+  }
+
+  export type Dashboard_favoriteMinAggregateOutputType = {
+    id: bigint | null
+    user_id: string | null
+    feature_key: string | null
+    created_at: Date | null
+    updated_at: Date | null
+  }
+
+  export type Dashboard_favoriteMaxAggregateOutputType = {
+    id: bigint | null
+    user_id: string | null
+    feature_key: string | null
+    created_at: Date | null
+    updated_at: Date | null
+  }
+
+  export type Dashboard_favoriteCountAggregateOutputType = {
+    id: number
+    user_id: number
+    feature_key: number
+    created_at: number
+    updated_at: number
+    _all: number
+  }
+
+
+  export type Dashboard_favoriteAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type Dashboard_favoriteSumAggregateInputType = {
+    id?: true
+  }
+
+  export type Dashboard_favoriteMinAggregateInputType = {
+    id?: true
+    user_id?: true
+    feature_key?: true
+    created_at?: true
+    updated_at?: true
+  }
+
+  export type Dashboard_favoriteMaxAggregateInputType = {
+    id?: true
+    user_id?: true
+    feature_key?: true
+    created_at?: true
+    updated_at?: true
+  }
+
+  export type Dashboard_favoriteCountAggregateInputType = {
+    id?: true
+    user_id?: true
+    feature_key?: true
+    created_at?: true
+    updated_at?: true
+    _all?: true
+  }
+
+  export type Dashboard_favoriteAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which dashboard_favorite to aggregate.
+     */
+    where?: dashboard_favoriteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of dashboard_favorites to fetch.
+     */
+    orderBy?: dashboard_favoriteOrderByWithRelationInput | dashboard_favoriteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: dashboard_favoriteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` dashboard_favorites from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` dashboard_favorites.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned dashboard_favorites
+    **/
+    _count?: true | Dashboard_favoriteCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: Dashboard_favoriteAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: Dashboard_favoriteSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: Dashboard_favoriteMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: Dashboard_favoriteMaxAggregateInputType
+  }
+
+  export type GetDashboard_favoriteAggregateType<T extends Dashboard_favoriteAggregateArgs> = {
+        [P in keyof T & keyof AggregateDashboard_favorite]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDashboard_favorite[P]>
+      : GetScalarType<T[P], AggregateDashboard_favorite[P]>
+  }
+
+
+
+
+  export type dashboard_favoriteGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: dashboard_favoriteWhereInput
+    orderBy?: dashboard_favoriteOrderByWithAggregationInput | dashboard_favoriteOrderByWithAggregationInput[]
+    by: Dashboard_favoriteScalarFieldEnum[] | Dashboard_favoriteScalarFieldEnum
+    having?: dashboard_favoriteScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: Dashboard_favoriteCountAggregateInputType | true
+    _avg?: Dashboard_favoriteAvgAggregateInputType
+    _sum?: Dashboard_favoriteSumAggregateInputType
+    _min?: Dashboard_favoriteMinAggregateInputType
+    _max?: Dashboard_favoriteMaxAggregateInputType
+  }
+
+  export type Dashboard_favoriteGroupByOutputType = {
+    id: bigint
+    user_id: string
+    feature_key: string
+    created_at: Date
+    updated_at: Date
+    _count: Dashboard_favoriteCountAggregateOutputType | null
+    _avg: Dashboard_favoriteAvgAggregateOutputType | null
+    _sum: Dashboard_favoriteSumAggregateOutputType | null
+    _min: Dashboard_favoriteMinAggregateOutputType | null
+    _max: Dashboard_favoriteMaxAggregateOutputType | null
+  }
+
+  type GetDashboard_favoriteGroupByPayload<T extends dashboard_favoriteGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<Dashboard_favoriteGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof Dashboard_favoriteGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], Dashboard_favoriteGroupByOutputType[P]>
+            : GetScalarType<T[P], Dashboard_favoriteGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type dashboard_favoriteSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    feature_key?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    users?: boolean | usersDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["dashboard_favorite"]>
+
+  export type dashboard_favoriteSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    feature_key?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    users?: boolean | usersDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["dashboard_favorite"]>
+
+  export type dashboard_favoriteSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    feature_key?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    users?: boolean | usersDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["dashboard_favorite"]>
+
+  export type dashboard_favoriteSelectScalar = {
+    id?: boolean
+    user_id?: boolean
+    feature_key?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }
+
+  export type dashboard_favoriteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "user_id" | "feature_key" | "created_at" | "updated_at", ExtArgs["result"]["dashboard_favorite"]>
+  export type dashboard_favoriteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | usersDefaultArgs<ExtArgs>
+  }
+  export type dashboard_favoriteIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | usersDefaultArgs<ExtArgs>
+  }
+  export type dashboard_favoriteIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | usersDefaultArgs<ExtArgs>
+  }
+
+  export type $dashboard_favoritePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "dashboard_favorite"
+    objects: {
+      users: Prisma.$usersPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: bigint
+      user_id: string
+      feature_key: string
+      created_at: Date
+      updated_at: Date
+    }, ExtArgs["result"]["dashboard_favorite"]>
+    composites: {}
+  }
+
+  type dashboard_favoriteGetPayload<S extends boolean | null | undefined | dashboard_favoriteDefaultArgs> = $Result.GetResult<Prisma.$dashboard_favoritePayload, S>
+
+  type dashboard_favoriteCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<dashboard_favoriteFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: Dashboard_favoriteCountAggregateInputType | true
+    }
+
+  export interface dashboard_favoriteDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['dashboard_favorite'], meta: { name: 'dashboard_favorite' } }
+    /**
+     * Find zero or one Dashboard_favorite that matches the filter.
+     * @param {dashboard_favoriteFindUniqueArgs} args - Arguments to find a Dashboard_favorite
+     * @example
+     * // Get one Dashboard_favorite
+     * const dashboard_favorite = await prisma.dashboard_favorite.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends dashboard_favoriteFindUniqueArgs>(args: SelectSubset<T, dashboard_favoriteFindUniqueArgs<ExtArgs>>): Prisma__dashboard_favoriteClient<$Result.GetResult<Prisma.$dashboard_favoritePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Dashboard_favorite that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {dashboard_favoriteFindUniqueOrThrowArgs} args - Arguments to find a Dashboard_favorite
+     * @example
+     * // Get one Dashboard_favorite
+     * const dashboard_favorite = await prisma.dashboard_favorite.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends dashboard_favoriteFindUniqueOrThrowArgs>(args: SelectSubset<T, dashboard_favoriteFindUniqueOrThrowArgs<ExtArgs>>): Prisma__dashboard_favoriteClient<$Result.GetResult<Prisma.$dashboard_favoritePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Dashboard_favorite that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {dashboard_favoriteFindFirstArgs} args - Arguments to find a Dashboard_favorite
+     * @example
+     * // Get one Dashboard_favorite
+     * const dashboard_favorite = await prisma.dashboard_favorite.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends dashboard_favoriteFindFirstArgs>(args?: SelectSubset<T, dashboard_favoriteFindFirstArgs<ExtArgs>>): Prisma__dashboard_favoriteClient<$Result.GetResult<Prisma.$dashboard_favoritePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Dashboard_favorite that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {dashboard_favoriteFindFirstOrThrowArgs} args - Arguments to find a Dashboard_favorite
+     * @example
+     * // Get one Dashboard_favorite
+     * const dashboard_favorite = await prisma.dashboard_favorite.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends dashboard_favoriteFindFirstOrThrowArgs>(args?: SelectSubset<T, dashboard_favoriteFindFirstOrThrowArgs<ExtArgs>>): Prisma__dashboard_favoriteClient<$Result.GetResult<Prisma.$dashboard_favoritePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Dashboard_favorites that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {dashboard_favoriteFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Dashboard_favorites
+     * const dashboard_favorites = await prisma.dashboard_favorite.findMany()
+     * 
+     * // Get first 10 Dashboard_favorites
+     * const dashboard_favorites = await prisma.dashboard_favorite.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const dashboard_favoriteWithIdOnly = await prisma.dashboard_favorite.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends dashboard_favoriteFindManyArgs>(args?: SelectSubset<T, dashboard_favoriteFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$dashboard_favoritePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Dashboard_favorite.
+     * @param {dashboard_favoriteCreateArgs} args - Arguments to create a Dashboard_favorite.
+     * @example
+     * // Create one Dashboard_favorite
+     * const Dashboard_favorite = await prisma.dashboard_favorite.create({
+     *   data: {
+     *     // ... data to create a Dashboard_favorite
+     *   }
+     * })
+     * 
+     */
+    create<T extends dashboard_favoriteCreateArgs>(args: SelectSubset<T, dashboard_favoriteCreateArgs<ExtArgs>>): Prisma__dashboard_favoriteClient<$Result.GetResult<Prisma.$dashboard_favoritePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Dashboard_favorites.
+     * @param {dashboard_favoriteCreateManyArgs} args - Arguments to create many Dashboard_favorites.
+     * @example
+     * // Create many Dashboard_favorites
+     * const dashboard_favorite = await prisma.dashboard_favorite.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends dashboard_favoriteCreateManyArgs>(args?: SelectSubset<T, dashboard_favoriteCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Dashboard_favorites and returns the data saved in the database.
+     * @param {dashboard_favoriteCreateManyAndReturnArgs} args - Arguments to create many Dashboard_favorites.
+     * @example
+     * // Create many Dashboard_favorites
+     * const dashboard_favorite = await prisma.dashboard_favorite.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Dashboard_favorites and only return the `id`
+     * const dashboard_favoriteWithIdOnly = await prisma.dashboard_favorite.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends dashboard_favoriteCreateManyAndReturnArgs>(args?: SelectSubset<T, dashboard_favoriteCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$dashboard_favoritePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Dashboard_favorite.
+     * @param {dashboard_favoriteDeleteArgs} args - Arguments to delete one Dashboard_favorite.
+     * @example
+     * // Delete one Dashboard_favorite
+     * const Dashboard_favorite = await prisma.dashboard_favorite.delete({
+     *   where: {
+     *     // ... filter to delete one Dashboard_favorite
+     *   }
+     * })
+     * 
+     */
+    delete<T extends dashboard_favoriteDeleteArgs>(args: SelectSubset<T, dashboard_favoriteDeleteArgs<ExtArgs>>): Prisma__dashboard_favoriteClient<$Result.GetResult<Prisma.$dashboard_favoritePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Dashboard_favorite.
+     * @param {dashboard_favoriteUpdateArgs} args - Arguments to update one Dashboard_favorite.
+     * @example
+     * // Update one Dashboard_favorite
+     * const dashboard_favorite = await prisma.dashboard_favorite.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends dashboard_favoriteUpdateArgs>(args: SelectSubset<T, dashboard_favoriteUpdateArgs<ExtArgs>>): Prisma__dashboard_favoriteClient<$Result.GetResult<Prisma.$dashboard_favoritePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Dashboard_favorites.
+     * @param {dashboard_favoriteDeleteManyArgs} args - Arguments to filter Dashboard_favorites to delete.
+     * @example
+     * // Delete a few Dashboard_favorites
+     * const { count } = await prisma.dashboard_favorite.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends dashboard_favoriteDeleteManyArgs>(args?: SelectSubset<T, dashboard_favoriteDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Dashboard_favorites.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {dashboard_favoriteUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Dashboard_favorites
+     * const dashboard_favorite = await prisma.dashboard_favorite.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends dashboard_favoriteUpdateManyArgs>(args: SelectSubset<T, dashboard_favoriteUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Dashboard_favorites and returns the data updated in the database.
+     * @param {dashboard_favoriteUpdateManyAndReturnArgs} args - Arguments to update many Dashboard_favorites.
+     * @example
+     * // Update many Dashboard_favorites
+     * const dashboard_favorite = await prisma.dashboard_favorite.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Dashboard_favorites and only return the `id`
+     * const dashboard_favoriteWithIdOnly = await prisma.dashboard_favorite.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends dashboard_favoriteUpdateManyAndReturnArgs>(args: SelectSubset<T, dashboard_favoriteUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$dashboard_favoritePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Dashboard_favorite.
+     * @param {dashboard_favoriteUpsertArgs} args - Arguments to update or create a Dashboard_favorite.
+     * @example
+     * // Update or create a Dashboard_favorite
+     * const dashboard_favorite = await prisma.dashboard_favorite.upsert({
+     *   create: {
+     *     // ... data to create a Dashboard_favorite
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Dashboard_favorite we want to update
+     *   }
+     * })
+     */
+    upsert<T extends dashboard_favoriteUpsertArgs>(args: SelectSubset<T, dashboard_favoriteUpsertArgs<ExtArgs>>): Prisma__dashboard_favoriteClient<$Result.GetResult<Prisma.$dashboard_favoritePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Dashboard_favorites.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {dashboard_favoriteCountArgs} args - Arguments to filter Dashboard_favorites to count.
+     * @example
+     * // Count the number of Dashboard_favorites
+     * const count = await prisma.dashboard_favorite.count({
+     *   where: {
+     *     // ... the filter for the Dashboard_favorites we want to count
+     *   }
+     * })
+    **/
+    count<T extends dashboard_favoriteCountArgs>(
+      args?: Subset<T, dashboard_favoriteCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], Dashboard_favoriteCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Dashboard_favorite.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {Dashboard_favoriteAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends Dashboard_favoriteAggregateArgs>(args: Subset<T, Dashboard_favoriteAggregateArgs>): Prisma.PrismaPromise<GetDashboard_favoriteAggregateType<T>>
+
+    /**
+     * Group by Dashboard_favorite.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {dashboard_favoriteGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends dashboard_favoriteGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: dashboard_favoriteGroupByArgs['orderBy'] }
+        : { orderBy?: dashboard_favoriteGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, dashboard_favoriteGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDashboard_favoriteGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the dashboard_favorite model
+   */
+  readonly fields: dashboard_favoriteFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for dashboard_favorite.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__dashboard_favoriteClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    users<T extends usersDefaultArgs<ExtArgs> = {}>(args?: Subset<T, usersDefaultArgs<ExtArgs>>): Prisma__usersClient<$Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the dashboard_favorite model
+   */
+  interface dashboard_favoriteFieldRefs {
+    readonly id: FieldRef<"dashboard_favorite", 'BigInt'>
+    readonly user_id: FieldRef<"dashboard_favorite", 'String'>
+    readonly feature_key: FieldRef<"dashboard_favorite", 'String'>
+    readonly created_at: FieldRef<"dashboard_favorite", 'DateTime'>
+    readonly updated_at: FieldRef<"dashboard_favorite", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * dashboard_favorite findUnique
+   */
+  export type dashboard_favoriteFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the dashboard_favorite
+     */
+    select?: dashboard_favoriteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the dashboard_favorite
+     */
+    omit?: dashboard_favoriteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: dashboard_favoriteInclude<ExtArgs> | null
+    /**
+     * Filter, which dashboard_favorite to fetch.
+     */
+    where: dashboard_favoriteWhereUniqueInput
+  }
+
+  /**
+   * dashboard_favorite findUniqueOrThrow
+   */
+  export type dashboard_favoriteFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the dashboard_favorite
+     */
+    select?: dashboard_favoriteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the dashboard_favorite
+     */
+    omit?: dashboard_favoriteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: dashboard_favoriteInclude<ExtArgs> | null
+    /**
+     * Filter, which dashboard_favorite to fetch.
+     */
+    where: dashboard_favoriteWhereUniqueInput
+  }
+
+  /**
+   * dashboard_favorite findFirst
+   */
+  export type dashboard_favoriteFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the dashboard_favorite
+     */
+    select?: dashboard_favoriteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the dashboard_favorite
+     */
+    omit?: dashboard_favoriteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: dashboard_favoriteInclude<ExtArgs> | null
+    /**
+     * Filter, which dashboard_favorite to fetch.
+     */
+    where?: dashboard_favoriteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of dashboard_favorites to fetch.
+     */
+    orderBy?: dashboard_favoriteOrderByWithRelationInput | dashboard_favoriteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for dashboard_favorites.
+     */
+    cursor?: dashboard_favoriteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` dashboard_favorites from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` dashboard_favorites.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of dashboard_favorites.
+     */
+    distinct?: Dashboard_favoriteScalarFieldEnum | Dashboard_favoriteScalarFieldEnum[]
+  }
+
+  /**
+   * dashboard_favorite findFirstOrThrow
+   */
+  export type dashboard_favoriteFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the dashboard_favorite
+     */
+    select?: dashboard_favoriteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the dashboard_favorite
+     */
+    omit?: dashboard_favoriteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: dashboard_favoriteInclude<ExtArgs> | null
+    /**
+     * Filter, which dashboard_favorite to fetch.
+     */
+    where?: dashboard_favoriteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of dashboard_favorites to fetch.
+     */
+    orderBy?: dashboard_favoriteOrderByWithRelationInput | dashboard_favoriteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for dashboard_favorites.
+     */
+    cursor?: dashboard_favoriteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` dashboard_favorites from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` dashboard_favorites.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of dashboard_favorites.
+     */
+    distinct?: Dashboard_favoriteScalarFieldEnum | Dashboard_favoriteScalarFieldEnum[]
+  }
+
+  /**
+   * dashboard_favorite findMany
+   */
+  export type dashboard_favoriteFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the dashboard_favorite
+     */
+    select?: dashboard_favoriteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the dashboard_favorite
+     */
+    omit?: dashboard_favoriteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: dashboard_favoriteInclude<ExtArgs> | null
+    /**
+     * Filter, which dashboard_favorites to fetch.
+     */
+    where?: dashboard_favoriteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of dashboard_favorites to fetch.
+     */
+    orderBy?: dashboard_favoriteOrderByWithRelationInput | dashboard_favoriteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing dashboard_favorites.
+     */
+    cursor?: dashboard_favoriteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` dashboard_favorites from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` dashboard_favorites.
+     */
+    skip?: number
+    distinct?: Dashboard_favoriteScalarFieldEnum | Dashboard_favoriteScalarFieldEnum[]
+  }
+
+  /**
+   * dashboard_favorite create
+   */
+  export type dashboard_favoriteCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the dashboard_favorite
+     */
+    select?: dashboard_favoriteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the dashboard_favorite
+     */
+    omit?: dashboard_favoriteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: dashboard_favoriteInclude<ExtArgs> | null
+    /**
+     * The data needed to create a dashboard_favorite.
+     */
+    data: XOR<dashboard_favoriteCreateInput, dashboard_favoriteUncheckedCreateInput>
+  }
+
+  /**
+   * dashboard_favorite createMany
+   */
+  export type dashboard_favoriteCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many dashboard_favorites.
+     */
+    data: dashboard_favoriteCreateManyInput | dashboard_favoriteCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * dashboard_favorite createManyAndReturn
+   */
+  export type dashboard_favoriteCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the dashboard_favorite
+     */
+    select?: dashboard_favoriteSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the dashboard_favorite
+     */
+    omit?: dashboard_favoriteOmit<ExtArgs> | null
+    /**
+     * The data used to create many dashboard_favorites.
+     */
+    data: dashboard_favoriteCreateManyInput | dashboard_favoriteCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: dashboard_favoriteIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * dashboard_favorite update
+   */
+  export type dashboard_favoriteUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the dashboard_favorite
+     */
+    select?: dashboard_favoriteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the dashboard_favorite
+     */
+    omit?: dashboard_favoriteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: dashboard_favoriteInclude<ExtArgs> | null
+    /**
+     * The data needed to update a dashboard_favorite.
+     */
+    data: XOR<dashboard_favoriteUpdateInput, dashboard_favoriteUncheckedUpdateInput>
+    /**
+     * Choose, which dashboard_favorite to update.
+     */
+    where: dashboard_favoriteWhereUniqueInput
+  }
+
+  /**
+   * dashboard_favorite updateMany
+   */
+  export type dashboard_favoriteUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update dashboard_favorites.
+     */
+    data: XOR<dashboard_favoriteUpdateManyMutationInput, dashboard_favoriteUncheckedUpdateManyInput>
+    /**
+     * Filter which dashboard_favorites to update
+     */
+    where?: dashboard_favoriteWhereInput
+    /**
+     * Limit how many dashboard_favorites to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * dashboard_favorite updateManyAndReturn
+   */
+  export type dashboard_favoriteUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the dashboard_favorite
+     */
+    select?: dashboard_favoriteSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the dashboard_favorite
+     */
+    omit?: dashboard_favoriteOmit<ExtArgs> | null
+    /**
+     * The data used to update dashboard_favorites.
+     */
+    data: XOR<dashboard_favoriteUpdateManyMutationInput, dashboard_favoriteUncheckedUpdateManyInput>
+    /**
+     * Filter which dashboard_favorites to update
+     */
+    where?: dashboard_favoriteWhereInput
+    /**
+     * Limit how many dashboard_favorites to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: dashboard_favoriteIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * dashboard_favorite upsert
+   */
+  export type dashboard_favoriteUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the dashboard_favorite
+     */
+    select?: dashboard_favoriteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the dashboard_favorite
+     */
+    omit?: dashboard_favoriteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: dashboard_favoriteInclude<ExtArgs> | null
+    /**
+     * The filter to search for the dashboard_favorite to update in case it exists.
+     */
+    where: dashboard_favoriteWhereUniqueInput
+    /**
+     * In case the dashboard_favorite found by the `where` argument doesn't exist, create a new dashboard_favorite with this data.
+     */
+    create: XOR<dashboard_favoriteCreateInput, dashboard_favoriteUncheckedCreateInput>
+    /**
+     * In case the dashboard_favorite was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<dashboard_favoriteUpdateInput, dashboard_favoriteUncheckedUpdateInput>
+  }
+
+  /**
+   * dashboard_favorite delete
+   */
+  export type dashboard_favoriteDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the dashboard_favorite
+     */
+    select?: dashboard_favoriteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the dashboard_favorite
+     */
+    omit?: dashboard_favoriteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: dashboard_favoriteInclude<ExtArgs> | null
+    /**
+     * Filter which dashboard_favorite to delete.
+     */
+    where: dashboard_favoriteWhereUniqueInput
+  }
+
+  /**
+   * dashboard_favorite deleteMany
+   */
+  export type dashboard_favoriteDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which dashboard_favorites to delete
+     */
+    where?: dashboard_favoriteWhereInput
+    /**
+     * Limit how many dashboard_favorites to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * dashboard_favorite without action
+   */
+  export type dashboard_favoriteDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the dashboard_favorite
+     */
+    select?: dashboard_favoriteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the dashboard_favorite
+     */
+    omit?: dashboard_favoriteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: dashboard_favoriteInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -37912,6 +39132,17 @@ export namespace Prisma {
   };
 
   export type Document_recordScalarFieldEnum = (typeof Document_recordScalarFieldEnum)[keyof typeof Document_recordScalarFieldEnum]
+
+
+  export const Dashboard_favoriteScalarFieldEnum: {
+    id: 'id',
+    user_id: 'user_id',
+    feature_key: 'feature_key',
+    created_at: 'created_at',
+    updated_at: 'updated_at'
+  };
+
+  export type Dashboard_favoriteScalarFieldEnum = (typeof Dashboard_favoriteScalarFieldEnum)[keyof typeof Dashboard_favoriteScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -39816,6 +41047,7 @@ export namespace Prisma {
     webauthn_credentials?: Webauthn_credentialsListRelationFilter
     card?: CardListRelationFilter
     credential_record?: Credential_recordListRelationFilter
+    dashboard_favorite?: Dashboard_favoriteListRelationFilter
     document_access_audit?: Document_access_auditListRelationFilter
     document_record?: Document_recordListRelationFilter
   }
@@ -39866,6 +41098,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsOrderByRelationAggregateInput
     card?: cardOrderByRelationAggregateInput
     credential_record?: credential_recordOrderByRelationAggregateInput
+    dashboard_favorite?: dashboard_favoriteOrderByRelationAggregateInput
     document_access_audit?: document_access_auditOrderByRelationAggregateInput
     document_record?: document_recordOrderByRelationAggregateInput
   }
@@ -39919,6 +41152,7 @@ export namespace Prisma {
     webauthn_credentials?: Webauthn_credentialsListRelationFilter
     card?: CardListRelationFilter
     credential_record?: Credential_recordListRelationFilter
+    dashboard_favorite?: Dashboard_favoriteListRelationFilter
     document_access_audit?: Document_access_auditListRelationFilter
     document_record?: Document_recordListRelationFilter
   }, "id" | "phone">
@@ -40684,6 +41918,64 @@ export namespace Prisma {
     created_at?: DateTimeWithAggregatesFilter<"document_record"> | Date | string
     updated_at?: DateTimeWithAggregatesFilter<"document_record"> | Date | string
     category?: StringNullableWithAggregatesFilter<"document_record"> | string | null
+  }
+
+  export type dashboard_favoriteWhereInput = {
+    AND?: dashboard_favoriteWhereInput | dashboard_favoriteWhereInput[]
+    OR?: dashboard_favoriteWhereInput[]
+    NOT?: dashboard_favoriteWhereInput | dashboard_favoriteWhereInput[]
+    id?: BigIntFilter<"dashboard_favorite"> | bigint | number
+    user_id?: UuidFilter<"dashboard_favorite"> | string
+    feature_key?: StringFilter<"dashboard_favorite"> | string
+    created_at?: DateTimeFilter<"dashboard_favorite"> | Date | string
+    updated_at?: DateTimeFilter<"dashboard_favorite"> | Date | string
+    users?: XOR<UsersScalarRelationFilter, usersWhereInput>
+  }
+
+  export type dashboard_favoriteOrderByWithRelationInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    feature_key?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    users?: usersOrderByWithRelationInput
+  }
+
+  export type dashboard_favoriteWhereUniqueInput = Prisma.AtLeast<{
+    id?: bigint | number
+    user_id_feature_key?: dashboard_favoriteUser_idFeature_keyCompoundUniqueInput
+    AND?: dashboard_favoriteWhereInput | dashboard_favoriteWhereInput[]
+    OR?: dashboard_favoriteWhereInput[]
+    NOT?: dashboard_favoriteWhereInput | dashboard_favoriteWhereInput[]
+    user_id?: UuidFilter<"dashboard_favorite"> | string
+    feature_key?: StringFilter<"dashboard_favorite"> | string
+    created_at?: DateTimeFilter<"dashboard_favorite"> | Date | string
+    updated_at?: DateTimeFilter<"dashboard_favorite"> | Date | string
+    users?: XOR<UsersScalarRelationFilter, usersWhereInput>
+  }, "id" | "user_id_feature_key">
+
+  export type dashboard_favoriteOrderByWithAggregationInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    feature_key?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    _count?: dashboard_favoriteCountOrderByAggregateInput
+    _avg?: dashboard_favoriteAvgOrderByAggregateInput
+    _max?: dashboard_favoriteMaxOrderByAggregateInput
+    _min?: dashboard_favoriteMinOrderByAggregateInput
+    _sum?: dashboard_favoriteSumOrderByAggregateInput
+  }
+
+  export type dashboard_favoriteScalarWhereWithAggregatesInput = {
+    AND?: dashboard_favoriteScalarWhereWithAggregatesInput | dashboard_favoriteScalarWhereWithAggregatesInput[]
+    OR?: dashboard_favoriteScalarWhereWithAggregatesInput[]
+    NOT?: dashboard_favoriteScalarWhereWithAggregatesInput | dashboard_favoriteScalarWhereWithAggregatesInput[]
+    id?: BigIntWithAggregatesFilter<"dashboard_favorite"> | bigint | number
+    user_id?: UuidWithAggregatesFilter<"dashboard_favorite"> | string
+    feature_key?: StringWithAggregatesFilter<"dashboard_favorite"> | string
+    created_at?: DateTimeWithAggregatesFilter<"dashboard_favorite"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"dashboard_favorite"> | Date | string
   }
 
   export type audit_log_entriesCreateInput = {
@@ -42471,6 +43763,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsCreateNestedManyWithoutUsersInput
     card?: cardCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditCreateNestedManyWithoutUsersInput
     document_record?: document_recordCreateNestedManyWithoutUsersInput
   }
@@ -42521,6 +43814,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
     card?: cardUncheckedCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordUncheckedCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteUncheckedCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditUncheckedCreateNestedManyWithoutUsersInput
     document_record?: document_recordUncheckedCreateNestedManyWithoutUsersInput
   }
@@ -42571,6 +43865,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUpdateManyWithoutUsersNestedInput
     card?: cardUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUpdateManyWithoutUsersNestedInput
   }
@@ -42621,6 +43916,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
     card?: cardUncheckedUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUncheckedUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUncheckedUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUncheckedUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUncheckedUpdateManyWithoutUsersNestedInput
   }
@@ -43489,6 +44785,61 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type dashboard_favoriteCreateInput = {
+    id?: bigint | number
+    feature_key: string
+    created_at?: Date | string
+    updated_at?: Date | string
+    users: usersCreateNestedOneWithoutDashboard_favoriteInput
+  }
+
+  export type dashboard_favoriteUncheckedCreateInput = {
+    id?: bigint | number
+    user_id: string
+    feature_key: string
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type dashboard_favoriteUpdateInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    feature_key?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    users?: usersUpdateOneRequiredWithoutDashboard_favoriteNestedInput
+  }
+
+  export type dashboard_favoriteUncheckedUpdateInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    user_id?: StringFieldUpdateOperationsInput | string
+    feature_key?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type dashboard_favoriteCreateManyInput = {
+    id?: bigint | number
+    user_id: string
+    feature_key: string
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type dashboard_favoriteUpdateManyMutationInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    feature_key?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type dashboard_favoriteUncheckedUpdateManyInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    user_id?: StringFieldUpdateOperationsInput | string
+    feature_key?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UuidNullableFilter<$PrismaModel = never> = {
@@ -44945,6 +46296,12 @@ export namespace Prisma {
     none?: credential_recordWhereInput
   }
 
+  export type Dashboard_favoriteListRelationFilter = {
+    every?: dashboard_favoriteWhereInput
+    some?: dashboard_favoriteWhereInput
+    none?: dashboard_favoriteWhereInput
+  }
+
   export type Document_access_auditListRelationFilter = {
     every?: document_access_auditWhereInput
     some?: document_access_auditWhereInput
@@ -44982,6 +46339,10 @@ export namespace Prisma {
   }
 
   export type credential_recordOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type dashboard_favoriteOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -45596,6 +46957,43 @@ export namespace Prisma {
     created_at?: SortOrder
     updated_at?: SortOrder
     category?: SortOrder
+  }
+
+  export type dashboard_favoriteUser_idFeature_keyCompoundUniqueInput = {
+    user_id: string
+    feature_key: string
+  }
+
+  export type dashboard_favoriteCountOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    feature_key?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type dashboard_favoriteAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type dashboard_favoriteMaxOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    feature_key?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type dashboard_favoriteMinOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    feature_key?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type dashboard_favoriteSumOrderByAggregateInput = {
+    id?: SortOrder
   }
 
   export type NullableStringFieldUpdateOperationsInput = {
@@ -46423,6 +47821,13 @@ export namespace Prisma {
     connect?: credential_recordWhereUniqueInput | credential_recordWhereUniqueInput[]
   }
 
+  export type dashboard_favoriteCreateNestedManyWithoutUsersInput = {
+    create?: XOR<dashboard_favoriteCreateWithoutUsersInput, dashboard_favoriteUncheckedCreateWithoutUsersInput> | dashboard_favoriteCreateWithoutUsersInput[] | dashboard_favoriteUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: dashboard_favoriteCreateOrConnectWithoutUsersInput | dashboard_favoriteCreateOrConnectWithoutUsersInput[]
+    createMany?: dashboard_favoriteCreateManyUsersInputEnvelope
+    connect?: dashboard_favoriteWhereUniqueInput | dashboard_favoriteWhereUniqueInput[]
+  }
+
   export type document_access_auditCreateNestedManyWithoutUsersInput = {
     create?: XOR<document_access_auditCreateWithoutUsersInput, document_access_auditUncheckedCreateWithoutUsersInput> | document_access_auditCreateWithoutUsersInput[] | document_access_auditUncheckedCreateWithoutUsersInput[]
     connectOrCreate?: document_access_auditCreateOrConnectWithoutUsersInput | document_access_auditCreateOrConnectWithoutUsersInput[]
@@ -46505,6 +47910,13 @@ export namespace Prisma {
     connectOrCreate?: credential_recordCreateOrConnectWithoutUsersInput | credential_recordCreateOrConnectWithoutUsersInput[]
     createMany?: credential_recordCreateManyUsersInputEnvelope
     connect?: credential_recordWhereUniqueInput | credential_recordWhereUniqueInput[]
+  }
+
+  export type dashboard_favoriteUncheckedCreateNestedManyWithoutUsersInput = {
+    create?: XOR<dashboard_favoriteCreateWithoutUsersInput, dashboard_favoriteUncheckedCreateWithoutUsersInput> | dashboard_favoriteCreateWithoutUsersInput[] | dashboard_favoriteUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: dashboard_favoriteCreateOrConnectWithoutUsersInput | dashboard_favoriteCreateOrConnectWithoutUsersInput[]
+    createMany?: dashboard_favoriteCreateManyUsersInputEnvelope
+    connect?: dashboard_favoriteWhereUniqueInput | dashboard_favoriteWhereUniqueInput[]
   }
 
   export type document_access_auditUncheckedCreateNestedManyWithoutUsersInput = {
@@ -46667,6 +48079,20 @@ export namespace Prisma {
     update?: credential_recordUpdateWithWhereUniqueWithoutUsersInput | credential_recordUpdateWithWhereUniqueWithoutUsersInput[]
     updateMany?: credential_recordUpdateManyWithWhereWithoutUsersInput | credential_recordUpdateManyWithWhereWithoutUsersInput[]
     deleteMany?: credential_recordScalarWhereInput | credential_recordScalarWhereInput[]
+  }
+
+  export type dashboard_favoriteUpdateManyWithoutUsersNestedInput = {
+    create?: XOR<dashboard_favoriteCreateWithoutUsersInput, dashboard_favoriteUncheckedCreateWithoutUsersInput> | dashboard_favoriteCreateWithoutUsersInput[] | dashboard_favoriteUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: dashboard_favoriteCreateOrConnectWithoutUsersInput | dashboard_favoriteCreateOrConnectWithoutUsersInput[]
+    upsert?: dashboard_favoriteUpsertWithWhereUniqueWithoutUsersInput | dashboard_favoriteUpsertWithWhereUniqueWithoutUsersInput[]
+    createMany?: dashboard_favoriteCreateManyUsersInputEnvelope
+    set?: dashboard_favoriteWhereUniqueInput | dashboard_favoriteWhereUniqueInput[]
+    disconnect?: dashboard_favoriteWhereUniqueInput | dashboard_favoriteWhereUniqueInput[]
+    delete?: dashboard_favoriteWhereUniqueInput | dashboard_favoriteWhereUniqueInput[]
+    connect?: dashboard_favoriteWhereUniqueInput | dashboard_favoriteWhereUniqueInput[]
+    update?: dashboard_favoriteUpdateWithWhereUniqueWithoutUsersInput | dashboard_favoriteUpdateWithWhereUniqueWithoutUsersInput[]
+    updateMany?: dashboard_favoriteUpdateManyWithWhereWithoutUsersInput | dashboard_favoriteUpdateManyWithWhereWithoutUsersInput[]
+    deleteMany?: dashboard_favoriteScalarWhereInput | dashboard_favoriteScalarWhereInput[]
   }
 
   export type document_access_auditUpdateManyWithoutUsersNestedInput = {
@@ -46835,6 +48261,20 @@ export namespace Prisma {
     update?: credential_recordUpdateWithWhereUniqueWithoutUsersInput | credential_recordUpdateWithWhereUniqueWithoutUsersInput[]
     updateMany?: credential_recordUpdateManyWithWhereWithoutUsersInput | credential_recordUpdateManyWithWhereWithoutUsersInput[]
     deleteMany?: credential_recordScalarWhereInput | credential_recordScalarWhereInput[]
+  }
+
+  export type dashboard_favoriteUncheckedUpdateManyWithoutUsersNestedInput = {
+    create?: XOR<dashboard_favoriteCreateWithoutUsersInput, dashboard_favoriteUncheckedCreateWithoutUsersInput> | dashboard_favoriteCreateWithoutUsersInput[] | dashboard_favoriteUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: dashboard_favoriteCreateOrConnectWithoutUsersInput | dashboard_favoriteCreateOrConnectWithoutUsersInput[]
+    upsert?: dashboard_favoriteUpsertWithWhereUniqueWithoutUsersInput | dashboard_favoriteUpsertWithWhereUniqueWithoutUsersInput[]
+    createMany?: dashboard_favoriteCreateManyUsersInputEnvelope
+    set?: dashboard_favoriteWhereUniqueInput | dashboard_favoriteWhereUniqueInput[]
+    disconnect?: dashboard_favoriteWhereUniqueInput | dashboard_favoriteWhereUniqueInput[]
+    delete?: dashboard_favoriteWhereUniqueInput | dashboard_favoriteWhereUniqueInput[]
+    connect?: dashboard_favoriteWhereUniqueInput | dashboard_favoriteWhereUniqueInput[]
+    update?: dashboard_favoriteUpdateWithWhereUniqueWithoutUsersInput | dashboard_favoriteUpdateWithWhereUniqueWithoutUsersInput[]
+    updateMany?: dashboard_favoriteUpdateManyWithWhereWithoutUsersInput | dashboard_favoriteUpdateManyWithWhereWithoutUsersInput[]
+    deleteMany?: dashboard_favoriteScalarWhereInput | dashboard_favoriteScalarWhereInput[]
   }
 
   export type document_access_auditUncheckedUpdateManyWithoutUsersNestedInput = {
@@ -47152,6 +48592,20 @@ export namespace Prisma {
     update?: document_fileUpdateWithWhereUniqueWithoutDocument_recordInput | document_fileUpdateWithWhereUniqueWithoutDocument_recordInput[]
     updateMany?: document_fileUpdateManyWithWhereWithoutDocument_recordInput | document_fileUpdateManyWithWhereWithoutDocument_recordInput[]
     deleteMany?: document_fileScalarWhereInput | document_fileScalarWhereInput[]
+  }
+
+  export type usersCreateNestedOneWithoutDashboard_favoriteInput = {
+    create?: XOR<usersCreateWithoutDashboard_favoriteInput, usersUncheckedCreateWithoutDashboard_favoriteInput>
+    connectOrCreate?: usersCreateOrConnectWithoutDashboard_favoriteInput
+    connect?: usersWhereUniqueInput
+  }
+
+  export type usersUpdateOneRequiredWithoutDashboard_favoriteNestedInput = {
+    create?: XOR<usersCreateWithoutDashboard_favoriteInput, usersUncheckedCreateWithoutDashboard_favoriteInput>
+    connectOrCreate?: usersCreateOrConnectWithoutDashboard_favoriteInput
+    upsert?: usersUpsertWithoutDashboard_favoriteInput
+    connect?: usersWhereUniqueInput
+    update?: XOR<XOR<usersUpdateToOneWithWhereWithoutDashboard_favoriteInput, usersUpdateWithoutDashboard_favoriteInput>, usersUncheckedUpdateWithoutDashboard_favoriteInput>
   }
 
   export type NestedUuidNullableFilter<$PrismaModel = never> = {
@@ -47820,6 +49274,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsCreateNestedManyWithoutUsersInput
     card?: cardCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditCreateNestedManyWithoutUsersInput
     document_record?: document_recordCreateNestedManyWithoutUsersInput
   }
@@ -47869,6 +49324,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
     card?: cardUncheckedCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordUncheckedCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteUncheckedCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditUncheckedCreateNestedManyWithoutUsersInput
     document_record?: document_recordUncheckedCreateNestedManyWithoutUsersInput
   }
@@ -47934,6 +49390,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUpdateManyWithoutUsersNestedInput
     card?: cardUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUpdateManyWithoutUsersNestedInput
   }
@@ -47983,6 +49440,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
     card?: cardUncheckedUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUncheckedUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUncheckedUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUncheckedUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUncheckedUpdateManyWithoutUsersNestedInput
   }
@@ -48232,6 +49690,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsCreateNestedManyWithoutUsersInput
     card?: cardCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditCreateNestedManyWithoutUsersInput
     document_record?: document_recordCreateNestedManyWithoutUsersInput
   }
@@ -48281,6 +49740,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
     card?: cardUncheckedCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordUncheckedCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteUncheckedCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditUncheckedCreateNestedManyWithoutUsersInput
     document_record?: document_recordUncheckedCreateNestedManyWithoutUsersInput
   }
@@ -48375,6 +49835,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUpdateManyWithoutUsersNestedInput
     card?: cardUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUpdateManyWithoutUsersNestedInput
   }
@@ -48424,6 +49885,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
     card?: cardUncheckedUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUncheckedUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUncheckedUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUncheckedUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUncheckedUpdateManyWithoutUsersNestedInput
   }
@@ -48514,6 +49976,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsCreateNestedManyWithoutUsersInput
     card?: cardCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditCreateNestedManyWithoutUsersInput
     document_record?: document_recordCreateNestedManyWithoutUsersInput
   }
@@ -48563,6 +50026,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
     card?: cardUncheckedCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordUncheckedCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteUncheckedCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditUncheckedCreateNestedManyWithoutUsersInput
     document_record?: document_recordUncheckedCreateNestedManyWithoutUsersInput
   }
@@ -48675,6 +50139,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUpdateManyWithoutUsersNestedInput
     card?: cardUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUpdateManyWithoutUsersNestedInput
   }
@@ -48724,6 +50189,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
     card?: cardUncheckedUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUncheckedUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUncheckedUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUncheckedUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUncheckedUpdateManyWithoutUsersNestedInput
   }
@@ -49040,6 +50506,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsCreateNestedManyWithoutUsersInput
     card?: cardCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditCreateNestedManyWithoutUsersInput
     document_record?: document_recordCreateNestedManyWithoutUsersInput
   }
@@ -49089,6 +50556,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
     card?: cardUncheckedCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordUncheckedCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteUncheckedCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditUncheckedCreateNestedManyWithoutUsersInput
     document_record?: document_recordUncheckedCreateNestedManyWithoutUsersInput
   }
@@ -49201,6 +50669,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUpdateManyWithoutUsersNestedInput
     card?: cardUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUpdateManyWithoutUsersNestedInput
   }
@@ -49250,6 +50719,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
     card?: cardUncheckedUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUncheckedUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUncheckedUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUncheckedUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUncheckedUpdateManyWithoutUsersNestedInput
   }
@@ -49299,6 +50769,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsCreateNestedManyWithoutUsersInput
     card?: cardCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditCreateNestedManyWithoutUsersInput
     document_record?: document_recordCreateNestedManyWithoutUsersInput
   }
@@ -49348,6 +50819,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
     card?: cardUncheckedCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordUncheckedCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteUncheckedCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditUncheckedCreateNestedManyWithoutUsersInput
     document_record?: document_recordUncheckedCreateNestedManyWithoutUsersInput
   }
@@ -49413,6 +50885,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUpdateManyWithoutUsersNestedInput
     card?: cardUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUpdateManyWithoutUsersNestedInput
   }
@@ -49462,6 +50935,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
     card?: cardUncheckedUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUncheckedUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUncheckedUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUncheckedUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUncheckedUpdateManyWithoutUsersNestedInput
   }
@@ -49908,6 +51382,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsCreateNestedManyWithoutUsersInput
     card?: cardCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditCreateNestedManyWithoutUsersInput
     document_record?: document_recordCreateNestedManyWithoutUsersInput
   }
@@ -49957,6 +51432,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
     card?: cardUncheckedCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordUncheckedCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteUncheckedCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditUncheckedCreateNestedManyWithoutUsersInput
     document_record?: document_recordUncheckedCreateNestedManyWithoutUsersInput
   }
@@ -50127,6 +51603,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUpdateManyWithoutUsersNestedInput
     card?: cardUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUpdateManyWithoutUsersNestedInput
   }
@@ -50176,6 +51653,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
     card?: cardUncheckedUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUncheckedUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUncheckedUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUncheckedUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUncheckedUpdateManyWithoutUsersNestedInput
   }
@@ -50780,6 +52258,30 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type dashboard_favoriteCreateWithoutUsersInput = {
+    id?: bigint | number
+    feature_key: string
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type dashboard_favoriteUncheckedCreateWithoutUsersInput = {
+    id?: bigint | number
+    feature_key: string
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type dashboard_favoriteCreateOrConnectWithoutUsersInput = {
+    where: dashboard_favoriteWhereUniqueInput
+    create: XOR<dashboard_favoriteCreateWithoutUsersInput, dashboard_favoriteUncheckedCreateWithoutUsersInput>
+  }
+
+  export type dashboard_favoriteCreateManyUsersInputEnvelope = {
+    data: dashboard_favoriteCreateManyUsersInput | dashboard_favoriteCreateManyUsersInput[]
+    skipDuplicates?: boolean
+  }
+
   export type document_access_auditCreateWithoutUsersInput = {
     id?: bigint | number
     action: string
@@ -51135,6 +52637,33 @@ export namespace Prisma {
     updated_at?: DateTimeFilter<"credential_record"> | Date | string
   }
 
+  export type dashboard_favoriteUpsertWithWhereUniqueWithoutUsersInput = {
+    where: dashboard_favoriteWhereUniqueInput
+    update: XOR<dashboard_favoriteUpdateWithoutUsersInput, dashboard_favoriteUncheckedUpdateWithoutUsersInput>
+    create: XOR<dashboard_favoriteCreateWithoutUsersInput, dashboard_favoriteUncheckedCreateWithoutUsersInput>
+  }
+
+  export type dashboard_favoriteUpdateWithWhereUniqueWithoutUsersInput = {
+    where: dashboard_favoriteWhereUniqueInput
+    data: XOR<dashboard_favoriteUpdateWithoutUsersInput, dashboard_favoriteUncheckedUpdateWithoutUsersInput>
+  }
+
+  export type dashboard_favoriteUpdateManyWithWhereWithoutUsersInput = {
+    where: dashboard_favoriteScalarWhereInput
+    data: XOR<dashboard_favoriteUpdateManyMutationInput, dashboard_favoriteUncheckedUpdateManyWithoutUsersInput>
+  }
+
+  export type dashboard_favoriteScalarWhereInput = {
+    AND?: dashboard_favoriteScalarWhereInput | dashboard_favoriteScalarWhereInput[]
+    OR?: dashboard_favoriteScalarWhereInput[]
+    NOT?: dashboard_favoriteScalarWhereInput | dashboard_favoriteScalarWhereInput[]
+    id?: BigIntFilter<"dashboard_favorite"> | bigint | number
+    user_id?: UuidFilter<"dashboard_favorite"> | string
+    feature_key?: StringFilter<"dashboard_favorite"> | string
+    created_at?: DateTimeFilter<"dashboard_favorite"> | Date | string
+    updated_at?: DateTimeFilter<"dashboard_favorite"> | Date | string
+  }
+
   export type document_access_auditUpsertWithWhereUniqueWithoutUsersInput = {
     where: document_access_auditWhereUniqueInput
     update: XOR<document_access_auditUpdateWithoutUsersInput, document_access_auditUncheckedUpdateWithoutUsersInput>
@@ -51244,6 +52773,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsCreateNestedManyWithoutUsersInput
     card?: cardCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditCreateNestedManyWithoutUsersInput
     document_record?: document_recordCreateNestedManyWithoutUsersInput
   }
@@ -51293,6 +52823,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
     card?: cardUncheckedCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordUncheckedCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteUncheckedCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditUncheckedCreateNestedManyWithoutUsersInput
     document_record?: document_recordUncheckedCreateNestedManyWithoutUsersInput
   }
@@ -51358,6 +52889,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUpdateManyWithoutUsersNestedInput
     card?: cardUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUpdateManyWithoutUsersNestedInput
   }
@@ -51407,6 +52939,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
     card?: cardUncheckedUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUncheckedUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUncheckedUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUncheckedUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUncheckedUpdateManyWithoutUsersNestedInput
   }
@@ -51456,6 +52989,7 @@ export namespace Prisma {
     webauthn_challenges?: webauthn_challengesCreateNestedManyWithoutUsersInput
     card?: cardCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditCreateNestedManyWithoutUsersInput
     document_record?: document_recordCreateNestedManyWithoutUsersInput
   }
@@ -51505,6 +53039,7 @@ export namespace Prisma {
     webauthn_challenges?: webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
     card?: cardUncheckedCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordUncheckedCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteUncheckedCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditUncheckedCreateNestedManyWithoutUsersInput
     document_record?: document_recordUncheckedCreateNestedManyWithoutUsersInput
   }
@@ -51570,6 +53105,7 @@ export namespace Prisma {
     webauthn_challenges?: webauthn_challengesUpdateManyWithoutUsersNestedInput
     card?: cardUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUpdateManyWithoutUsersNestedInput
   }
@@ -51619,6 +53155,7 @@ export namespace Prisma {
     webauthn_challenges?: webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
     card?: cardUncheckedUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUncheckedUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUncheckedUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUncheckedUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUncheckedUpdateManyWithoutUsersNestedInput
   }
@@ -51668,6 +53205,7 @@ export namespace Prisma {
     webauthn_challenges?: webauthn_challengesCreateNestedManyWithoutUsersInput
     webauthn_credentials?: webauthn_credentialsCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditCreateNestedManyWithoutUsersInput
     document_record?: document_recordCreateNestedManyWithoutUsersInput
   }
@@ -51717,6 +53255,7 @@ export namespace Prisma {
     webauthn_challenges?: webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
     webauthn_credentials?: webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordUncheckedCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteUncheckedCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditUncheckedCreateNestedManyWithoutUsersInput
     document_record?: document_recordUncheckedCreateNestedManyWithoutUsersInput
   }
@@ -51801,6 +53340,7 @@ export namespace Prisma {
     webauthn_challenges?: webauthn_challengesUpdateManyWithoutUsersNestedInput
     webauthn_credentials?: webauthn_credentialsUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUpdateManyWithoutUsersNestedInput
   }
@@ -51850,6 +53390,7 @@ export namespace Prisma {
     webauthn_challenges?: webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
     webauthn_credentials?: webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUncheckedUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUncheckedUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUncheckedUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUncheckedUpdateManyWithoutUsersNestedInput
   }
@@ -51990,6 +53531,7 @@ export namespace Prisma {
     webauthn_challenges?: webauthn_challengesCreateNestedManyWithoutUsersInput
     webauthn_credentials?: webauthn_credentialsCreateNestedManyWithoutUsersInput
     card?: cardCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditCreateNestedManyWithoutUsersInput
     document_record?: document_recordCreateNestedManyWithoutUsersInput
   }
@@ -52039,6 +53581,7 @@ export namespace Prisma {
     webauthn_challenges?: webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
     webauthn_credentials?: webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
     card?: cardUncheckedCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteUncheckedCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditUncheckedCreateNestedManyWithoutUsersInput
     document_record?: document_recordUncheckedCreateNestedManyWithoutUsersInput
   }
@@ -52104,6 +53647,7 @@ export namespace Prisma {
     webauthn_challenges?: webauthn_challengesUpdateManyWithoutUsersNestedInput
     webauthn_credentials?: webauthn_credentialsUpdateManyWithoutUsersNestedInput
     card?: cardUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUpdateManyWithoutUsersNestedInput
   }
@@ -52153,6 +53697,7 @@ export namespace Prisma {
     webauthn_challenges?: webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
     webauthn_credentials?: webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
     card?: cardUncheckedUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUncheckedUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUncheckedUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUncheckedUpdateManyWithoutUsersNestedInput
   }
@@ -52203,6 +53748,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsCreateNestedManyWithoutUsersInput
     card?: cardCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteCreateNestedManyWithoutUsersInput
     document_record?: document_recordCreateNestedManyWithoutUsersInput
   }
 
@@ -52252,6 +53798,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
     card?: cardUncheckedCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordUncheckedCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteUncheckedCreateNestedManyWithoutUsersInput
     document_record?: document_recordUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -52358,6 +53905,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUpdateManyWithoutUsersNestedInput
     card?: cardUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUpdateManyWithoutUsersNestedInput
   }
 
@@ -52407,6 +53955,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
     card?: cardUncheckedUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUncheckedUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUncheckedUpdateManyWithoutUsersNestedInput
     document_record?: document_recordUncheckedUpdateManyWithoutUsersNestedInput
   }
 
@@ -52645,6 +54194,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsCreateNestedManyWithoutUsersInput
     card?: cardCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditCreateNestedManyWithoutUsersInput
   }
 
@@ -52694,6 +54244,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
     card?: cardUncheckedCreateNestedManyWithoutUsersInput
     credential_record?: credential_recordUncheckedCreateNestedManyWithoutUsersInput
+    dashboard_favorite?: dashboard_favoriteUncheckedCreateNestedManyWithoutUsersInput
     document_access_audit?: document_access_auditUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -52804,6 +54355,7 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUpdateManyWithoutUsersNestedInput
     card?: cardUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUpdateManyWithoutUsersNestedInput
   }
 
@@ -52853,7 +54405,224 @@ export namespace Prisma {
     webauthn_credentials?: webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
     card?: cardUncheckedUpdateManyWithoutUsersNestedInput
     credential_record?: credential_recordUncheckedUpdateManyWithoutUsersNestedInput
+    dashboard_favorite?: dashboard_favoriteUncheckedUpdateManyWithoutUsersNestedInput
     document_access_audit?: document_access_auditUncheckedUpdateManyWithoutUsersNestedInput
+  }
+
+  export type usersCreateWithoutDashboard_favoriteInput = {
+    instance_id?: string | null
+    id: string
+    aud?: string | null
+    role?: string | null
+    email?: string | null
+    encrypted_password?: string | null
+    email_confirmed_at?: Date | string | null
+    invited_at?: Date | string | null
+    confirmation_token?: string | null
+    confirmation_sent_at?: Date | string | null
+    recovery_token?: string | null
+    recovery_sent_at?: Date | string | null
+    email_change_token_new?: string | null
+    email_change?: string | null
+    email_change_sent_at?: Date | string | null
+    last_sign_in_at?: Date | string | null
+    raw_app_meta_data?: NullableJsonNullValueInput | InputJsonValue
+    raw_user_meta_data?: NullableJsonNullValueInput | InputJsonValue
+    is_super_admin?: boolean | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    phone?: string | null
+    phone_confirmed_at?: Date | string | null
+    phone_change?: string | null
+    phone_change_token?: string | null
+    phone_change_sent_at?: Date | string | null
+    confirmed_at?: Date | string | null
+    email_change_token_current?: string | null
+    email_change_confirm_status?: number | null
+    banned_until?: Date | string | null
+    reauthentication_token?: string | null
+    reauthentication_sent_at?: Date | string | null
+    is_sso_user?: boolean
+    deleted_at?: Date | string | null
+    is_anonymous?: boolean
+    identities?: identitiesCreateNestedManyWithoutUsersInput
+    mfa_factors?: mfa_factorsCreateNestedManyWithoutUsersInput
+    oauth_authorizations?: oauth_authorizationsCreateNestedManyWithoutUsersInput
+    oauth_consents?: oauth_consentsCreateNestedManyWithoutUsersInput
+    one_time_tokens?: one_time_tokensCreateNestedManyWithoutUsersInput
+    sessions?: sessionsCreateNestedManyWithoutUsersInput
+    webauthn_challenges?: webauthn_challengesCreateNestedManyWithoutUsersInput
+    webauthn_credentials?: webauthn_credentialsCreateNestedManyWithoutUsersInput
+    card?: cardCreateNestedManyWithoutUsersInput
+    credential_record?: credential_recordCreateNestedManyWithoutUsersInput
+    document_access_audit?: document_access_auditCreateNestedManyWithoutUsersInput
+    document_record?: document_recordCreateNestedManyWithoutUsersInput
+  }
+
+  export type usersUncheckedCreateWithoutDashboard_favoriteInput = {
+    instance_id?: string | null
+    id: string
+    aud?: string | null
+    role?: string | null
+    email?: string | null
+    encrypted_password?: string | null
+    email_confirmed_at?: Date | string | null
+    invited_at?: Date | string | null
+    confirmation_token?: string | null
+    confirmation_sent_at?: Date | string | null
+    recovery_token?: string | null
+    recovery_sent_at?: Date | string | null
+    email_change_token_new?: string | null
+    email_change?: string | null
+    email_change_sent_at?: Date | string | null
+    last_sign_in_at?: Date | string | null
+    raw_app_meta_data?: NullableJsonNullValueInput | InputJsonValue
+    raw_user_meta_data?: NullableJsonNullValueInput | InputJsonValue
+    is_super_admin?: boolean | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    phone?: string | null
+    phone_confirmed_at?: Date | string | null
+    phone_change?: string | null
+    phone_change_token?: string | null
+    phone_change_sent_at?: Date | string | null
+    confirmed_at?: Date | string | null
+    email_change_token_current?: string | null
+    email_change_confirm_status?: number | null
+    banned_until?: Date | string | null
+    reauthentication_token?: string | null
+    reauthentication_sent_at?: Date | string | null
+    is_sso_user?: boolean
+    deleted_at?: Date | string | null
+    is_anonymous?: boolean
+    identities?: identitiesUncheckedCreateNestedManyWithoutUsersInput
+    mfa_factors?: mfa_factorsUncheckedCreateNestedManyWithoutUsersInput
+    oauth_authorizations?: oauth_authorizationsUncheckedCreateNestedManyWithoutUsersInput
+    oauth_consents?: oauth_consentsUncheckedCreateNestedManyWithoutUsersInput
+    one_time_tokens?: one_time_tokensUncheckedCreateNestedManyWithoutUsersInput
+    sessions?: sessionsUncheckedCreateNestedManyWithoutUsersInput
+    webauthn_challenges?: webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
+    webauthn_credentials?: webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
+    card?: cardUncheckedCreateNestedManyWithoutUsersInput
+    credential_record?: credential_recordUncheckedCreateNestedManyWithoutUsersInput
+    document_access_audit?: document_access_auditUncheckedCreateNestedManyWithoutUsersInput
+    document_record?: document_recordUncheckedCreateNestedManyWithoutUsersInput
+  }
+
+  export type usersCreateOrConnectWithoutDashboard_favoriteInput = {
+    where: usersWhereUniqueInput
+    create: XOR<usersCreateWithoutDashboard_favoriteInput, usersUncheckedCreateWithoutDashboard_favoriteInput>
+  }
+
+  export type usersUpsertWithoutDashboard_favoriteInput = {
+    update: XOR<usersUpdateWithoutDashboard_favoriteInput, usersUncheckedUpdateWithoutDashboard_favoriteInput>
+    create: XOR<usersCreateWithoutDashboard_favoriteInput, usersUncheckedCreateWithoutDashboard_favoriteInput>
+    where?: usersWhereInput
+  }
+
+  export type usersUpdateToOneWithWhereWithoutDashboard_favoriteInput = {
+    where?: usersWhereInput
+    data: XOR<usersUpdateWithoutDashboard_favoriteInput, usersUncheckedUpdateWithoutDashboard_favoriteInput>
+  }
+
+  export type usersUpdateWithoutDashboard_favoriteInput = {
+    instance_id?: NullableStringFieldUpdateOperationsInput | string | null
+    id?: StringFieldUpdateOperationsInput | string
+    aud?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    encrypted_password?: NullableStringFieldUpdateOperationsInput | string | null
+    email_confirmed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invited_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation_token?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmation_sent_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    recovery_token?: NullableStringFieldUpdateOperationsInput | string | null
+    recovery_sent_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email_change_token_new?: NullableStringFieldUpdateOperationsInput | string | null
+    email_change?: NullableStringFieldUpdateOperationsInput | string | null
+    email_change_sent_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    last_sign_in_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    raw_app_meta_data?: NullableJsonNullValueInput | InputJsonValue
+    raw_user_meta_data?: NullableJsonNullValueInput | InputJsonValue
+    is_super_admin?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phone_confirmed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phone_change?: NullableStringFieldUpdateOperationsInput | string | null
+    phone_change_token?: NullableStringFieldUpdateOperationsInput | string | null
+    phone_change_sent_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email_change_token_current?: NullableStringFieldUpdateOperationsInput | string | null
+    email_change_confirm_status?: NullableIntFieldUpdateOperationsInput | number | null
+    banned_until?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reauthentication_token?: NullableStringFieldUpdateOperationsInput | string | null
+    reauthentication_sent_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is_sso_user?: BoolFieldUpdateOperationsInput | boolean
+    deleted_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is_anonymous?: BoolFieldUpdateOperationsInput | boolean
+    identities?: identitiesUpdateManyWithoutUsersNestedInput
+    mfa_factors?: mfa_factorsUpdateManyWithoutUsersNestedInput
+    oauth_authorizations?: oauth_authorizationsUpdateManyWithoutUsersNestedInput
+    oauth_consents?: oauth_consentsUpdateManyWithoutUsersNestedInput
+    one_time_tokens?: one_time_tokensUpdateManyWithoutUsersNestedInput
+    sessions?: sessionsUpdateManyWithoutUsersNestedInput
+    webauthn_challenges?: webauthn_challengesUpdateManyWithoutUsersNestedInput
+    webauthn_credentials?: webauthn_credentialsUpdateManyWithoutUsersNestedInput
+    card?: cardUpdateManyWithoutUsersNestedInput
+    credential_record?: credential_recordUpdateManyWithoutUsersNestedInput
+    document_access_audit?: document_access_auditUpdateManyWithoutUsersNestedInput
+    document_record?: document_recordUpdateManyWithoutUsersNestedInput
+  }
+
+  export type usersUncheckedUpdateWithoutDashboard_favoriteInput = {
+    instance_id?: NullableStringFieldUpdateOperationsInput | string | null
+    id?: StringFieldUpdateOperationsInput | string
+    aud?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    encrypted_password?: NullableStringFieldUpdateOperationsInput | string | null
+    email_confirmed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invited_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation_token?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmation_sent_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    recovery_token?: NullableStringFieldUpdateOperationsInput | string | null
+    recovery_sent_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email_change_token_new?: NullableStringFieldUpdateOperationsInput | string | null
+    email_change?: NullableStringFieldUpdateOperationsInput | string | null
+    email_change_sent_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    last_sign_in_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    raw_app_meta_data?: NullableJsonNullValueInput | InputJsonValue
+    raw_user_meta_data?: NullableJsonNullValueInput | InputJsonValue
+    is_super_admin?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    phone_confirmed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phone_change?: NullableStringFieldUpdateOperationsInput | string | null
+    phone_change_token?: NullableStringFieldUpdateOperationsInput | string | null
+    phone_change_sent_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email_change_token_current?: NullableStringFieldUpdateOperationsInput | string | null
+    email_change_confirm_status?: NullableIntFieldUpdateOperationsInput | number | null
+    banned_until?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reauthentication_token?: NullableStringFieldUpdateOperationsInput | string | null
+    reauthentication_sent_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is_sso_user?: BoolFieldUpdateOperationsInput | boolean
+    deleted_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is_anonymous?: BoolFieldUpdateOperationsInput | boolean
+    identities?: identitiesUncheckedUpdateManyWithoutUsersNestedInput
+    mfa_factors?: mfa_factorsUncheckedUpdateManyWithoutUsersNestedInput
+    oauth_authorizations?: oauth_authorizationsUncheckedUpdateManyWithoutUsersNestedInput
+    oauth_consents?: oauth_consentsUncheckedUpdateManyWithoutUsersNestedInput
+    one_time_tokens?: one_time_tokensUncheckedUpdateManyWithoutUsersNestedInput
+    sessions?: sessionsUncheckedUpdateManyWithoutUsersNestedInput
+    webauthn_challenges?: webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
+    webauthn_credentials?: webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
+    card?: cardUncheckedUpdateManyWithoutUsersNestedInput
+    credential_record?: credential_recordUncheckedUpdateManyWithoutUsersNestedInput
+    document_access_audit?: document_access_auditUncheckedUpdateManyWithoutUsersNestedInput
+    document_record?: document_recordUncheckedUpdateManyWithoutUsersNestedInput
   }
 
   export type saml_relay_statesCreateManyFlow_stateInput = {
@@ -53435,6 +55204,13 @@ export namespace Prisma {
     updated_at?: Date | string
   }
 
+  export type dashboard_favoriteCreateManyUsersInput = {
+    id?: bigint | number
+    feature_key: string
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
   export type document_access_auditCreateManyUsersInput = {
     id?: bigint | number
     document_id?: string | null
@@ -53878,6 +55654,27 @@ export namespace Prisma {
     url?: NullableStringFieldUpdateOperationsInput | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type dashboard_favoriteUpdateWithoutUsersInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    feature_key?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type dashboard_favoriteUncheckedUpdateWithoutUsersInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    feature_key?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type dashboard_favoriteUncheckedUpdateManyWithoutUsersInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    feature_key?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }

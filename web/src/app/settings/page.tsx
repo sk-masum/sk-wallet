@@ -297,8 +297,8 @@ export default function SettingsPage() {
                 </div>
                 <span
                   className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${biometricSupported
-                      ? 'border-emerald-400/35 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
-                      : 'border-border/70 bg-background/80 text-muted-foreground'
+                    ? 'border-emerald-400/35 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                    : 'border-border/70 bg-background/80 text-muted-foreground'
                     }`}
                 >
                   {biometricSupported ? 'Supported' : 'Unsupported'}
@@ -357,7 +357,6 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <BottomTabBar />
     </main>
   )
 }

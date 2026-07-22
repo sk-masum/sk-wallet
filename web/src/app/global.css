@@ -107,3 +107,12 @@ body {
 .dark .ios-pwa-statusbar-bg {
   background: #030816;
 }
+
+/* Prevent iOS Safari/PWA auto-zoom when focusing small form fields. */
+@supports (-webkit-touch-callout: none) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}

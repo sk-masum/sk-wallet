@@ -8,13 +8,14 @@ import { DeleteConfirmDialog } from '@/components/shared/delete-confirm-dialog'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
 import { Dialog } from '@/components/ui/dialog'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { ChevronDown, ChevronRight, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, Eye, EyeOff, Pencil, Star, Trash2 } from 'lucide-react'
 import { CARD_STATUS_OPTIONS, isCardStatus } from '@/constants/card/status'
 import type { WalletCard } from '@/models/card'
 import { clientApiDelete, clientApiPatch } from '@/lib/api/client'
 import { showToast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 import { resolveNetworkLabel } from '@/utils/card/network'
+import { useDashboardFavorites } from '@/components/dashboard/use-dashboard-favorites'
 
 type CardGridProps = {
   cards: WalletCard[]
@@ -23,6 +24,7 @@ type CardGridProps = {
 
 export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
   const router = useRouter()
+  const { hydrated, isFavorite, toggleFavorite } = useDashboardFavorites()
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -270,6 +272,36 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
                 ) : null}
 
                 <div className="grid grid-cols-2 gap-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={buttonVariants({
+                      variant: 'outline',
+                      size: 'sm',
+                      className:
+                        'h-11 justify-start rounded-xl border-border/70 bg-background/85 px-3 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]',
+                    })}
+                    onClick={() => {
+                      if (!selectedCard) return
+                      toggleFavorite(`card:${selectedCard.id}`)
+                    }}
+                  >
+                    <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                      <Star
+                        className={cn(
+                          'h-3.5 w-3.5',
+                          selectedCard && hydrated && isFavorite(`card:${selectedCard.id}`)
+                            ? 'fill-amber-500 text-amber-500'
+                            : ''
+                        )}
+                      />
+                    </span>
+                    {selectedCard && hydrated && isFavorite(`card:${selectedCard.id}`)
+                      ? 'Remove favourite'
+                      : 'Add favourite'}
+                  </Button>
+
                   <Button
                     type="button"
                     variant="outline"

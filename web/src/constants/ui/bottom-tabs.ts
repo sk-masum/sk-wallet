@@ -19,10 +19,4 @@ export const BOTTOM_TABS = [
     icon: KeyRound,
     match: (pathname: string) => pathname.startsWith('/credential'),
   },
-  {
-    href: '/settings',
-    label: 'Settings',
-    icon: Settings,
-    match: (pathname: string) => pathname.startsWith('/settings'),
-  },
 ]

@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Star, Trash2 } from 'lucide-react'
 
+import { useDashboardFavorites } from '@/components/dashboard/use-dashboard-favorites'
 import NoDocIcon from '@/components/icons/nodoc-icon'
 import { DeleteConfirmDialog } from '@/components/shared/delete-confirm-dialog'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
@@ -82,6 +83,7 @@ function getCustomMetadataEntries(metadata: Record<string, unknown> | null | und
 
 export function DocumentVault({ initialDocuments, initialError = '' }: DocumentVaultProps) {
   const router = useRouter()
+  const { hydrated, isFavorite, toggleFavorite } = useDashboardFavorites()
   const searchParams = useSearchParams()
   const [documents, setDocuments] = useState<UserDocument[]>(initialDocuments)
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null)
@@ -475,7 +477,25 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
                     </div>
                   ) : null}
 
-                  <div className="grid grid-cols-2 gap-2 pt-2">
+                  <div className="grid grid-cols-1 gap-2 pt-2 sm:grid-cols-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleFavorite(`document:${selectedDocument.id}`)}
+                    >
+                      <Star
+                        className={cn(
+                          'mr-1 h-4 w-4',
+                          hydrated && isFavorite(`document:${selectedDocument.id}`)
+                            ? 'fill-amber-500 text-amber-500'
+                            : ''
+                        )}
+                      />
+                      {hydrated && isFavorite(`document:${selectedDocument.id}`)
+                        ? 'Unfavourite'
+                        : 'Favourite'}
+                    </Button>
                     <Button
                       type="button"
                       variant="outline"

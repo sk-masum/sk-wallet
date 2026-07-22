@@ -510,6 +510,14 @@ exports.Prisma.Document_recordScalarFieldEnum = {
   category: 'category'
 };
 
+exports.Prisma.Dashboard_favoriteScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  feature_key: 'feature_key',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -620,7 +628,8 @@ exports.Prisma.ModelName = {
   credential_record: 'credential_record',
   document_access_audit: 'document_access_audit',
   document_file: 'document_file',
-  document_record: 'document_record'
+  document_record: 'document_record',
+  dashboard_favorite: 'dashboard_favorite'
 };
 
 /**

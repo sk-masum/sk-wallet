@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Check, Copy, LoaderCircle, Pencil, Trash2 } from 'lucide-react'
+import { Check, Copy, LoaderCircle, Pencil, Star, Trash2 } from 'lucide-react'
 
 import NoDocIcon from '@/components/icons/nodoc-icon'
+import { useDashboardFavorites } from '@/components/dashboard/use-dashboard-favorites'
 import { DeleteConfirmDialog } from '@/components/shared/delete-confirm-dialog'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
 import { Button } from '@/components/ui/button'
@@ -52,6 +53,7 @@ function formatDateTime(value: string | null | undefined) {
 
 export function CredentialVault({ initialCredentials, initialError = '' }: CredentialVaultProps) {
     const router = useRouter()
+    const { hydrated, isFavorite, toggleFavorite } = useDashboardFavorites()
     const searchParams = useSearchParams()
     const [credentials, setCredentials] = useState<UserCredential[]>(initialCredentials)
     const [selectedCredentialId, setSelectedCredentialId] = useState<string | null>(null)
@@ -385,7 +387,25 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
                                     <p className="whitespace-pre-wrap">{selectedCredential.notes || 'N/A'}</p>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-2 pt-2">
+                                <div className="grid grid-cols-1 gap-2 pt-2 sm:grid-cols-3">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => toggleFavorite(`credential:${selectedCredential.id}`)}
+                                    >
+                                        <Star
+                                            className={cn(
+                                                'mr-1 h-4 w-4',
+                                                hydrated && isFavorite(`credential:${selectedCredential.id}`)
+                                                    ? 'fill-amber-500 text-amber-500'
+                                                    : ''
+                                            )}
+                                        />
+                                        {hydrated && isFavorite(`credential:${selectedCredential.id}`)
+                                            ? 'Unfavourite'
+                                            : 'Favourite'}
+                                    </Button>
                                     <Button
                                         type="button"
                                         variant="outline"
