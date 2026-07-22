@@ -19,9 +19,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  if ((pathname === '/auth' || pathname === '/') && user) {
+  if (pathname === '/auth' && user) {
+    const nextPath = request.nextUrl.searchParams.get('next')
+    const safeNextPath =
+      nextPath && nextPath.startsWith('/') && !nextPath.startsWith('//') && nextPath !== '/auth'
+        ? nextPath
+        : '/'
+
     const url = request.nextUrl.clone()
-    url.pathname = '/card'
+    url.pathname = safeNextPath
+    url.search = ''
     return NextResponse.redirect(url)
   }
 

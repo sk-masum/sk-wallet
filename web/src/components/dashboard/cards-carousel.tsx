@@ -27,7 +27,7 @@ export function CardsCarousel({ cards }: CardsCarouselProps) {
 
                 return (
                     <MiniVerticalCarouselCard
-                        href={card.href}
+                        href={`/card/${card.id}`}
                         title={card.maskedNumber}
                         subtitle={card.name}
                         className={`min-w-44 border-white/20 ${theme.surface}`}
