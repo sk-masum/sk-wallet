@@ -16,9 +16,13 @@ import {
   BIOMETRIC_CREDENTIAL_STORAGE_KEY,
   BIOMETRIC_SESSION_UNLOCK_KEY,
   BIOMETRIC_STORAGE_KEY,
+  clearBiometricVault,
+  initializeBiometricVault,
+  isBiometricVaultProvisioned,
   isPlatformAuthenticatorAvailable,
+  lockBiometricVault,
   registerBiometricCredential,
-  verifyBiometricCredential,
+  unlockBiometricVault,
 } from '@/lib/biometric'
 import { getBrowserUser, signOutBrowserSession } from '@/lib/supabase/browser-auth'
 
@@ -109,7 +113,7 @@ export default function SettingsPage() {
     }
 
     try {
-      const verified = await verifyBiometricCredential()
+      const verified = await unlockBiometricVault()
       if (!verified) {
         setBiometricMessage('Biometric verification was cancelled.')
         return false
@@ -132,6 +136,20 @@ export default function SettingsPage() {
       const registered = credentialId ? true : await registerBiometric()
 
       if (registered) {
+        const vaultProvisioned = await isBiometricVaultProvisioned()
+        if (!vaultProvisioned) {
+          await initializeBiometricVault()
+        }
+
+        const unlocked = await unlockBiometricVault()
+        if (!unlocked) {
+          setBiometricEnabled(false)
+          localStorage.setItem(BIOMETRIC_STORAGE_KEY, 'false')
+          setBiometricMessage('Biometric setup requires one successful verification.')
+          setIsBiometricBusy(false)
+          return
+        }
+
         setBiometricEnabled(true)
         localStorage.setItem(BIOMETRIC_STORAGE_KEY, 'true')
         setBiometricMessage('Biometric unlock enabled for this device.')
@@ -144,6 +162,7 @@ export default function SettingsPage() {
       localStorage.setItem(BIOMETRIC_STORAGE_KEY, 'false')
       localStorage.removeItem(BIOMETRIC_CREDENTIAL_STORAGE_KEY)
       sessionStorage.removeItem(BIOMETRIC_SESSION_UNLOCK_KEY)
+      await clearBiometricVault()
       setBiometricMessage('Biometric unlock disabled for this device.')
     }
 
@@ -156,6 +175,7 @@ export default function SettingsPage() {
     setIsSigningOut(true)
 
     try {
+      lockBiometricVault()
       sessionStorage.removeItem(BIOMETRIC_SESSION_UNLOCK_KEY)
       const { error } = await signOutBrowserSession()
 

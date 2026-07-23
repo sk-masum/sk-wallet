@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ArrowUpDown, CreditCard, Layers3, Network } from 'lucide-react'
 
 import {
@@ -14,212 +13,96 @@ import {
 } from '@/components/shared/listing-filter-panels'
 import { ListingFilterTopBar } from '@/components/shared/listing-filter-topbar'
 import { CardTypeButtonGroup } from '@/components/ui/card-type-button-group'
-import { NetworkFilterDropdown } from '@/components/ui/network-filter-dropdown'
-import { ProviderFilterDropdown } from '@/components/ui/provider-filter-dropdown'
-import { TagFilterDropdown } from '@/components/ui/tag-filter-dropdown'
-import { CardSortDropdown } from '@/components/ui/card-sort-dropdown'
-import { CardGroupDropdown } from '@/components/ui/card-group-dropdown'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+    selectCardFilterMeta,
+    useCardVaultStore,
+    type CardGroup,
+    type CardSort,
+} from '@/lib/stores/card-vault-store'
 
-type CardExpiryFilter = 'all' | 'soon'
+const CARD_GROUP_OPTIONS = [
+    { value: 'none', label: 'No grouping' },
+    { value: 'provider', label: 'Group by provider' },
+    { value: 'network', label: 'Group by network' },
+    { value: 'tags', label: 'Group by tags' },
+] as const
 
-type CardMobileFiltersProps = {
-    query: string
-    selectedType: 'all' | 'credit' | 'debit'
-    selectedNetwork: string
-    selectedProvider: string
-    selectedTag: string
-    selectedExpiry: CardExpiryFilter
-    selectedCreditLimitMin: number
-    selectedCreditLimitMax: number
-    minCreditLimitBound: number
-    maxCreditLimitBound: number
-    selectedBillingDate: string
-    selectedPaymentDate: string
-    selectedSort:
-    | 'newest'
-    | 'oldest'
-    | 'name-asc'
-    | 'name-desc'
-    | 'expiry-asc'
-    | 'expiry-desc'
-    | 'credit-limit-asc'
-    | 'credit-limit-desc'
-    | 'billing-date-asc'
-    | 'billing-date-desc'
-    | 'payment-date-asc'
-    | 'payment-date-desc'
-    selectedGroup: 'none' | 'provider' | 'network' | 'tags'
-    networkOptions: string[]
-    providerOptions: string[]
-    tagOptions: string[]
-    activeFilterCount: number
-    formAction?: string
-    clearSearchHref: string
-    clearAllHref: string
-    typeHrefs: {
-        all: string
-        credit: string
-        debit: string
-    }
-}
+const CARD_SORT_OPTIONS = [
+    { value: 'newest', label: 'Newest first' },
+    { value: 'oldest', label: 'Oldest first' },
+    { value: 'name-asc', label: 'Name (A-Z)' },
+    { value: 'name-desc', label: 'Name (Z-A)' },
+    { value: 'expiry-asc', label: 'Expiry (Soonest)' },
+    { value: 'expiry-desc', label: 'Expiry (Latest)' },
+    { value: 'credit-limit-asc', label: 'Credit limit (Low-High)' },
+    { value: 'credit-limit-desc', label: 'Credit limit (High-Low)' },
+    { value: 'billing-date-asc', label: 'Billing date (Earliest)' },
+    { value: 'billing-date-desc', label: 'Billing date (Latest)' },
+    { value: 'payment-date-asc', label: 'Payment date (Earliest)' },
+    { value: 'payment-date-desc', label: 'Payment date (Latest)' },
+] as const
 
-export function CardMobileFilters({
-    query,
-    selectedType,
-    selectedNetwork,
-    selectedProvider,
-    selectedTag,
-    selectedExpiry,
-    selectedCreditLimitMin,
-    selectedCreditLimitMax,
-    minCreditLimitBound,
-    maxCreditLimitBound,
-    selectedBillingDate,
-    selectedPaymentDate,
-    selectedSort,
-    selectedGroup,
-    networkOptions,
-    providerOptions,
-    tagOptions,
-    activeFilterCount,
-    formAction = '/card',
-    clearSearchHref,
-    clearAllHref,
-    typeHrefs,
-}: CardMobileFiltersProps) {
-    const billingDate = selectedBillingDate ?? ''
-    const paymentDate = selectedPaymentDate ?? ''
+export function CardMobileFilters() {
     const [mobileOpen, setMobileOpen] = useState(false)
     const [desktopOpen, setDesktopOpen] = useState(false)
-    const [creditLimitRange, setCreditLimitRange] = useState<[number, number]>([
-        selectedCreditLimitMin,
-        selectedCreditLimitMax,
-    ])
-    const router = useRouter()
-    const pathname = usePathname()
-    const searchParams = useSearchParams()
+    const [creditLimitRange, setCreditLimitRange] = useState<[number, number]>([0, 0])
+
+    const query = useCardVaultStore((state) => state.query)
+    const selectedType = useCardVaultStore((state) => state.typeFilter)
+    const selectedNetwork = useCardVaultStore((state) => state.networkFilter)
+    const selectedProvider = useCardVaultStore((state) => state.providerFilter)
+    const selectedTag = useCardVaultStore((state) => state.tagFilter)
+    const selectedExpiry = useCardVaultStore((state) => state.expiryFilter)
+    const selectedBillingDate = useCardVaultStore((state) => state.billingDate)
+    const selectedPaymentDate = useCardVaultStore((state) => state.paymentDate)
+    const selectedSort = useCardVaultStore((state) => state.sortBy)
+    const selectedGroup = useCardVaultStore((state) => state.groupBy)
+
+    const setFilters = useCardVaultStore((state) => state.setFilters)
+    const setSortBy = useCardVaultStore((state) => state.setSortBy)
+    const setGroupBy = useCardVaultStore((state) => state.setGroupBy)
+    const setCreditLimitRangeInStore = useCardVaultStore((state) => state.setCreditLimitRange)
+    const resetFilters = useCardVaultStore((state) => state.resetFilters)
+
+    const meta = useCardVaultStore(selectCardFilterMeta)
 
     useEffect(() => {
-        setCreditLimitRange([selectedCreditLimitMin, selectedCreditLimitMax])
-    }, [selectedCreditLimitMin, selectedCreditLimitMax])
-
-    const hasCreditLimitFilter =
-        minCreditLimitBound < maxCreditLimitBound &&
-        (selectedCreditLimitMin > minCreditLimitBound || selectedCreditLimitMax < maxCreditLimitBound)
-
-    const hasActiveControls =
-        query.length > 0 ||
-        selectedType !== 'all' ||
-        selectedNetwork.length > 0 ||
-        selectedProvider.length > 0 ||
-        selectedTag.length > 0 ||
-        selectedExpiry !== 'all' ||
-        hasCreditLimitFilter ||
-        billingDate.length > 0 ||
-        paymentDate.length > 0 ||
-        selectedSort !== 'newest' ||
-        selectedGroup !== 'none'
-
-    const hiddenSearchFields = (
-        <>
-            {selectedNetwork ? <input type="hidden" name="network" value={selectedNetwork} /> : null}
-            {selectedProvider ? <input type="hidden" name="provider" value={selectedProvider} /> : null}
-            {selectedTag ? <input type="hidden" name="tag" value={selectedTag} /> : null}
-            {selectedExpiry !== 'all' ? <input type="hidden" name="expiry" value={selectedExpiry} /> : null}
-            {hasCreditLimitFilter ? <input type="hidden" name="credit_limit_min" value={String(selectedCreditLimitMin)} /> : null}
-            {hasCreditLimitFilter ? <input type="hidden" name="credit_limit_max" value={String(selectedCreditLimitMax)} /> : null}
-            {billingDate ? <input type="hidden" name="billing_date" value={billingDate} /> : null}
-            {paymentDate ? <input type="hidden" name="payment_date" value={paymentDate} /> : null}
-            {selectedType !== 'all' ? <input type="hidden" name="type" value={selectedType} /> : null}
-            {selectedSort !== 'newest' ? <input type="hidden" name="sort" value={selectedSort} /> : null}
-            {selectedGroup !== 'none' ? <input type="hidden" name="group" value={selectedGroup} /> : null}
-        </>
-    )
-
-    const handleExpiryChange = (value: string) => {
-        if (value !== 'all' && value !== 'soon') return
-
-        const params = new URLSearchParams(searchParams.toString())
-        if (value === 'all') {
-            params.delete('expiry')
-        } else {
-            params.set('expiry', value)
-        }
-
-        const serialized = params.toString()
-        router.push(serialized ? `${pathname}?${serialized}` : pathname)
-    }
+        setCreditLimitRange([meta.selectedCreditLimitMin, meta.selectedCreditLimitMax])
+    }, [meta.selectedCreditLimitMin, meta.selectedCreditLimitMax])
 
     const commitCreditLimitRange = (minLimit: number, maxLimit: number) => {
-        const params = new URLSearchParams(searchParams.toString())
-
-        if (minCreditLimitBound >= maxCreditLimitBound) {
-            params.delete('credit_limit_min')
-            params.delete('credit_limit_max')
-        } else {
-            const normalizedMin = Math.min(minLimit, maxLimit)
-            const normalizedMax = Math.max(minLimit, maxLimit)
-
-            if (normalizedMin <= minCreditLimitBound) {
-                params.delete('credit_limit_min')
-            } else {
-                params.set('credit_limit_min', String(normalizedMin))
-            }
-
-            if (normalizedMax >= maxCreditLimitBound) {
-                params.delete('credit_limit_max')
-            } else {
-                params.set('credit_limit_max', String(normalizedMax))
-            }
+        if (meta.creditLimitBounds.min >= meta.creditLimitBounds.max) {
+            setCreditLimitRangeInStore(null, null)
+            return
         }
 
-        const serialized = params.toString()
-        router.push(serialized ? `${pathname}?${serialized}` : pathname)
-    }
+        const normalizedMin = Math.max(meta.creditLimitBounds.min, Math.min(minLimit, maxLimit))
+        const normalizedMax = Math.min(meta.creditLimitBounds.max, Math.max(minLimit, maxLimit))
 
-    const handleBillingDateChange = (value: string) => {
-        const params = new URLSearchParams(searchParams.toString())
-        if (value === 'ALL') {
-            params.delete('billing_date')
-        } else {
-            params.set('billing_date', value)
-        }
-
-        const serialized = params.toString()
-        router.push(serialized ? `${pathname}?${serialized}` : pathname)
-    }
-
-    const handlePaymentDateChange = (value: string) => {
-        const params = new URLSearchParams(searchParams.toString())
-        if (value === 'ALL') {
-            params.delete('payment_date')
-        } else {
-            params.set('payment_date', value)
-        }
-
-        const serialized = params.toString()
-        router.push(serialized ? `${pathname}?${serialized}` : pathname)
+        setCreditLimitRangeInStore(
+            normalizedMin <= meta.creditLimitBounds.min ? null : normalizedMin,
+            normalizedMax >= meta.creditLimitBounds.max ? null : normalizedMax
+        )
     }
 
     return (
         <>
             <ListingFilterTopBar
-                formAction={formAction}
+                formAction="/card"
                 searchValue={query}
-                searchMode="form"
-                clearSearchHref={clearSearchHref}
-                searchInputName="q"
-                searchHiddenFields={hiddenSearchFields}
+                searchMode="controlled"
+                onSearchChange={(value) => setFilters({ query: value })}
+                onClearSearch={() => setFilters({ query: '' })}
                 mobileSearchPlaceholder="Search cards"
                 desktopSearchPlaceholder="Search cards by name, provider, or number"
                 mobileSearchAriaLabel="Search cards"
                 desktopSearchAriaLabel="Search cards by name, provider, or number"
-                mobileFilterCount={activeFilterCount}
+                mobileFilterCount={meta.activeFilterCount}
                 onOpenMobileFilters={() => setMobileOpen(true)}
-                hasTextQuery={query.length > 0}
-                hasActiveControls={hasActiveControls}
-                resetHref={clearAllHref}
+                hasTextQuery={meta.hasTextQuery}
+                hasActiveControls={meta.hasActiveControls}
+                onResetAll={resetFilters}
                 desktopFilterOpen={desktopOpen}
                 onToggleDesktopFilters={() => setDesktopOpen((prev) => !prev)}
                 desktopExpandedClassName=""
@@ -229,39 +112,61 @@ export function CardMobileFilters({
                             <ListingFilterDesktopSection label="Card type" className="space-y-2">
                                 <CardTypeButtonGroup
                                     selectedType={selectedType}
+                                    onSelect={(type) => setFilters({ typeFilter: type })}
                                     className="h-10 w-full max-w-none rounded-xl border-border/60 bg-background/90"
-                                    hrefs={typeHrefs}
                                 />
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Network">
-                                <NetworkFilterDropdown
-                                    options={networkOptions}
-                                    selectedNetwork={selectedNetwork}
-                                    query={query}
-                                    selectedType={selectedType}
-                                    className="h-10 w-full rounded-xl border-border/60 bg-background/95"
-                                />
+                                <Select value={selectedNetwork || 'ALL'} onValueChange={(value) => setFilters({ networkFilter: value === 'ALL' ? '' : value })}>
+                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by network">
+                                        <SelectValue placeholder="All networks" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="ALL">All networks</SelectItem>
+                                        {meta.networkOptions.map((network) => (
+                                            <SelectItem key={network} value={network}>
+                                                {network}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Provider">
-                                <ProviderFilterDropdown
-                                    options={providerOptions}
-                                    selectedProvider={selectedProvider}
-                                    className="h-10 w-full rounded-xl border-border/60 bg-background/95"
-                                />
+                                <Select value={selectedProvider || 'ALL'} onValueChange={(value) => setFilters({ providerFilter: value === 'ALL' ? '' : value })}>
+                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by provider">
+                                        <SelectValue placeholder="All providers" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="ALL">All providers</SelectItem>
+                                        {meta.providerOptions.map((provider) => (
+                                            <SelectItem key={provider} value={provider}>
+                                                {provider}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Tag">
-                                <TagFilterDropdown
-                                    options={tagOptions}
-                                    selectedTag={selectedTag}
-                                    className="h-10 w-full rounded-xl border-border/60 bg-background/95"
-                                />
+                                <Select value={selectedTag || 'ALL'} onValueChange={(value) => setFilters({ tagFilter: value === 'ALL' ? '' : value })}>
+                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by tag">
+                                        <SelectValue placeholder="All tags" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="ALL">All tags</SelectItem>
+                                        {meta.tagOptions.map((tag) => (
+                                            <SelectItem key={tag} value={tag}>
+                                                {tag}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Expiry">
-                                <Select value={selectedExpiry} onValueChange={handleExpiryChange}>
+                                <Select value={selectedExpiry} onValueChange={(value) => setFilters({ expiryFilter: value as 'all' | 'soon' })}>
                                     <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by expiry">
                                         <SelectValue placeholder="All cards" />
                                     </SelectTrigger>
@@ -280,8 +185,8 @@ export function CardMobileFilters({
                                     </div>
                                     <input
                                         type="range"
-                                        min={minCreditLimitBound}
-                                        max={maxCreditLimitBound}
+                                        min={meta.creditLimitBounds.min}
+                                        max={meta.creditLimitBounds.max}
                                         step={100}
                                         value={creditLimitRange[0]}
                                         onChange={(event) => {
@@ -292,12 +197,12 @@ export function CardMobileFilters({
                                         onTouchEnd={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
                                         className="w-full accent-primary"
                                         aria-label="Minimum credit limit"
-                                        disabled={minCreditLimitBound >= maxCreditLimitBound}
+                                        disabled={meta.creditLimitBounds.min >= meta.creditLimitBounds.max}
                                     />
                                     <input
                                         type="range"
-                                        min={minCreditLimitBound}
-                                        max={maxCreditLimitBound}
+                                        min={meta.creditLimitBounds.min}
+                                        max={meta.creditLimitBounds.max}
                                         step={100}
                                         value={creditLimitRange[1]}
                                         onChange={(event) => {
@@ -308,13 +213,13 @@ export function CardMobileFilters({
                                         onTouchEnd={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
                                         className="w-full accent-primary"
                                         aria-label="Maximum credit limit"
-                                        disabled={minCreditLimitBound >= maxCreditLimitBound}
+                                        disabled={meta.creditLimitBounds.min >= meta.creditLimitBounds.max}
                                     />
                                 </div>
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Billing date">
-                                <Select value={billingDate || 'ALL'} onValueChange={handleBillingDateChange}>
+                                <Select value={selectedBillingDate || 'ALL'} onValueChange={(value) => setFilters({ billingDate: value === 'ALL' ? '' : value })}>
                                     <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by billing date">
                                         <SelectValue placeholder="All dates" />
                                     </SelectTrigger>
@@ -333,7 +238,7 @@ export function CardMobileFilters({
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Payment date">
-                                <Select value={paymentDate || 'ALL'} onValueChange={handlePaymentDateChange}>
+                                <Select value={selectedPaymentDate || 'ALL'} onValueChange={(value) => setFilters({ paymentDate: value === 'ALL' ? '' : value })}>
                                     <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by payment date">
                                         <SelectValue placeholder="All dates" />
                                     </SelectTrigger>
@@ -352,17 +257,39 @@ export function CardMobileFilters({
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Sort">
-                                <CardSortDropdown selectedSort={selectedSort} className="h-10 w-full rounded-xl border-border/60 bg-background/95" />
+                                <Select value={selectedSort} onValueChange={(value) => setSortBy(value as CardSort)}>
+                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Sort cards">
+                                        <SelectValue placeholder="Newest first" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {CARD_SORT_OPTIONS.map((option) => (
+                                            <SelectItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Group">
-                                <CardGroupDropdown selectedGroup={selectedGroup} className="h-10 w-full rounded-xl border-border/60 bg-background/95" />
+                                <Select value={selectedGroup} onValueChange={(value) => setGroupBy(value as CardGroup)}>
+                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Group cards">
+                                        <SelectValue placeholder="No grouping" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {CARD_GROUP_OPTIONS.map((option) => (
+                                            <SelectItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </ListingFilterDesktopSection>
                         </div>
 
                         <ListingFilterDesktopActions
-                            hasActiveControls={hasActiveControls}
-                            resetHref={clearAllHref}
+                            hasActiveControls={meta.hasActiveControls}
+                            onReset={resetFilters}
                             collapseLabel="Save"
                             className="sticky bottom-0 z-10 -mx-1 mt-1 rounded-xl border border-border/45 bg-background/92 p-2 backdrop-blur-sm"
                             onCollapse={() => setDesktopOpen(false)}
@@ -378,37 +305,59 @@ export function CardMobileFilters({
                 description="Apply filters, sorting, and grouping in one place."
             >
                 <ListingFilterMobileSection label="Type" icon={<CreditCard className="h-3.5 w-3.5" />}>
-                    <CardTypeButtonGroup selectedType={selectedType} hrefs={typeHrefs} className="h-10 max-w-none rounded-xl border-border/60 bg-background/90" />
+                    <CardTypeButtonGroup selectedType={selectedType} onSelect={(type) => setFilters({ typeFilter: type })} className="h-10 max-w-none rounded-xl border-border/60 bg-background/90" />
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Network" icon={<Network className="h-3.5 w-3.5" />}>
-                    <NetworkFilterDropdown
-                        options={networkOptions}
-                        selectedNetwork={selectedNetwork}
-                        query={query}
-                        selectedType={selectedType}
-                        className="h-10 w-full rounded-xl border-border/60 bg-background/95"
-                    />
+                    <Select value={selectedNetwork || 'ALL'} onValueChange={(value) => setFilters({ networkFilter: value === 'ALL' ? '' : value })}>
+                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by network">
+                            <SelectValue placeholder="All networks" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="ALL">All networks</SelectItem>
+                            {meta.networkOptions.map((network) => (
+                                <SelectItem key={network} value={network}>
+                                    {network}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Provider" icon={<CreditCard className="h-3.5 w-3.5" />}>
-                    <ProviderFilterDropdown
-                        options={providerOptions}
-                        selectedProvider={selectedProvider}
-                        className="h-10 w-full rounded-xl border-border/60 bg-background/95"
-                    />
+                    <Select value={selectedProvider || 'ALL'} onValueChange={(value) => setFilters({ providerFilter: value === 'ALL' ? '' : value })}>
+                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by provider">
+                            <SelectValue placeholder="All providers" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="ALL">All providers</SelectItem>
+                            {meta.providerOptions.map((provider) => (
+                                <SelectItem key={provider} value={provider}>
+                                    {provider}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Tag" icon={<CreditCard className="h-3.5 w-3.5" />}>
-                    <TagFilterDropdown
-                        options={tagOptions}
-                        selectedTag={selectedTag}
-                        className="h-10 w-full rounded-xl border-border/60 bg-background/95"
-                    />
+                    <Select value={selectedTag || 'ALL'} onValueChange={(value) => setFilters({ tagFilter: value === 'ALL' ? '' : value })}>
+                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by tag">
+                            <SelectValue placeholder="All tags" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="ALL">All tags</SelectItem>
+                            {meta.tagOptions.map((tag) => (
+                                <SelectItem key={tag} value={tag}>
+                                    {tag}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Expiry" icon={<CreditCard className="h-3.5 w-3.5" />}>
-                    <Select value={selectedExpiry} onValueChange={handleExpiryChange}>
+                    <Select value={selectedExpiry} onValueChange={(value) => setFilters({ expiryFilter: value as 'all' | 'soon' })}>
                         <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by expiry">
                             <SelectValue placeholder="All cards" />
                         </SelectTrigger>
@@ -427,8 +376,8 @@ export function CardMobileFilters({
                         </div>
                         <input
                             type="range"
-                            min={minCreditLimitBound}
-                            max={maxCreditLimitBound}
+                            min={meta.creditLimitBounds.min}
+                            max={meta.creditLimitBounds.max}
                             step={100}
                             value={creditLimitRange[0]}
                             onChange={(event) => {
@@ -439,12 +388,12 @@ export function CardMobileFilters({
                             onTouchEnd={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
                             className="w-full accent-primary"
                             aria-label="Minimum credit limit"
-                            disabled={minCreditLimitBound >= maxCreditLimitBound}
+                            disabled={meta.creditLimitBounds.min >= meta.creditLimitBounds.max}
                         />
                         <input
                             type="range"
-                            min={minCreditLimitBound}
-                            max={maxCreditLimitBound}
+                            min={meta.creditLimitBounds.min}
+                            max={meta.creditLimitBounds.max}
                             step={100}
                             value={creditLimitRange[1]}
                             onChange={(event) => {
@@ -455,13 +404,13 @@ export function CardMobileFilters({
                             onTouchEnd={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
                             className="w-full accent-primary"
                             aria-label="Maximum credit limit"
-                            disabled={minCreditLimitBound >= maxCreditLimitBound}
+                            disabled={meta.creditLimitBounds.min >= meta.creditLimitBounds.max}
                         />
                     </div>
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Billing date" icon={<CreditCard className="h-3.5 w-3.5" />}>
-                    <Select value={billingDate || 'ALL'} onValueChange={handleBillingDateChange}>
+                    <Select value={selectedBillingDate || 'ALL'} onValueChange={(value) => setFilters({ billingDate: value === 'ALL' ? '' : value })}>
                         <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by billing date">
                             <SelectValue placeholder="All dates" />
                         </SelectTrigger>
@@ -480,7 +429,7 @@ export function CardMobileFilters({
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Payment date" icon={<CreditCard className="h-3.5 w-3.5" />}>
-                    <Select value={paymentDate || 'ALL'} onValueChange={handlePaymentDateChange}>
+                    <Select value={selectedPaymentDate || 'ALL'} onValueChange={(value) => setFilters({ paymentDate: value === 'ALL' ? '' : value })}>
                         <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by payment date">
                             <SelectValue placeholder="All dates" />
                         </SelectTrigger>
@@ -499,16 +448,38 @@ export function CardMobileFilters({
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Sort" icon={<ArrowUpDown className="h-3.5 w-3.5" />}>
-                    <CardSortDropdown selectedSort={selectedSort} className="h-10 w-full rounded-xl border-border/60 bg-background/95" />
+                    <Select value={selectedSort} onValueChange={(value) => setSortBy(value as CardSort)}>
+                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Sort cards">
+                            <SelectValue placeholder="Newest first" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {CARD_SORT_OPTIONS.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Group" icon={<Layers3 className="h-3.5 w-3.5" />}>
-                    <CardGroupDropdown selectedGroup={selectedGroup} className="h-10 w-full rounded-xl border-border/60 bg-background/95" />
+                    <Select value={selectedGroup} onValueChange={(value) => setGroupBy(value as CardGroup)}>
+                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Group cards">
+                            <SelectValue placeholder="No grouping" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {CARD_GROUP_OPTIONS.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileActions
-                    hasActiveControls={hasActiveControls}
-                    resetHref={clearAllHref}
+                    hasActiveControls={meta.hasActiveControls}
+                    onReset={resetFilters}
                     doneLabel="Save"
                     onDone={() => setMobileOpen(false)}
                 />

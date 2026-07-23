@@ -1,6 +1,22 @@
 //@ts-check
 
 const path = require('path');
+/** @type {(config: import('next').NextConfig) => import('next').NextConfig} */
+let withSerwist = (config) => config;
+
+try {
+  const dynamicRequire = eval('require');
+  const withSerwistInit = dynamicRequire('@serwist/next').default;
+  withSerwist = withSerwistInit({
+    swSrc: 'src/app/sw.js',
+    swDest: 'public/sw.js',
+    register: false,
+    reloadOnOnline: true,
+    disable: process.env.NODE_ENV === 'development',
+  });
+} catch {
+  // Serwist package is not installed yet; keep base Next config usable.
+}
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -26,4 +42,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withSerwist(nextConfig);

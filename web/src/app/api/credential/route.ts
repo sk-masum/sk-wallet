@@ -35,10 +35,8 @@ function getCredentialWriteErrorMessage(error: { code?: string; message: string 
   return error.message
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   const { user, unauthorizedResponse } = await getRouteSupabaseContext()
-  const { searchParams } = new URL(request.url)
-  const requestedType = searchParams.get('type')?.trim().toUpperCase() ?? ''
 
   if (unauthorizedResponse || !user) {
     return unauthorizedResponse
@@ -49,9 +47,6 @@ export async function GET(request: Request) {
   const data = await prisma.credential_record.findMany({
     where: {
       user_id: user.id,
-      ...(requestedType && isCredentialTypeCode(requestedType)
-        ? { credential_type: requestedType }
-        : {}),
     },
     select: {
       id: true,
@@ -67,7 +62,6 @@ export async function GET(request: Request) {
       created_at: true,
       updated_at: true,
     },
-    orderBy: { updated_at: 'desc' },
   })
 
   return NextResponse.json({ data: data ?? [] })

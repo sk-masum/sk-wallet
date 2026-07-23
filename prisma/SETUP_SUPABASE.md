@@ -10,19 +10,21 @@ Create `web/.env.local` for Next.js runtime and set:
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
 CARD_TOKEN_SECRET=replace-with-a-long-random-secret
-DATABASE_URL=postgresql://postgres.your-project-ref:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
+DATABASE_URL=postgresql://postgres.your-project-ref:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
 DIRECT_URL=postgresql://postgres:[password]@db.your-project-ref.supabase.co:5432/postgres
 ```
 
 Create `prisma/.env` for Prisma CLI and set:
 
 ```env
-DATABASE_URL=postgresql://postgres.your-project-ref:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
+DATABASE_URL=postgresql://postgres.your-project-ref:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
 DIRECT_URL=postgresql://postgres:[password]@db.your-project-ref.supabase.co:5432/postgres
 ```
 
 Notes:
-- `DATABASE_URL`: pooled Supabase connection (runtime queries).
+- `DATABASE_URL`: pooled Supabase connection (runtime queries). Use:
+	`postgresql://...pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1`
+	so serverless functions do not exhaust direct Postgres connections.
 - `DIRECT_URL`: direct Supabase connection (schema/introspection/migration operations).
 - `CARD_TOKEN_SECRET`: server-only secret for card token encryption.
 

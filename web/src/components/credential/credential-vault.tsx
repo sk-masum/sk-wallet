@@ -17,13 +17,19 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-import { CREDENTIAL_TYPE_OPTIONS, getCredentialTypeConfig } from '@/constants/credential/types'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { getCredentialTypeConfig } from '@/constants/credential/types'
 import { clientApiDelete, clientApiGet } from '@/lib/api/client'
 import {
     BIOMETRIC_CREDENTIAL_STORAGE_KEY,
+    isBiometricVaultUnlocked,
     isWebAuthnSupported,
-    verifyBiometricCredential,
+    unlockBiometricVault,
 } from '@/lib/biometric'
+import {
+    selectVisibleCredentials,
+    useCredentialVaultStore,
+} from '@/lib/stores/credential-vault-store'
 import { showToast } from '@/lib/toast'
 import { copyToClipboard } from '@/utils/copy'
 import { cn } from '@/lib/utils'
@@ -55,7 +61,6 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
     const router = useRouter()
     const { hydrated, isFavorite, toggleFavorite } = useDashboardFavorites()
     const searchParams = useSearchParams()
-    const [credentials, setCredentials] = useState<UserCredential[]>(initialCredentials)
     const [selectedCredentialId, setSelectedCredentialId] = useState<string | null>(null)
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
@@ -63,15 +68,14 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
     const [secretCopied, setSecretCopied] = useState(false)
     const secretCopyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-    const searchValue = (searchParams.get('q') ?? '').trim()
-    const selectedTypeParam = (searchParams.get('type') ?? 'ALL').trim().toUpperCase()
-    const selectedType = CREDENTIAL_TYPE_OPTIONS.some((item) => item.code === selectedTypeParam)
-        ? selectedTypeParam
-        : 'ALL'
+    const credentials = useCredentialVaultStore((state) => state.credentials)
+    const visibleCredentials = useCredentialVaultStore(selectVisibleCredentials)
+    const setCredentials = useCredentialVaultStore((state) => state.setCredentials)
+    const removeCredential = useCredentialVaultStore((state) => state.removeCredential)
 
     useEffect(() => {
         setCredentials(initialCredentials)
-    }, [initialCredentials])
+    }, [initialCredentials, setCredentials])
 
     useEffect(() => {
         return () => {
@@ -98,42 +102,10 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
         }
     }, [initialError, searchParams, router])
 
-    const sortedCredentials = useMemo(
-        () => [...credentials].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()),
-        [credentials]
-    )
-
-    const filteredCredentials = useMemo(() => {
-        const query = searchValue.trim().toLowerCase()
-
-        return sortedCredentials.filter((cred) => {
-            if (selectedType !== 'ALL' && cred.credential_type !== selectedType) {
-                return false
-            }
-
-            if (!query) return true
-
-            const typeLabel = getCredentialTypeConfig(cred.credential_type)?.label ?? cred.credential_type
-            const searchable = [
-                typeLabel,
-                cred.credential_type,
-                cred.service_name,
-                cred.identifier ?? '',
-                cred.masked_secret,
-            ]
-                .join(' ')
-                .toLowerCase()
-
-            return searchable.includes(query)
-        })
-    }, [searchValue, selectedType, sortedCredentials])
-
     const selectedCredential = useMemo(
-        () => filteredCredentials.find((cred) => cred.id === selectedCredentialId) ?? null,
-        [filteredCredentials, selectedCredentialId]
+        () => credentials.find((cred) => cred.id === selectedCredentialId) ?? null,
+        [credentials, selectedCredentialId]
     )
-
-    const hasFilters = searchValue.length > 0 || selectedType !== 'ALL'
 
     function getCredentialTypeBadgeClass(type: string) {
         if (type === 'LOGIN') return 'bg-blue-500/15 text-blue-600 border-blue-500/30'
@@ -161,7 +133,7 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
             showToast({ message: 'Credential deleted successfully.', variant: 'success' })
             setConfirmDeleteOpen(false)
             setSelectedCredentialId(null)
-            router.refresh()
+            removeCredential(selectedCredential.id)
         } finally {
             setIsDeleting(false)
         }
@@ -193,7 +165,7 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
 
         setIsCopyingSecret(true)
         try {
-            const verified = await verifyBiometricCredential()
+            const verified = isBiometricVaultUnlocked() ? true : await unlockBiometricVault()
             if (!verified) {
                 showToast({ message: 'Biometric verification failed.', variant: 'error' })
                 return
@@ -232,19 +204,19 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
 
     return (
         <section className="mx-auto w-full max-w-5xl space-y-4">
-            {filteredCredentials.length === 0 ? (
+            {visibleCredentials.length === 0 ? (
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-base">
-                            {sortedCredentials.length === 0 ? 'No credentials yet' : 'No matching credentials'}
+                            {credentials.length === 0 ? 'No credentials yet' : 'No matching credentials'}
                         </CardTitle>
                         <CardDescription>
-                            {sortedCredentials.length === 0
+                            {credentials.length === 0
                                 ? 'Add login, API, PIN, Wi-Fi, and other credentials from the add credential page.'
                                 : 'Try changing your search or type filter, or add a new credential.'}
                         </CardDescription>
                     </CardHeader>
-                    {sortedCredentials.length > 0 ? (
+                    {credentials.length > 0 ? (
                         <CardContent className="flex justify-center pb-6 pt-0">
                             <NoDocIcon className="h-28 w-full max-w-65" />
                         </CardContent>
@@ -252,7 +224,7 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
                 </Card>
             ) : (
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {filteredCredentials.map((cred, index) => {
+                    {visibleCredentials.map((cred, index) => {
                         const label = getCredentialTypeConfig(cred.credential_type)?.label ?? cred.credential_type
 
                         return (

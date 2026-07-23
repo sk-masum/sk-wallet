@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { Pencil, Star, Trash2 } from 'lucide-react'
 
 import { useDashboardFavorites } from '@/components/dashboard/use-dashboard-favorites'
@@ -18,9 +18,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { getDocumentCategoryLabel } from '@/constants/document/categories'
-import { DOCUMENT_TYPE_OPTIONS, getDocumentTypeConfig } from '@/constants/document/types'
+import { getDocumentTypeConfig } from '@/constants/document/types'
 import { clientApiGet } from '@/lib/api/client'
 import { clientApiDelete } from '@/lib/api/client'
+import {
+  selectVisibleDocuments,
+  useDocumentVaultStore,
+} from '@/lib/stores/document-vault-store'
 import { showToast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 import type { UserDocument } from '@/models/document'
@@ -84,8 +88,6 @@ function getCustomMetadataEntries(metadata: Record<string, unknown> | null | und
 export function DocumentVault({ initialDocuments, initialError = '' }: DocumentVaultProps) {
   const router = useRouter()
   const { hydrated, isFavorite, toggleFavorite } = useDashboardFavorites()
-  const searchParams = useSearchParams()
-  const [documents, setDocuments] = useState<UserDocument[]>(initialDocuments)
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
   const [selectedDocumentDetail, setSelectedDocumentDetail] = useState<
@@ -93,21 +95,14 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
   >(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const searchValue = (searchParams.get('q') ?? '').trim()
-  const selectedTypeParam = (searchParams.get('type') ?? 'ALL').trim().toUpperCase()
-  const selectedCategory = (searchParams.get('category') ?? 'all').trim().toLowerCase()
-  const selectedSortParam = (searchParams.get('sort') ?? 'newest').trim().toLowerCase()
-  const selectedType = DOCUMENT_TYPE_OPTIONS.some((item) => item.code === selectedTypeParam)
-    ? selectedTypeParam
-    : 'ALL'
-  const selectedSort =
-    selectedSortParam === 'oldest' || selectedSortParam === 'name-asc' || selectedSortParam === 'name-desc'
-      ? selectedSortParam
-      : 'newest'
+  const documents = useDocumentVaultStore((state) => state.documents)
+  const visibleDocuments = useDocumentVaultStore(selectVisibleDocuments)
+  const setDocuments = useDocumentVaultStore((state) => state.setDocuments)
+  const removeDocument = useDocumentVaultStore((state) => state.removeDocument)
 
   useEffect(() => {
     setDocuments(initialDocuments)
-  }, [initialDocuments])
+  }, [initialDocuments, setDocuments])
 
   useEffect(() => {
     if (!initialError) return
@@ -156,52 +151,9 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
     setConfirmDeleteOpen(false)
   }, [selectedDocumentId])
 
-  const sortedDocuments = useMemo(
-    () => [...documents].sort((a, b) => {
-      if (selectedSort === 'name-asc' || selectedSort === 'name-desc') {
-        const aLabel = (getDocumentTypeConfig(a.document_type)?.label ?? a.document_type).toLowerCase()
-        const bLabel = (getDocumentTypeConfig(b.document_type)?.label ?? b.document_type).toLowerCase()
-        return selectedSort === 'name-asc' ? aLabel.localeCompare(bLabel) : bLabel.localeCompare(aLabel)
-      }
-
-      const aTime = new Date(a.updated_at).getTime()
-      const bTime = new Date(b.updated_at).getTime()
-      return selectedSort === 'oldest' ? aTime - bTime : bTime - aTime
-    }),
-    [documents, selectedSort]
-  )
-
-  const filteredDocuments = useMemo(() => {
-    const query = searchValue.trim().toLowerCase()
-
-    return sortedDocuments.filter((doc) => {
-      if (selectedType !== 'ALL' && doc.document_type !== selectedType) {
-        return false
-      }
-
-      if (selectedCategory !== 'all' && String(doc.category ?? 'other').toLowerCase() !== selectedCategory) {
-        return false
-      }
-
-      if (!query) return true
-
-      const typeLabel = getDocumentTypeConfig(doc.document_type)?.label ?? doc.document_type
-      const searchable = [
-        typeLabel,
-        doc.document_type,
-        doc.masked_number,
-        doc.name_on_document ?? '',
-      ]
-        .join(' ')
-        .toLowerCase()
-
-      return searchable.includes(query)
-    })
-  }, [searchValue, selectedCategory, selectedType, sortedDocuments])
-
   const selectedDocument = useMemo(
-    () => filteredDocuments.find((doc) => doc.id === selectedDocumentId) ?? null,
-    [filteredDocuments, selectedDocumentId]
+    () => documents.find((doc) => doc.id === selectedDocumentId) ?? null,
+    [documents, selectedDocumentId]
   )
 
   const detailCustomMetadata = useMemo(
@@ -233,7 +185,7 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
 
       setConfirmDeleteOpen(false)
       setSelectedDocumentId(null)
-      router.refresh()
+      removeDocument(selectedDocument.id)
     } finally {
       setIsDeleting(false)
     }
@@ -241,19 +193,19 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
 
   return (
     <section className="mx-auto w-full max-w-5xl space-y-4">
-      {filteredDocuments.length === 0 ? (
+      {visibleDocuments.length === 0 ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">
-              {sortedDocuments.length === 0 ? 'No documents yet' : 'No matching documents'}
+              {documents.length === 0 ? 'No documents yet' : 'No matching documents'}
             </CardTitle>
             <CardDescription>
-              {sortedDocuments.length === 0
+              {documents.length === 0
                 ? 'Add Aadhaar, PAN, voter ID, driving license, or ration card details from the add document page.'
                 : 'Try changing your search or type filter, or add a new document.'}
             </CardDescription>
           </CardHeader>
-          {sortedDocuments.length > 0 ? (
+          {documents.length > 0 ? (
             <CardContent className="flex justify-center pb-6 pt-0">
               <NoDocIcon className="h-28 w-full max-w-65" />
             </CardContent>
@@ -261,7 +213,7 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
         </Card>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredDocuments.map((doc, index) => {
+          {visibleDocuments.map((doc, index) => {
             const type = getDocumentTypeConfig(doc.document_type)
             const label = type?.label ?? doc.document_type
 

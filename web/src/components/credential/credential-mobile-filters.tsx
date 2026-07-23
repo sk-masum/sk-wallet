@@ -1,8 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { CreditCard } from 'lucide-react'
+import { useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { ArrowUpDown, CreditCard } from 'lucide-react'
 
 import {
     ListingFilterDesktopActions,
@@ -15,42 +15,37 @@ import {
 import { ListingFilterTopBar } from '@/components/shared/listing-filter-topbar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CREDENTIAL_TYPE_OPTIONS } from '@/constants/credential/types'
+import { DEFAULT_CREDENTIAL_SORT, useCredentialVaultStore, type CredentialSort } from '@/lib/stores/credential-vault-store'
 
-type CredentialMobileFiltersProps = {
-    query: string
-    selectedType: string
-}
+const CREDENTIAL_SORT_OPTIONS: ReadonlyArray<{ value: CredentialSort; label: string }> = [
+    { value: DEFAULT_CREDENTIAL_SORT, label: 'Last updated (newest)' },
+    { value: 'updated_asc', label: 'Last updated (oldest)' },
+    { value: 'service_asc', label: 'Service name (A-Z)' },
+    { value: 'service_desc', label: 'Service name (Z-A)' },
+]
 
-export function CredentialMobileFilters({ query, selectedType }: CredentialMobileFiltersProps) {
+export function CredentialMobileFilters() {
     const [mobileOpen, setMobileOpen] = useState(false)
     const [desktopOpen, setDesktopOpen] = useState(false)
-    const router = useRouter()
     const pathname = usePathname()
-    const searchParams = useSearchParams()
+    const query = useCredentialVaultStore((state) => state.query)
+    const selectedType = useCredentialVaultStore((state) => state.typeFilter)
+    const selectedSort = useCredentialVaultStore((state) => state.sortBy)
+    const setFilters = useCredentialVaultStore((state) => state.setFilters)
+    const setSortBy = useCredentialVaultStore((state) => state.setSortBy)
 
     const hasTextQuery = query.length > 0
     const hasTypeFilter = selectedType !== 'ALL'
-    const hasActiveControls = hasTextQuery || hasTypeFilter
+    const hasSortOverride = selectedSort !== DEFAULT_CREDENTIAL_SORT
+    const hasActiveControls = hasTextQuery || hasTypeFilter || hasSortOverride
 
-    const clearSearchHref = useMemo(() => {
-        const params = new URLSearchParams(searchParams.toString())
-        params.delete('q')
-        const serialized = params.toString()
-        return serialized ? `${pathname}?${serialized}` : pathname
-    }, [pathname, searchParams])
-
-    const clearAllHref = pathname
+    const clearAll = () => {
+        setFilters({ query: '', typeFilter: 'ALL' })
+        setSortBy(DEFAULT_CREDENTIAL_SORT)
+    }
 
     const handleTypeChange = (value: string) => {
-        const params = new URLSearchParams(searchParams.toString())
-        if (value === 'ALL') {
-            params.delete('type')
-        } else {
-            params.set('type', value)
-        }
-
-        const serialized = params.toString()
-        router.push(serialized ? `${pathname}?${serialized}` : pathname)
+        setFilters({ typeFilter: value })
     }
 
     return (
@@ -58,10 +53,9 @@ export function CredentialMobileFilters({ query, selectedType }: CredentialMobil
             <ListingFilterTopBar
                 formAction={pathname}
                 searchValue={query}
-                searchMode="form"
-                clearSearchHref={clearSearchHref}
-                searchInputName="q"
-                searchHiddenFields={hasTypeFilter ? <input type="hidden" name="type" value={selectedType} /> : null}
+                searchMode="controlled"
+                onSearchChange={(value) => setFilters({ query: value })}
+                onClearSearch={() => setFilters({ query: '' })}
                 mobileSearchPlaceholder="Search credentials"
                 desktopSearchPlaceholder="Search credentials by service, identifier, or type"
                 mobileSearchAriaLabel="Search credentials"
@@ -70,7 +64,7 @@ export function CredentialMobileFilters({ query, selectedType }: CredentialMobil
                 onOpenMobileFilters={() => setMobileOpen(true)}
                 hasTextQuery={hasTextQuery}
                 hasActiveControls={hasActiveControls}
-                resetHref={clearAllHref}
+                onResetAll={clearAll}
                 desktopFilterOpen={desktopOpen}
                 onToggleDesktopFilters={() => setDesktopOpen((prev) => !prev)}
                 desktopExpandedClassName=""
@@ -92,9 +86,24 @@ export function CredentialMobileFilters({ query, selectedType }: CredentialMobil
                             </Select>
                         </ListingFilterDesktopSection>
 
+                        <ListingFilterDesktopSection label="Sort">
+                            <Select value={selectedSort} onValueChange={(value) => setSortBy(value as CredentialSort)}>
+                                <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Sort credentials">
+                                    <SelectValue placeholder="Sort credentials" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {CREDENTIAL_SORT_OPTIONS.map((option) => (
+                                        <SelectItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </ListingFilterDesktopSection>
+
                         <ListingFilterDesktopActions
                             hasActiveControls={hasActiveControls}
-                            resetHref={clearAllHref}
+                            onReset={clearAll}
                             onCollapse={() => setDesktopOpen(false)}
                         />
                     </ListingFilterDesktopPanel>
@@ -123,9 +132,24 @@ export function CredentialMobileFilters({ query, selectedType }: CredentialMobil
                     </Select>
                 </ListingFilterMobileSection>
 
+                <ListingFilterMobileSection label="Sort" icon={<ArrowUpDown className="h-3.5 w-3.5" />}>
+                    <Select value={selectedSort} onValueChange={(value) => setSortBy(value as CredentialSort)}>
+                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Sort credentials">
+                            <SelectValue placeholder="Sort credentials" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {CREDENTIAL_SORT_OPTIONS.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </ListingFilterMobileSection>
+
                 <ListingFilterMobileActions
                     hasActiveControls={hasActiveControls}
-                    resetHref={clearAllHref}
+                    onReset={clearAll}
                     onDone={() => setMobileOpen(false)}
                 />
             </ListingFilterMobileSheet>

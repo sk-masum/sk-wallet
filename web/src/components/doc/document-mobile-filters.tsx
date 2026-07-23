@@ -1,7 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { CreditCard } from 'lucide-react'
 
 import {
@@ -16,13 +16,11 @@ import { ListingFilterTopBar } from '@/components/shared/listing-filter-topbar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DOCUMENT_CATEGORY_OPTIONS } from '@/constants/document/categories'
 import { DOCUMENT_TYPE_OPTIONS } from '@/constants/document/types'
-
-type DocumentMobileFiltersProps = {
-    query: string
-    selectedType: string
-    selectedCategory: string
-    selectedSort: 'newest' | 'oldest' | 'name-asc' | 'name-desc'
-}
+import {
+    DEFAULT_DOCUMENT_SORT,
+    type DocumentSort,
+    useDocumentVaultStore,
+} from '@/lib/stores/document-vault-store'
 
 const DOCUMENT_SORT_OPTIONS = [
     { value: 'newest', label: 'Newest first' },
@@ -31,62 +29,38 @@ const DOCUMENT_SORT_OPTIONS = [
     { value: 'name-desc', label: 'Name (Z-A)' },
 ] as const
 
-export function DocumentMobileFilters({ query, selectedType, selectedCategory, selectedSort }: DocumentMobileFiltersProps) {
+export function DocumentMobileFilters() {
     const [mobileOpen, setMobileOpen] = useState(false)
     const [desktopOpen, setDesktopOpen] = useState(false)
-    const router = useRouter()
     const pathname = usePathname()
-    const searchParams = useSearchParams()
+    const query = useDocumentVaultStore((state) => state.query)
+    const selectedType = useDocumentVaultStore((state) => state.typeFilter)
+    const selectedCategory = useDocumentVaultStore((state) => state.categoryFilter)
+    const selectedSort = useDocumentVaultStore((state) => state.sortBy)
+    const setFilters = useDocumentVaultStore((state) => state.setFilters)
+    const setSortBy = useDocumentVaultStore((state) => state.setSortBy)
 
     const hasTextQuery = query.length > 0
     const hasTypeFilter = selectedType !== 'ALL'
     const hasCategoryFilter = selectedCategory !== 'all'
-    const hasSortSelection = selectedSort !== 'newest'
+    const hasSortSelection = selectedSort !== DEFAULT_DOCUMENT_SORT
     const hasActiveControls = hasTextQuery || hasTypeFilter || hasCategoryFilter || hasSortSelection
 
-    const clearSearchHref = useMemo(() => {
-        const params = new URLSearchParams(searchParams.toString())
-        params.delete('q')
-        const serialized = params.toString()
-        return serialized ? `${pathname}?${serialized}` : pathname
-    }, [pathname, searchParams])
-
-    const clearAllHref = pathname
+    const clearAll = () => {
+        setFilters({ query: '', typeFilter: 'ALL', categoryFilter: 'all' })
+        setSortBy(DEFAULT_DOCUMENT_SORT)
+    }
 
     const handleTypeChange = (value: string) => {
-        const params = new URLSearchParams(searchParams.toString())
-        if (value === 'ALL') {
-            params.delete('type')
-        } else {
-            params.set('type', value)
-        }
-
-        const serialized = params.toString()
-        router.push(serialized ? `${pathname}?${serialized}` : pathname)
+        setFilters({ typeFilter: value })
     }
 
     const handleCategoryChange = (value: string) => {
-        const params = new URLSearchParams(searchParams.toString())
-        if (value === 'all') {
-            params.delete('category')
-        } else {
-            params.set('category', value)
-        }
-
-        const serialized = params.toString()
-        router.push(serialized ? `${pathname}?${serialized}` : pathname)
+        setFilters({ categoryFilter: value })
     }
 
     const handleSortChange = (value: string) => {
-        const params = new URLSearchParams(searchParams.toString())
-        if (value === 'newest') {
-            params.delete('sort')
-        } else {
-            params.set('sort', value)
-        }
-
-        const serialized = params.toString()
-        router.push(serialized ? `${pathname}?${serialized}` : pathname)
+        setSortBy(value as DocumentSort)
     }
 
     return (
@@ -94,16 +68,9 @@ export function DocumentMobileFilters({ query, selectedType, selectedCategory, s
             <ListingFilterTopBar
                 formAction={pathname}
                 searchValue={query}
-                searchMode="form"
-                clearSearchHref={clearSearchHref}
-                searchInputName="q"
-                searchHiddenFields={
-                    <>
-                        {hasTypeFilter ? <input type="hidden" name="type" value={selectedType} /> : null}
-                        {hasCategoryFilter ? <input type="hidden" name="category" value={selectedCategory} /> : null}
-                        {hasSortSelection ? <input type="hidden" name="sort" value={selectedSort} /> : null}
-                    </>
-                }
+                searchMode="controlled"
+                onSearchChange={(value) => setFilters({ query: value })}
+                onClearSearch={() => setFilters({ query: '' })}
                 mobileSearchPlaceholder="Search documents"
                 desktopSearchPlaceholder="Search by number, type, or name"
                 mobileSearchAriaLabel="Search documents"
@@ -112,7 +79,7 @@ export function DocumentMobileFilters({ query, selectedType, selectedCategory, s
                 onOpenMobileFilters={() => setMobileOpen(true)}
                 hasTextQuery={hasTextQuery}
                 hasActiveControls={hasActiveControls}
-                resetHref={clearAllHref}
+                onResetAll={clearAll}
                 desktopFilterOpen={desktopOpen}
                 onToggleDesktopFilters={() => setDesktopOpen((prev) => !prev)}
                 desktopExpandedClassName=""
@@ -169,7 +136,7 @@ export function DocumentMobileFilters({ query, selectedType, selectedCategory, s
 
                         <ListingFilterDesktopActions
                             hasActiveControls={hasActiveControls}
-                            resetHref={clearAllHref}
+                            onReset={clearAll}
                             onCollapse={() => setDesktopOpen(false)}
                         />
                     </ListingFilterDesktopPanel>
@@ -231,7 +198,7 @@ export function DocumentMobileFilters({ query, selectedType, selectedCategory, s
 
                 <ListingFilterMobileActions
                     hasActiveControls={hasActiveControls}
-                    resetHref={clearAllHref}
+                    onReset={clearAll}
                     onDone={() => setMobileOpen(false)}
                 />
             </ListingFilterMobileSheet>

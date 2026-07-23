@@ -10,17 +10,19 @@ type CardType = 'all' | 'credit' | 'debit'
 
 interface CardTypeButtonGroupProps {
   selectedType: CardType
-  hrefs: {
+  hrefs?: {
     all: string
     credit: string
     debit: string
   }
+  onSelect?: (type: CardType) => void
   className?: string
 }
 
 export function CardTypeButtonGroup({
   selectedType,
   hrefs,
+  onSelect,
   className,
 }: CardTypeButtonGroupProps) {
   const router = useRouter()
@@ -33,6 +35,14 @@ export function CardTypeButtonGroup({
 
   const handleSelect = (type: CardType) => {
     if (isPending || selectedType === type) return
+
+    if (onSelect) {
+      onSelect(type)
+      return
+    }
+
+    if (!hrefs) return
+
     setPendingType(type)
 
     startTransition(() => {

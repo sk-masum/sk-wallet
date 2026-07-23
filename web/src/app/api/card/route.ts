@@ -80,23 +80,6 @@ async function resolveOrCreateProvider(
   }
 }
 
-function parseCardIds(idsParam: string | null) {
-  if (!idsParam) return [] as bigint[];
-
-  return idsParam
-    .split(',')
-    .map((value) => value.trim())
-    .filter(Boolean)
-    .map((value) => {
-      try {
-        return BigInt(value);
-      } catch {
-        return null;
-      }
-    })
-    .filter((value): value is bigint => value !== null);
-}
-
 function decodeCardFieldOrEmpty(value: string) {
   try {
     return detokenizeCardNumber(value);
@@ -113,10 +96,8 @@ function decodeCvvFieldOrEmpty(value: string) {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   const { user, unauthorizedResponse } = await getRouteSupabaseContext();
-  const { searchParams } = new URL(request.url);
-  const ids = parseCardIds(searchParams.get('ids'));
 
   if (unauthorizedResponse || !user) {
     return unauthorizedResponse;
@@ -126,14 +107,12 @@ export async function GET(request: Request) {
   const data = await prisma.card.findMany({
     where: {
       owner_id: user.id,
-      ...(ids.length > 0 ? { id: { in: ids } } : {}),
     },
     include: {
       card_provider: {
         select: { name: true },
       },
     },
-    orderBy: { id: 'asc' },
   });
 
   const detokenizedData = data.map((card) => ({

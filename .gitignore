@@ -44,3 +44,7 @@ next-env.d.ts
 # Next.js
 .next
 out
+
+# Serwist generated service worker files
+web/public/sw*
+web/public/swe-worker*

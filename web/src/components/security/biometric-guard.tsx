@@ -9,8 +9,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import {
   BIOMETRIC_STORAGE_KEY,
   BIOMETRIC_SESSION_UNLOCK_KEY,
+  isBiometricVaultProvisioned,
   isPlatformAuthenticatorAvailable,
-  verifyBiometricCredential,
+  lockBiometricVault,
+  unlockBiometricVault,
 } from '@/lib/biometric'
 
 type BiometricGuardProps = {
@@ -26,6 +28,7 @@ export function BiometricGuard({ children }: BiometricGuardProps) {
 
   useEffect(() => {
     if (shouldSkip) {
+      lockBiometricVault()
       setIsLocked(false)
       return
     }
@@ -51,6 +54,14 @@ export function BiometricGuard({ children }: BiometricGuardProps) {
         return
       }
 
+      const hasVaultKey = await isBiometricVaultProvisioned()
+      if (!hasVaultKey) {
+        localStorage.setItem(BIOMETRIC_STORAGE_KEY, 'false')
+        sessionStorage.removeItem(BIOMETRIC_SESSION_UNLOCK_KEY)
+        setIsLocked(false)
+        return
+      }
+
       setIsLocked(true)
     }
 
@@ -61,9 +72,8 @@ export function BiometricGuard({ children }: BiometricGuardProps) {
     setIsBusy(true)
     setMessage('')
     try {
-      const ok = await verifyBiometricCredential()
+      const ok = await unlockBiometricVault()
       if (ok) {
-        sessionStorage.setItem(BIOMETRIC_SESSION_UNLOCK_KEY, 'true')
         setIsLocked(false)
       } else {
         setMessage('Biometric verification failed.')

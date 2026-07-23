@@ -7,6 +7,7 @@ import { ArrowRight, Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { requestPersistentStorageOnFirstLogin } from '@/lib/biometric'
 import { signInWithEmailPassword } from '@/lib/supabase/browser-auth'
 
 export default function AuthPage() {
@@ -37,6 +38,8 @@ export default function AuthPage() {
         setError(signInError.message)
         return
       }
+
+      await requestPersistentStorageOnFirstLogin()
 
       window.location.assign(nextPath)
       return
