@@ -87,3 +87,32 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  const relativeUrl = event.notification?.data?.url || '/card';
+  const targetUrl = new URL(relativeUrl, self.location.origin).href;
+
+  event.waitUntil((async () => {
+    const clientList = await self.clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true,
+    });
+
+    for (const client of clientList) {
+      if (!('focus' in client)) continue;
+
+      const currentUrl = new URL(client.url);
+      if (currentUrl.origin === self.location.origin) {
+        if ('navigate' in client) {
+          await client.navigate(targetUrl);
+        }
+        await client.focus();
+        return;
+      }
+    }
+
+    await self.clients.openWindow(targetUrl);
+  })());
+});
