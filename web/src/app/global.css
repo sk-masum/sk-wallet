@@ -289,7 +289,7 @@ body {
     transition: all 200ms;
   }
 
-  .vault-list-card:hover {
+  .vault-list-item-trigger:hover .vault-list-card {
     transform: translateY(-0.125rem);
     border-color: hsl(var(--primary) / 0.5);
     box-shadow:
