@@ -2,9 +2,11 @@ import { NextResponse } from 'next/server'
 import { Prisma } from '@/generated/prisma'
 
 import { isDocumentCategory } from '@/constants/document/categories'
+import { isDocumentTypeCode } from '@/constants/document/types'
 import { detokenizeDocumentNumber } from '@/lib/security/doc-token'
 import { getRouteSupabaseContext } from '@/lib/supabase/route-auth'
 import { getRequiredPrismaClient } from '@/lib/prisma'
+import { DocumentTypeCode } from '@/models/document'
 
 const RESERVED_METADATA_KEYS = new Set([
   'issued_date',
@@ -12,10 +14,12 @@ const RESERVED_METADATA_KEYS = new Set([
   'address',
   'guardian_name',
   'other_details',
+  'other_type_label',
   'custom_fields',
 ])
 
 type DocumentUpdatePayload = {
+  type?: string
   category?: string
   nameOnDocument?: string
   issuedDate?: string
@@ -156,7 +160,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
 
   const existing = await prisma.document_record.findFirst({
     where: { id, user_id: user.id },
-    select: { id: true, metadata: true },
+    select: { id: true, document_type: true, metadata: true },
   })
 
   if (!existing) {
@@ -164,8 +168,9 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
   }
 
   const nameOnDocument = normalizeOptionalText(payload.nameOnDocument, 120)
-  const category = String(payload.category ?? '').trim().toLowerCase()
-  if (category && !isDocumentCategory(category)) {
+  const rawCategory = String(payload.category ?? '').trim()
+  const normalizedCategory = rawCategory.toLowerCase()
+  if (normalizedCategory && !isDocumentCategory(normalizedCategory) && !String(payload.type ?? '').trim()) {
     return NextResponse.json({ error: 'Unsupported document category' }, { status: 400 })
   }
   const issuedDate = normalizeOptionalText(payload.issuedDate, 10)
@@ -186,6 +191,41 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
   const address = normalizeOptionalText(payload.address, 240)
   const guardianName = normalizeOptionalText(payload.guardianName, 120)
   const otherDetails = normalizeOptionalText(payload.otherDetails, 500)
+  const selectedType = String(payload.type ?? '').trim().toUpperCase()
+  const existingType = String(existing.document_type ?? '').trim()
+
+  let nextDocumentType = ''
+  let nextCategory = ''
+  if (selectedType) {
+    if (!isDocumentTypeCode(selectedType)) {
+      return NextResponse.json({ error: 'Unsupported document type' }, { status: 400 })
+    }
+
+    if (selectedType === DocumentTypeCode.OTHERS) {
+      const customTypeLabel = normalizeOptionalText(rawCategory, 60)
+      if (customTypeLabel.length < 2) {
+        return NextResponse.json({ error: 'Please provide a custom label for Others.' }, { status: 400 })
+      }
+      nextDocumentType = customTypeLabel
+      nextCategory = 'other'
+    } else {
+      if (normalizedCategory && !isDocumentCategory(normalizedCategory)) {
+        return NextResponse.json({ error: 'Unsupported document category' }, { status: 400 })
+      }
+      nextDocumentType = selectedType
+      nextCategory = normalizedCategory
+    }
+  } else if (normalizedCategory && isDocumentCategory(normalizedCategory)) {
+    nextCategory = normalizedCategory
+  } else if (rawCategory && !isDocumentTypeCode(existingType)) {
+    const customTypeLabel = normalizeOptionalText(rawCategory, 60)
+    if (customTypeLabel.length < 2) {
+      return NextResponse.json({ error: 'Please provide a custom label for Others.' }, { status: 400 })
+    }
+    nextDocumentType = customTypeLabel
+    nextCategory = 'other'
+  }
+
   const hasCustomFields = Object.prototype.hasOwnProperty.call(payload, 'customFields')
   const customFields = normalizeCustomFields(payload.customFields)
 
@@ -202,8 +242,10 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     otherDetails
   )
 
+  const metadataWithTypeLabel = withMetadataField(mergedMetadata, 'other_type_label', '')
+
   const metadataWithDates = withMetadataField(
-    withMetadataField(mergedMetadata, 'issued_date', issuedDate),
+    withMetadataField(metadataWithTypeLabel, 'issued_date', issuedDate),
     'expiry_date',
     expiryDate
   )
@@ -227,8 +269,9 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     const data = await prisma.document_record.update({
       where: { id },
       data: {
+      ...(nextDocumentType ? { document_type: nextDocumentType } : {}),
       name_on_document: nameOnDocument || null,
-      ...(category ? { category } : {}),
+      ...(nextCategory ? { category: nextCategory } : {}),
       metadata: metadata ? (metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
       },
       select: {

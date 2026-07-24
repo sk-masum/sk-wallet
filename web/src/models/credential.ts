@@ -1,8 +1,14 @@
 export enum CredentialTypeCode {
   LOGIN = 'LOGIN',
+  EMAIL = 'EMAIL',
+  SOCIAL = 'SOCIAL',
   BANKING = 'BANKING',
   PIN = 'PIN',
+  OTP = 'OTP',
+  WALLET = 'WALLET',
   API_KEY = 'API_KEY',
+  SERVER = 'SERVER',
+  DATABASE = 'DATABASE',
   WIFI = 'WIFI',
   OTHER = 'OTHER',
 }

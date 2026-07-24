@@ -15,6 +15,11 @@ alter table if exists public.document_record
       'PASSPORT',
       'BIRTH_CERTIFICATE',
       'VEHICLE_RC',
+      'PASSBOOK',
       'OTHERS'
+    )
+    or (
+      category = 'other'
+      and length(btrim(document_type)) between 2 and 60
     )
   );

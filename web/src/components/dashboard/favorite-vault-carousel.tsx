@@ -14,11 +14,11 @@ import { Dialog } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getCredentialTypeConfig } from '@/constants/credential/types'
 import { getDocumentCategoryLabel } from '@/constants/document/categories'
-import { getDocumentTypeConfig } from '@/constants/document/types'
 import { clientApiGet } from '@/lib/api/client'
 import type { UserCredential } from '@/models/credential'
 import type { DashboardFavoriteVaultItem } from '@/models/dashboard'
 import type { UserDocument } from '@/models/document'
+import { getDocumentDisplayTypeLabel } from '@/utils/document/label'
 
 type CredentialDetailsResponse = {
     data?: UserCredential
@@ -158,6 +158,11 @@ export function FavoriteVaultCarousel({
                         title={item.title}
                         subtitle={item.subtitle}
                         className="min-w-44"
+                        leadingMedia={
+                            item.type === 'document' && (
+                                <div className='uppercase text-xs'>{item.document_type}</div>
+                            )
+                        }
                         media={
                             item.type === 'document' ? (
                                 <FileText className="h-6 w-6 text-foreground/80" />
@@ -297,7 +302,7 @@ export function FavoriteVaultCarousel({
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-base">{dialogTitle}</CardTitle>
                                 <CardDescription>
-                                    {getDocumentTypeConfig(detailData.document.document_type)?.label ?? detailData.document.document_type}
+                                    {getDocumentDisplayTypeLabel(detailData.document.document_type, detailData.document.metadata)}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-3 text-sm">

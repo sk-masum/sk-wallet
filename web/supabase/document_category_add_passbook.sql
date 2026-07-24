@@ -1,0 +1,5 @@
+-- Deprecated migration.
+-- Passbook is now supported as a document TYPE, not a CATEGORY.
+-- Use:
+--   1) web/supabase/document_type_options_expand.sql
+--   2) web/supabase/document_type_allow_custom_when_other.sql

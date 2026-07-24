@@ -41,10 +41,12 @@ Run these scripts in Supabase SQL Editor (order matters):
 7. `web/supabase/card_billing_payment_dates.sql`
 8. `web/supabase/card_tags.sql`
 9. `web/supabase/credential_schema.sql`
-10. `web/supabase/document_schema.sql`
-11. `web/supabase/document_type_options_expand.sql`
-12. `web/supabase/document_category_options_expand.sql`
-13. `web/supabase/document_allow_multiple_same_type.sql`
+10. `web/supabase/credential_type_options_expand.sql`
+11. `web/supabase/document_schema.sql`
+12. `web/supabase/document_type_options_expand.sql`
+13. `web/supabase/document_category_options_expand.sql`
+14. `web/supabase/document_type_allow_custom_when_other.sql`
+15. `web/supabase/document_allow_multiple_same_type.sql`
 
 ## 3) Introspect and generate Prisma client
 

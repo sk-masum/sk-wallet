@@ -66,6 +66,14 @@ export const DOCUMENT_TYPE_OPTIONS: DocumentTypeFieldConfig[] = [
     maxLength: 20,
   },
   {
+    code: DocumentTypeCode.PASSBOOK,
+    label: 'Passbook',
+    placeholder: 'SBIN0001234',
+    hint: 'Bank formats vary; 6-30 letters/digits accepted',
+    minLength: 6,
+    maxLength: 30,
+  },
+  {
     code: DocumentTypeCode.OTHERS,
     label: 'Others',
     placeholder: 'DOC123456',

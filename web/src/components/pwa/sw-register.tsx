@@ -91,7 +91,6 @@ async function checkAndNotifyBillingDueToday(force = false) {
       await registration.showNotification('Billing date reminder', {
         body: `${card.name}: billing is due today (day ${effectiveDay}).`,
         tag: `billing-reminder-${card.id}-${todayKey}`,
-        renotify: false,
         requireInteraction: false,
         data: {
           url: `/card/${card.id}`,

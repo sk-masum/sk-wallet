@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { CalendarIcon, Plus, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -28,9 +28,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { isDocumentCategory } from '@/constants/document/categories'
 import { DOCUMENT_CATEGORY_OPTIONS } from '@/constants/document/categories'
 import { DOCUMENT_TYPE_OPTIONS, getDocumentTypeConfig } from '@/constants/document/types'
-import type { DocumentFormFieldErrors, DocumentFormPayload } from '@/models/document'
+import { DocumentTypeCode, type DocumentFormFieldErrors, type DocumentFormPayload } from '@/models/document'
 import { cn } from '@/lib/utils'
 import { validateDocumentFormFields } from '@/utils/document/validation'
 
@@ -83,6 +84,20 @@ function toInitialCustomFields(value: DocumentFormInitialValues['customFields'])
   }))
 }
 
+function ensurePassbookCustomFields(fields: DocumentCustomFieldInput[]) {
+  const requiredKeys = ['IFSC Number', 'Branch Name']
+  const existingKeys = new Set(fields.map((field) => field.key.trim().toLowerCase()))
+  const missingFields = requiredKeys
+    .filter((key) => !existingKeys.has(key.toLowerCase()))
+    .map((key) => ({ id: createCustomFieldId(), key, value: '' }))
+
+  if (missingFields.length === 0) {
+    return fields
+  }
+
+  return [...fields, ...missingFields]
+}
+
 export function DocumentForm({
   submitLabel = 'Save document',
   initialValues,
@@ -120,6 +135,12 @@ export function DocumentForm({
     const parsed = new Date(`${values.expiryDate}T00:00:00`)
     return Number.isNaN(parsed.getTime()) ? undefined : parsed
   }, [values.expiryDate])
+
+  useEffect(() => {
+    if (values.type !== DocumentTypeCode.PASSBOOK) return
+
+    setCustomFields((prev) => ensurePassbookCustomFields(prev))
+  }, [values.type])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -169,8 +190,16 @@ export function DocumentForm({
           disabled={lockTypeField}
           value={values.type}
           onValueChange={(value) => {
-            setValues((prev) => ({ ...prev, type: value, number: '' }))
-            setFieldErrors((prev) => ({ ...prev, type: undefined, number: undefined }))
+            setValues((prev) => ({
+              ...prev,
+              type: value,
+              number: '',
+              category:
+                value === DocumentTypeCode.OTHERS
+                  ? (isDocumentCategory(prev.category) ? '' : prev.category)
+                  : (isDocumentCategory(prev.category) ? prev.category : 'other'),
+            }))
+            setFieldErrors((prev) => ({ ...prev, type: undefined, number: undefined, category: undefined }))
           }}
         >
           <SelectTrigger id="doc-type" className={cn(entityFormSelectClass, fieldErrors.type && 'border-destructive')}>
@@ -186,26 +215,53 @@ export function DocumentForm({
         </Select>
       </FormField>
 
-      <FormField id="doc-category" label="Category" error={fieldErrors.category} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
-        <Select
-          value={values.category}
-          onValueChange={(value) => {
-            setValues((prev) => ({ ...prev, category: value }))
-            setFieldErrors((prev) => ({ ...prev, category: undefined }))
-          }}
+      {values.type === DocumentTypeCode.OTHERS ? (
+        <FormField
+          id="doc-custom-label"
+          label="Custom label"
+          hint="This label will be shown instead of Others in your vault."
+          error={fieldErrors.category}
+          className={entityFormFieldCardClass}
+          labelClassName={entityFormLabelClass}
         >
-          <SelectTrigger id="doc-category" className={cn(entityFormSelectClass, fieldErrors.category && 'border-destructive')}>
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-          <SelectContent>
-            {DOCUMENT_CATEGORY_OPTIONS.map((item) => (
-              <SelectItem key={item.value} value={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </FormField>
+          <Input
+            id="doc-custom-label"
+            value={values.category}
+            onChange={(event) => {
+              setValues((prev) => ({ ...prev, category: event.target.value }))
+              setFieldErrors((prev) => ({ ...prev, category: undefined }))
+            }}
+            placeholder="e.g. Employee ID"
+            className={cn(entityFormControlClass, fieldErrors.category && 'border-destructive focus-visible:ring-destructive')}
+            aria-invalid={Boolean(fieldErrors.category)}
+            maxLength={60}
+            required
+          />
+        </FormField>
+      ) : null}
+
+      {values.type !== DocumentTypeCode.OTHERS ? (
+        <FormField id="doc-category" label="Category" error={fieldErrors.category} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
+          <Select
+            value={values.category}
+            onValueChange={(value) => {
+              setValues((prev) => ({ ...prev, category: value }))
+              setFieldErrors((prev) => ({ ...prev, category: undefined }))
+            }}
+          >
+            <SelectTrigger id="doc-category" className={cn(entityFormSelectClass, fieldErrors.category && 'border-destructive')}>
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              {DOCUMENT_CATEGORY_OPTIONS.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FormField>
+      ) : null}
 
       <FormField
         id="doc-number"

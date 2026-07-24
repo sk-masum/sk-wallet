@@ -18,7 +18,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { getDocumentCategoryLabel } from '@/constants/document/categories'
-import { getDocumentTypeConfig } from '@/constants/document/types'
 import { clientApiGet } from '@/lib/api/client'
 import { clientApiDelete } from '@/lib/api/client'
 import {
@@ -28,6 +27,7 @@ import {
 import { showToast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 import type { UserDocument } from '@/models/document'
+import { getDocumentDisplayTypeLabel } from '@/utils/document/label'
 
 type DocumentVaultProps = {
   initialDocuments: UserDocument[]
@@ -40,6 +40,7 @@ const RESERVED_METADATA_KEYS = new Set([
   'address',
   'guardian_name',
   'other_details',
+  'other_type_label',
   'custom_fields',
 ])
 
@@ -214,8 +215,7 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {visibleDocuments.map((doc, index) => {
-            const type = getDocumentTypeConfig(doc.document_type)
-            const label = type?.label ?? doc.document_type
+            const label = getDocumentDisplayTypeLabel(doc.document_type, doc.metadata)
 
             return (
               <button
@@ -260,7 +260,7 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
               <div className="space-y-3 rounded-xl border border-border bg-background p-4 text-sm shadow-xl backdrop-blur-md">
                 <DialogHeader>
                   <DialogTitle>
-                    {getDocumentTypeConfig(selectedDocument.document_type)?.label ?? selectedDocument.document_type}
+                    {getDocumentDisplayTypeLabel(selectedDocument.document_type, selectedDocument.metadata)}
                   </DialogTitle>
                   <DialogDescription>Updated {formatDateTime(selectedDocument.updated_at)}</DialogDescription>
                 </DialogHeader>

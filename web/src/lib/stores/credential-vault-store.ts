@@ -4,6 +4,7 @@ import { getCredentialTypeConfig } from '@/constants/credential/types'
 import type { UserCredential } from '@/models/credential'
 
 export type CredentialSort = 'updated_desc' | 'updated_asc' | 'service_asc' | 'service_desc'
+export type CredentialGroup = 'none' | 'type' | 'service'
 
 type CredentialVaultFilters = {
   query?: string
@@ -15,13 +16,16 @@ type CredentialVaultState = {
   query: string
   typeFilter: string
   sortBy: CredentialSort
+  groupBy: CredentialGroup
   setCredentials: (credentials: UserCredential[]) => void
   setFilters: (filters: CredentialVaultFilters) => void
   setSortBy: (sortBy: CredentialSort) => void
+  setGroupBy: (groupBy: CredentialGroup) => void
   removeCredential: (id: string) => void
 }
 
 export const DEFAULT_CREDENTIAL_SORT: CredentialSort = 'updated_desc'
+export const DEFAULT_CREDENTIAL_GROUP: CredentialGroup = 'none'
 
 const listeners = new Set<() => void>()
 
@@ -40,6 +44,7 @@ store = {
   query: '',
   typeFilter: 'ALL',
   sortBy: DEFAULT_CREDENTIAL_SORT,
+  groupBy: DEFAULT_CREDENTIAL_GROUP,
   setCredentials(credentials) {
     setStore({ credentials })
   },
@@ -51,6 +56,9 @@ store = {
   },
   setSortBy(sortBy) {
     setStore({ sortBy })
+  },
+  setGroupBy(groupBy) {
+    setStore({ groupBy })
   },
   removeCredential(id) {
     setStore({ credentials: store.credentials.filter((cred) => cred.id !== id) })

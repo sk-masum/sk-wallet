@@ -17,7 +17,20 @@ create table if not exists public.credential_record (
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now()),
   constraint credential_record_type_check check (
-    credential_type in ('LOGIN', 'BANKING', 'PIN', 'API_KEY', 'WIFI', 'OTHER')
+    credential_type in (
+      'LOGIN',
+      'EMAIL',
+      'SOCIAL',
+      'BANKING',
+      'PIN',
+      'OTP',
+      'WALLET',
+      'API_KEY',
+      'SERVER',
+      'DATABASE',
+      'WIFI',
+      'OTHER'
+    )
   ),
   constraint credential_record_service_name_length_check check (
     char_length(service_name) between 2 and 120

@@ -102,7 +102,7 @@ export function CardsCarousel({ cards }: CardsCarouselProps) {
                             titleClassName="text-base text-white/95"
                             subtitleClassName="text-sm font-mono font-semibold text-white"
                             leadingMedia={
-                                <ChipIcon className="h-8 w-10 text-white rotate-90" />
+                                <ChipIcon className="h-8 w-10 text-white -rotate-90" />
                             }
                             media={
                                 <div className="flex items-start gap-2 text-foreground">

@@ -1,7 +1,9 @@
 import { useSyncExternalStore } from 'react'
 
-import { getDocumentTypeConfig } from '@/constants/document/types'
+import { isDocumentTypeCode } from '@/constants/document/types'
+import { DocumentTypeCode } from '@/models/document'
 import type { UserDocument } from '@/models/document'
+import { getDocumentDisplayTypeLabel } from '@/utils/document/label'
 
 export type DocumentSort = 'newest' | 'oldest' | 'name-asc' | 'name-desc'
 
@@ -88,8 +90,8 @@ function sortDocuments(items: UserDocument[], sortBy: DocumentSort) {
 
   if (sortBy === 'name-asc' || sortBy === 'name-desc') {
     sorted.sort((a, b) => {
-      const aLabel = (getDocumentTypeConfig(a.document_type)?.label ?? a.document_type).toLowerCase()
-      const bLabel = (getDocumentTypeConfig(b.document_type)?.label ?? b.document_type).toLowerCase()
+      const aLabel = getDocumentDisplayTypeLabel(a.document_type, a.metadata).toLowerCase()
+      const bLabel = getDocumentDisplayTypeLabel(b.document_type, b.metadata).toLowerCase()
       return sortBy === 'name-asc' ? aLabel.localeCompare(bLabel) : bLabel.localeCompare(aLabel)
     })
     return sorted
@@ -108,7 +110,8 @@ export function selectVisibleDocuments(state: DocumentVaultState) {
   const normalizedQuery = state.query.trim().toLowerCase()
 
   const filtered = state.documents.filter((doc) => {
-    if (state.typeFilter !== 'ALL' && doc.document_type !== state.typeFilter) {
+    const filterableType = isDocumentTypeCode(doc.document_type) ? doc.document_type : DocumentTypeCode.OTHERS
+    if (state.typeFilter !== 'ALL' && filterableType !== state.typeFilter) {
       return false
     }
 
@@ -118,7 +121,7 @@ export function selectVisibleDocuments(state: DocumentVaultState) {
 
     if (!normalizedQuery) return true
 
-    const typeLabel = getDocumentTypeConfig(doc.document_type)?.label ?? doc.document_type
+    const typeLabel = getDocumentDisplayTypeLabel(doc.document_type, doc.metadata)
     const searchable = [
       typeLabel,
       doc.document_type,

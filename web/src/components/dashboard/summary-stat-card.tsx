@@ -34,8 +34,8 @@ export function SummaryStatCard({ label, value, icon, toneClassName }: SummarySt
             <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-white/10 via-transparent to-transparent" />
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/45 to-transparent" />
             <div className="relative space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                    <p className="max-w-[80%] text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/90">{label}</p>
+                <div className="flex items-start justify-between gap-1 sm:gap-2">
+                    <p className="max-w-[50%] sm:max-w-[70%] text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/90">{label}</p>
                     {Icon ? (
                         <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/30 bg-white/15 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]">
                             <Icon className="h-4 w-4" />

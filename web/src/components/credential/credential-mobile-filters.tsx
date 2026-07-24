@@ -13,15 +13,33 @@ import {
     ListingFilterMobileSheet,
 } from '@/components/shared/listing-filter-panels'
 import { ListingFilterTopBar } from '@/components/shared/listing-filter-topbar'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 import { CREDENTIAL_TYPE_OPTIONS } from '@/constants/credential/types'
-import { DEFAULT_CREDENTIAL_SORT, useCredentialVaultStore, type CredentialSort } from '@/lib/stores/credential-vault-store'
+import {
+    DEFAULT_CREDENTIAL_GROUP,
+    DEFAULT_CREDENTIAL_SORT,
+    useCredentialVaultStore,
+    type CredentialGroup,
+    type CredentialSort,
+} from '@/lib/stores/credential-vault-store'
 
 const CREDENTIAL_SORT_OPTIONS: ReadonlyArray<{ value: CredentialSort; label: string }> = [
     { value: DEFAULT_CREDENTIAL_SORT, label: 'Last updated (newest)' },
     { value: 'updated_asc', label: 'Last updated (oldest)' },
     { value: 'service_asc', label: 'Service name (A-Z)' },
     { value: 'service_desc', label: 'Service name (Z-A)' },
+]
+
+const CREDENTIAL_GROUP_OPTIONS: ReadonlyArray<{ value: CredentialGroup; label: string }> = [
+    { value: DEFAULT_CREDENTIAL_GROUP, label: 'No grouping' },
+    { value: 'type', label: 'Group by type' },
+    { value: 'service', label: 'Group by service name' },
 ]
 
 export function CredentialMobileFilters() {
@@ -31,17 +49,21 @@ export function CredentialMobileFilters() {
     const query = useCredentialVaultStore((state) => state.query)
     const selectedType = useCredentialVaultStore((state) => state.typeFilter)
     const selectedSort = useCredentialVaultStore((state) => state.sortBy)
+    const selectedGroup = useCredentialVaultStore((state) => state.groupBy)
     const setFilters = useCredentialVaultStore((state) => state.setFilters)
     const setSortBy = useCredentialVaultStore((state) => state.setSortBy)
+    const setGroupBy = useCredentialVaultStore((state) => state.setGroupBy)
 
     const hasTextQuery = query.length > 0
     const hasTypeFilter = selectedType !== 'ALL'
     const hasSortOverride = selectedSort !== DEFAULT_CREDENTIAL_SORT
-    const hasActiveControls = hasTextQuery || hasTypeFilter || hasSortOverride
+    const hasGroupSelection = selectedGroup !== DEFAULT_CREDENTIAL_GROUP
+    const hasActiveControls = hasTextQuery || hasTypeFilter || hasSortOverride || hasGroupSelection
 
     const clearAll = () => {
         setFilters({ query: '', typeFilter: 'ALL' })
         setSortBy(DEFAULT_CREDENTIAL_SORT)
+        setGroupBy(DEFAULT_CREDENTIAL_GROUP)
     }
 
     const handleTypeChange = (value: string) => {
@@ -80,6 +102,21 @@ export function CredentialMobileFilters() {
                                     {CREDENTIAL_TYPE_OPTIONS.map((item) => (
                                         <SelectItem key={item.code} value={item.code}>
                                             {item.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </ListingFilterDesktopSection>
+
+                        <ListingFilterDesktopSection label="Group">
+                            <Select value={selectedGroup} onValueChange={(value) => setGroupBy(value as CredentialGroup)}>
+                                <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Group credentials">
+                                    <SelectValue placeholder="No grouping" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {CREDENTIAL_GROUP_OPTIONS.map((option) => (
+                                        <SelectItem key={option.value} value={option.value}>
+                                            {option.label}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -126,6 +163,21 @@ export function CredentialMobileFilters() {
                             {CREDENTIAL_TYPE_OPTIONS.map((item) => (
                                 <SelectItem key={item.code} value={item.code}>
                                     {item.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </ListingFilterMobileSection>
+
+                <ListingFilterMobileSection label="Group" icon={<CreditCard className="h-3.5 w-3.5" />}>
+                    <Select value={selectedGroup} onValueChange={(value) => setGroupBy(value as CredentialGroup)}>
+                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Group credentials">
+                            <SelectValue placeholder="No grouping" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {CREDENTIAL_GROUP_OPTIONS.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
                                 </SelectItem>
                             ))}
                         </SelectContent>

@@ -3,9 +3,10 @@
 import { useRouter } from 'next/navigation'
 
 import { DocumentForm } from '@/components/doc/document-form'
+import { getDocumentTypeConfig } from '@/constants/document/types'
 import { clientApiPut } from '@/lib/api/client'
 import { showToast } from '@/lib/toast'
-import type { DocumentFormPayload, UserDocument } from '@/models/document'
+import { DocumentTypeCode, type DocumentFormPayload, type UserDocument } from '@/models/document'
 
 const RESERVED_METADATA_KEYS = new Set([
   'issued_date',
@@ -13,6 +14,7 @@ const RESERVED_METADATA_KEYS = new Set([
   'address',
   'guardian_name',
   'other_details',
+  'other_type_label',
   'custom_fields',
 ])
 
@@ -65,11 +67,19 @@ function ensureEditableCustomFieldRow(fields: Array<{ key: string; value: string
 
 export function DocumentEditForm({ document }: DocumentEditFormProps) {
   const router = useRouter()
+  const hasKnownType = Boolean(getDocumentTypeConfig(document.document_type))
+  const selectedType = hasKnownType ? document.document_type : DocumentTypeCode.OTHERS
+  const customTypeLabel = !hasKnownType
+    ? String(document.document_type ?? '').trim()
+    : selectedType === DocumentTypeCode.OTHERS
+      ? getMetadataText(document.metadata, 'other_type_label')
+      : ''
 
   const handleSave = async (payload: DocumentFormPayload) => {
     const { response, data } = await clientApiPut<{ success?: boolean; error?: string }>(
       `/api/document/${document.id}`,
       {
+        type: payload.type,
         category: payload.category,
         nameOnDocument: payload.nameOnDocument ?? '',
         issuedDate: payload.issuedDate ?? '',
@@ -100,14 +110,17 @@ export function DocumentEditForm({ document }: DocumentEditFormProps) {
 
   return (
     <DocumentForm
+      key={document.id}
       submitLabel="Save changes"
       showReset={false}
       lockTypeField
       lockNumberField
       validateIdentityFields={false}
       initialValues={{
-        type: document.document_type,
-        category: String(document.category ?? 'other'),
+        type: selectedType,
+        category: selectedType === DocumentTypeCode.OTHERS
+          ? customTypeLabel
+          : String(document.category ?? 'other'),
         number: document.masked_number,
         nameOnDocument: String(document.name_on_document ?? ''),
         issuedDate: getMetadataText(document.metadata, 'issued_date'),

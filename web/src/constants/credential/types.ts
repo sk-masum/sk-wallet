@@ -8,6 +8,18 @@ export const CREDENTIAL_TYPE_OPTIONS: CredentialTypeFieldConfig[] = [
     hint: 'Use for websites/apps login passwords',
   },
   {
+    code: CredentialTypeCode.EMAIL,
+    label: 'Email',
+    placeholder: 'Email account password',
+    hint: 'Use for email account credentials',
+  },
+  {
+    code: CredentialTypeCode.SOCIAL,
+    label: 'Social',
+    placeholder: 'Social media account password',
+    hint: 'Use for social platform credentials',
+  },
+  {
     code: CredentialTypeCode.BANKING,
     label: 'Banking',
     placeholder: 'Banking password or transaction passcode',
@@ -20,10 +32,34 @@ export const CREDENTIAL_TYPE_OPTIONS: CredentialTypeFieldConfig[] = [
     hint: 'Use for device/card/app PINs',
   },
   {
+    code: CredentialTypeCode.OTP,
+    label: 'OTP / 2FA',
+    placeholder: 'Backup code or authenticator secret',
+    hint: 'Use for one-time passcodes and 2FA backup details',
+  },
+  {
+    code: CredentialTypeCode.WALLET,
+    label: 'Wallet',
+    placeholder: 'Wallet passphrase or private key',
+    hint: 'Use for crypto or digital wallet access data',
+  },
+  {
     code: CredentialTypeCode.API_KEY,
     label: 'API Key',
     placeholder: 'API token or key',
     hint: 'Use for developer API tokens',
+  },
+  {
+    code: CredentialTypeCode.SERVER,
+    label: 'Server',
+    placeholder: 'SSH password or server secret',
+    hint: 'Use for server login and infrastructure credentials',
+  },
+  {
+    code: CredentialTypeCode.DATABASE,
+    label: 'Database',
+    placeholder: 'Database user password or connection secret',
+    hint: 'Use for database credentials and access secrets',
   },
   {
     code: CredentialTypeCode.WIFI,

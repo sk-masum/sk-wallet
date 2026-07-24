@@ -3,7 +3,7 @@ import { Prisma } from '@/generated/prisma'
 
 import { getRouteSupabaseContext } from '@/lib/supabase/route-auth'
 import { getRequiredPrismaClient } from '@/lib/prisma'
-import { type DocumentFormPayload, type DocumentTypeCode } from '@/models/document'
+import { DocumentTypeCode, type DocumentFormPayload } from '@/models/document'
 import { hashDocumentIdentity } from '@/lib/security/doc-hash'
 import { tokenizeDocumentNumber } from '@/lib/security/doc-token'
 import { isDocumentCategory } from '@/constants/document/categories'
@@ -101,11 +101,11 @@ export async function POST(request: Request) {
   }
 
   const type = String(payload.type ?? '').trim().toUpperCase()
-  const category = String(payload.category ?? '').trim().toLowerCase()
+  const rawCategory = String(payload.category ?? '').trim()
   if (!isDocumentTypeCode(type)) {
     return NextResponse.json({ error: 'Unsupported document type' }, { status: 400 })
   }
-  if (!isDocumentCategory(category)) {
+  if (type !== DocumentTypeCode.OTHERS && !isDocumentCategory(rawCategory.toLowerCase())) {
     return NextResponse.json({ error: 'Unsupported document category' }, { status: 400 })
   }
 
@@ -119,7 +119,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Document tokenization is not configured correctly' }, { status: 500 })
   }
 
-  const documentHash = hashDocumentIdentity(type as DocumentTypeCode, normalizedNumber)
+  const customTypeLabel = rawCategory.slice(0, 60)
+  const storedType = type === DocumentTypeCode.OTHERS ? customTypeLabel : type
+  const storedCategory = type === DocumentTypeCode.OTHERS ? 'other' : rawCategory.toLowerCase()
+
+  if (type === DocumentTypeCode.OTHERS && storedType.length < 2) {
+    return NextResponse.json({ error: 'Please provide a custom label for Others.' }, { status: 400 })
+  }
+
+  const documentHash = hashDocumentIdentity(storedType, normalizedNumber)
   const maskedNumber = maskDocumentNumber(type, normalizedNumber)
   const nameOnDocument = String(payload.nameOnDocument ?? '').trim()
   const issuedDate = String(payload.issuedDate ?? '').trim()
@@ -145,13 +153,13 @@ export async function POST(request: Request) {
     const data = await prisma.document_record.create({
       data: {
       user_id: user.id,
-      document_type: type,
+      document_type: storedType,
       document_number_token: tokenizedNumber,
       document_number_last4: last4,
       document_number_hash: documentHash,
       masked_number: maskedNumber,
       name_on_document: nameOnDocument || null,
-      category,
+      category: storedCategory,
       metadata: Object.keys(metadata).length > 0 ? (metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
       },
       select: {

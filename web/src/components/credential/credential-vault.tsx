@@ -70,6 +70,7 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
 
     const credentials = useCredentialVaultStore((state) => state.credentials)
     const visibleCredentials = useCredentialVaultStore(selectVisibleCredentials)
+    const groupBy = useCredentialVaultStore((state) => state.groupBy)
     const setCredentials = useCredentialVaultStore((state) => state.setCredentials)
     const removeCredential = useCredentialVaultStore((state) => state.removeCredential)
 
@@ -107,11 +108,73 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
         [credentials, selectedCredentialId]
     )
 
+    const groupedCredentials = useMemo(() => {
+        if (groupBy === 'none') return []
+
+        const groups = new Map<string, UserCredential[]>()
+
+        for (const credential of visibleCredentials) {
+            const key =
+                groupBy === 'type'
+                    ? (getCredentialTypeConfig(credential.credential_type)?.label ?? credential.credential_type)
+                    : (credential.service_name || 'Unknown service')
+
+            const current = groups.get(key) ?? []
+            current.push(credential)
+            groups.set(key, current)
+        }
+
+        return Array.from(groups.entries())
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([label, items]) => ({ label, items }))
+    }, [visibleCredentials, groupBy])
+
+    const renderCredentialCard = (cred: UserCredential, index: number) => {
+        const label = getCredentialTypeConfig(cred.credential_type)?.label ?? cred.credential_type
+
+        return (
+            <button
+                key={cred.id}
+                type="button"
+                className={cn(
+                    'text-left transition-transform duration-300 ease-out hover:-translate-y-0.5',
+                    'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500'
+                )}
+                style={{ animationDelay: `${Math.min(index, 9) * 65}ms` }}
+                onClick={() => setSelectedCredentialId(cred.id)}
+            >
+                <Card className="group transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md">
+                    <CardHeader>
+                        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                            <CardTitle className="line-clamp-1 text-base">{cred.service_name}</CardTitle>
+                            <span
+                                className={cn(
+                                    'inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium',
+                                    getCredentialTypeBadgeClass(cred.credential_type)
+                                )}
+                            >
+                                {label}
+                            </span>
+                        </div>
+
+                        <CardDescription className="line-clamp-1">{cred.identifier || label}</CardDescription>
+                    </CardHeader>
+                </Card>
+            </button>
+        )
+    }
+
     function getCredentialTypeBadgeClass(type: string) {
         if (type === 'LOGIN') return 'bg-blue-500/15 text-blue-600 border-blue-500/30'
+        if (type === 'EMAIL') return 'bg-sky-500/15 text-sky-600 border-sky-500/30'
+        if (type === 'SOCIAL') return 'bg-fuchsia-500/15 text-fuchsia-600 border-fuchsia-500/30'
         if (type === 'BANKING') return 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30'
         if (type === 'PIN') return 'bg-amber-500/15 text-amber-600 border-amber-500/30'
+        if (type === 'OTP') return 'bg-orange-500/15 text-orange-600 border-orange-500/30'
+        if (type === 'WALLET') return 'bg-lime-500/15 text-lime-600 border-lime-500/30'
         if (type === 'API_KEY') return 'bg-violet-500/15 text-violet-600 border-violet-500/30'
+        if (type === 'SERVER') return 'bg-indigo-500/15 text-indigo-600 border-indigo-500/30'
+        if (type === 'DATABASE') return 'bg-teal-500/15 text-teal-600 border-teal-500/30'
         if (type === 'WIFI') return 'bg-cyan-500/15 text-cyan-600 border-cyan-500/30'
         return 'bg-muted text-muted-foreground border-border'
     }
@@ -222,45 +285,22 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
                         </CardContent>
                     ) : null}
                 </Card>
-            ) : (
+            ) : groupBy === 'none' ? (
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {visibleCredentials.map((cred, index) => {
-                        const label = getCredentialTypeConfig(cred.credential_type)?.label ?? cred.credential_type
-
-                        return (
-                            <button
-                                key={cred.id}
-                                type="button"
-                                className={cn(
-                                    'text-left transition-transform duration-300 ease-out hover:-translate-y-0.5',
-                                    'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500'
-                                )}
-                                style={{ animationDelay: `${Math.min(index, 9) * 65}ms` }}
-                                onClick={() => setSelectedCredentialId(cred.id)}
-                            >
-                                <Card className="group transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md">
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="line-clamp-1 text-base">{cred.service_name}</CardTitle>
-                                        <CardDescription className="line-clamp-1">{cred.identifier || label}</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-2 pt-0">
-                                        <p className="font-mono text-sm">{cred.masked_secret}</p>
-                                        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                                            <span className="truncate">{cred.url || 'No website'}</span>
-                                            <span
-                                                className={cn(
-                                                    'inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium',
-                                                    getCredentialTypeBadgeClass(cred.credential_type)
-                                                )}
-                                            >
-                                                {label}
-                                            </span>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </button>
-                        )
-                    })}
+                    {visibleCredentials.map((cred, index) => renderCredentialCard(cred, index))}
+                </div>
+            ) : (
+                <div className="space-y-5">
+                    {groupedCredentials.map((group, groupIndex) => (
+                        <section key={group.label} className="space-y-2">
+                            <h3 className="px-1 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+                                {group.label}
+                            </h3>
+                            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                {group.items.map((cred, index) => renderCredentialCard(cred, groupIndex * 20 + index))}
+                            </div>
+                        </section>
+                    ))}
                 </div>
             )}
 

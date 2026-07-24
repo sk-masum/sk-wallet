@@ -21,7 +21,7 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
         <main className="relative mx-auto w-full max-w-7xl space-y-7 px-4 pb-24 pt-6 sm:space-y-8 sm:px-6 sm:pb-6 lg:px-8">
             <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_8%_0%,hsl(var(--primary)/0.12),transparent_36%),radial-gradient(circle_at_100%_18%,hsl(var(--accent)/0.09),transparent_34%)]" />
 
-            <section className="rounded-2xl p-4 sm:p-5">
+            <section className="rounded-2xl py-3 sm:py-7">
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Dashboard</h1>
                     <div className="flex items-center gap-2">
@@ -30,14 +30,14 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
                             aria-label="Open alerts"
                             className="bg-background p-3 sm:p-5 rounded-full text-foreground"
                         >
-                            <Bell className="sm:h-6 sm:w-6 h-4 w-4" />
+                            <Bell className="sm:h-6 sm:w-6 h-5 w-5" />
                         </Link>
                         <Link
                             href="/settings"
                             aria-label="Open settings"
                             className="bg-background p-3 sm:p-5 rounded-full text-foreground"
                         >
-                            <Settings className="sm:h-6 sm:w-6 h-4 w-4" />
+                            <Settings className="sm:h-6 sm:w-6 h-5 w-5" />
                         </Link>
                     </div>
                 </div>

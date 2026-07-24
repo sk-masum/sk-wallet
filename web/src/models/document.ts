@@ -7,6 +7,7 @@ export enum DocumentTypeCode {
   PASSPORT = 'PASSPORT',
   BIRTH_CERTIFICATE = 'BIRTH_CERTIFICATE',
   VEHICLE_RC = 'VEHICLE_RC',
+  PASSBOOK = 'PASSBOOK',
   OTHERS = 'OTHERS',
 }
 
@@ -29,7 +30,7 @@ export enum DocumentCategory {
 export type UserDocument = {
   id: string
   user_id: string
-  document_type: DocumentTypeCode
+  document_type: string
   masked_number: string
   document_number_last4: string
   name_on_document: string | null

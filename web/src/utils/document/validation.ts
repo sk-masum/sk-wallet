@@ -21,6 +21,7 @@ function normalizeByType(type: DocumentTypeCode, value: string) {
     case DocumentTypeCode.PASSPORT:
     case DocumentTypeCode.BIRTH_CERTIFICATE:
     case DocumentTypeCode.VEHICLE_RC:
+    case DocumentTypeCode.PASSBOOK:
     case DocumentTypeCode.OTHERS:
       return compact.replace(/[^A-Z0-9]/g, '')
     default:
@@ -70,6 +71,11 @@ function validateNumberByType(type: DocumentTypeCode, number: string) {
         return 'Vehicle RC number must be 8 to 20 letters/digits.'
       }
       return null
+    case DocumentTypeCode.PASSBOOK:
+      if (!/^[A-Z0-9]{6,30}$/.test(number)) {
+        return 'Passbook number must be 6 to 30 letters/digits.'
+      }
+      return null
     case DocumentTypeCode.OTHERS:
       if (!/^[A-Z0-9]{4,40}$/.test(number)) {
         return 'Document number must be 4 to 40 letters/digits.'
@@ -109,8 +115,15 @@ export function validateDocumentFormFields(payload: DocumentFormPayload) {
     return errors
   }
 
-  const category = String(payload.category ?? '').trim().toLowerCase()
-  if (!isDocumentCategory(category)) {
+  const category = String(payload.category ?? '').trim()
+  if (type === DocumentTypeCode.OTHERS) {
+    if (category.length > 60) {
+      errors.category = 'Custom label must be at most 60 characters.'
+    }
+    if (category.length < 2) {
+      errors.category = 'Please provide a custom label for Others.'
+    }
+  } else if (!isDocumentCategory(category.toLowerCase())) {
     errors.category = 'Please select a valid category.'
   }
 
