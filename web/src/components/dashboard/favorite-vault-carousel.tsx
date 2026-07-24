@@ -142,6 +142,8 @@ export function FavoriteVaultCarousel({
         return parsed.toLocaleString()
     }
 
+
+
     return (
         <>
             <SharedCarouselSection
@@ -160,7 +162,7 @@ export function FavoriteVaultCarousel({
                         className="min-w-44"
                         leadingMedia={
                             item.type === 'document' && (
-                                <div className='uppercase text-xs'>{item.document_type}</div>
+                                <div className='uppercase text-xs'>{getDocumentDisplayTypeLabel(item.document_type, item.metadata)}</div>
                             )
                         }
                         media={
@@ -220,7 +222,7 @@ export function FavoriteVaultCarousel({
                             </div>
 
                             <div className="rounded-2xl border border-border/65 bg-background/95 px-4 py-3">
-                                <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                                <div className="inline-flex items-center gap-2 text-sm text-muted-foreground dark:text-foreground/78">
                                     <LoaderCircle className="h-4 w-4 animate-spin" />
                                     Preparing secure {selectedItem?.type === 'credential' ? 'credential' : 'document'} details...
                                 </div>
@@ -228,7 +230,7 @@ export function FavoriteVaultCarousel({
                         </div>
                     ) : detailsError ? (
                         <div className="mx-auto flex min-h-56 w-full max-w-120 flex-col items-center justify-center gap-4 rounded-2xl border border-border/65 bg-background/95 px-6 py-8 text-center motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
-                            <p className="text-sm text-muted-foreground">{detailsError}</p>
+                            <p className="text-sm text-muted-foreground dark:text-foreground/78">{detailsError}</p>
                             <Button
                                 type="button"
                                 variant="outline"
@@ -247,13 +249,13 @@ export function FavoriteVaultCarousel({
                             </CardHeader>
                             <CardContent className="space-y-3 text-sm">
                                 <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                    <p className="text-xs text-muted-foreground">Service</p>
+                                    <p className="text-xs text-muted-foreground dark:text-foreground/78">Service</p>
                                     <p className="mt-1 font-medium text-foreground">{detailData.credential.service_name}</p>
                                 </div>
 
                                 <div className="grid gap-3 sm:grid-cols-2">
                                     <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground">Identifier</p>
+                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Identifier</p>
                                         <div className="mt-1 flex items-center justify-between gap-2">
                                             <p className="truncate font-medium text-foreground">{detailData.credential.identifier || 'N/A'}</p>
                                             {detailData.credential.identifier ? (
@@ -267,25 +269,25 @@ export function FavoriteVaultCarousel({
                                         </div>
                                     </div>
                                     <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground">Secret</p>
+                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Secret</p>
                                         <p className="mt-1 font-mono text-foreground">{detailData.credential.masked_secret}</p>
                                     </div>
                                 </div>
 
                                 <div className="grid gap-3 sm:grid-cols-2">
                                     <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground">Website</p>
+                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Website</p>
                                         <p className="mt-1 truncate font-medium text-foreground">{detailData.credential.url || 'N/A'}</p>
                                     </div>
                                     <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground">Updated</p>
+                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Updated</p>
                                         <p className="mt-1 font-medium text-foreground">{formatDateTime(detailData.credential.updated_at)}</p>
                                     </div>
                                 </div>
 
                                 {detailData.credential.notes ? (
                                     <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground">Notes</p>
+                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Notes</p>
                                         <p className="mt-1 whitespace-pre-wrap text-foreground">{detailData.credential.notes}</p>
                                     </div>
                                 ) : null}
@@ -307,7 +309,7 @@ export function FavoriteVaultCarousel({
                             </CardHeader>
                             <CardContent className="space-y-3 text-sm">
                                 <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                    <p className="text-xs text-muted-foreground">Document number</p>
+                                    <p className="text-xs text-muted-foreground dark:text-foreground/78">Document number</p>
                                     <div className="mt-1 flex items-center justify-between gap-2">
                                         <p className="truncate font-mono text-foreground">{detailData.document.document_number || detailData.document.masked_number}</p>
                                         <CopyButton
@@ -321,22 +323,22 @@ export function FavoriteVaultCarousel({
 
                                 <div className="grid gap-3 sm:grid-cols-2">
                                     <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground">Name on document</p>
+                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Name on document</p>
                                         <p className="mt-1 font-medium text-foreground">{detailData.document.name_on_document || 'N/A'}</p>
                                     </div>
                                     <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground">Category</p>
+                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Category</p>
                                         <p className="mt-1 font-medium text-foreground">{getDocumentCategoryLabel(detailData.document.category)}</p>
                                     </div>
                                 </div>
 
                                 <div className="grid gap-3 sm:grid-cols-2">
                                     <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground">Verified at</p>
+                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Verified at</p>
                                         <p className="mt-1 font-medium text-foreground">{formatDateTime(detailData.document.verified_at)}</p>
                                     </div>
                                     <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground">Expires at</p>
+                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Expires at</p>
                                         <p className="mt-1 font-medium text-foreground">{formatDateTime(detailData.document.expires_at)}</p>
                                     </div>
                                 </div>

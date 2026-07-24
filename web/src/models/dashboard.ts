@@ -21,7 +21,8 @@ export type DashboardFavoriteVaultItem = {
   title: string
   subtitle: string
   href: string
-  document_type?: string
+  document_type: string
+  metadata?: Record<string, unknown> | null
 }
 
 export type DashboardRecentBillingCard = {

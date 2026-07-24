@@ -60,14 +60,14 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 max-sm:data-[state=open]:slide-in-from-bottom-10 max-sm:data-[state=closed]:slide-out-to-bottom-10 fixed top-1/2 left-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border border-transparent bg-card p-6 shadow-[12px_12px_28px_hsl(220_18%_82%),-12px_-12px_28px_hsl(220_40%_98%)] duration-200 dark:shadow-[12px_12px_28px_hsl(224_24%_12%),-12px_-12px_28px_hsl(224_16%_24%)]',
+          'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 max-sm:data-[state=open]:slide-in-from-bottom-10 max-sm:data-[state=closed]:slide-out-to-bottom-10 fixed top-1/2 left-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border border-white/42 bg-(--glass-surface) p-6 shadow-(--neu-shadow-raised) backdrop-blur-md duration-200 dark:border-white/12',
           className
         )}
         {...props}
       >
         {children}
         {showCloseButton ? (
-          <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-md border border-transparent bg-background p-1 opacity-95 shadow-[6px_6px_12px_hsl(220_18%_82%),-6px_-6px_12px_hsl(220_40%_98%)] transition-all hover:brightness-105 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none dark:shadow-[5px_5px_10px_hsl(224_24%_12%),-5px_-5px_10px_hsl(224_16%_24%)]">
+          <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-md border border-white/42 bg-(--glass-surface) p-1 opacity-95 shadow-(--neu-shadow-raised-sm) backdrop-blur-sm transition-all hover:bg-(--glass-surface-strong) focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none dark:border-white/12">
             <X className="size-4" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>

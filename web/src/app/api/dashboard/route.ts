@@ -86,6 +86,7 @@ export async function GET() {
         masked_number: true,
         name_on_document: true,
         document_type: true,
+        metadata: true,
       },
       orderBy: { id: 'desc' },
     }),
@@ -165,6 +166,7 @@ export async function GET() {
         subtitle: String(document.name_on_document),
         href: `/doc/${document.id}`,
         document_type: document.document_type ?? 'Uncategorized',
+        metadata: document.metadata ?? null,
       })),
   ].slice(0, 16)
 

@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import type { ReactNode } from 'react'
 
 import { PageHeader } from '@/components/ui/page-header'
@@ -19,7 +18,7 @@ type ListingPageHeaderProps = {
 }
 
 const sharedDesktopAddButtonClass =
-    'hidden sm:inline-flex ring-2 ring-primary/25 shadow-[0_10px_25px_-10px_rgba(0,0,0,0.6)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_30px_-12px_rgba(0,0,0,0.7)]'
+    'hidden sm:inline-flex ring-1 ring-primary/30 shadow-[0_14px_28px_-16px_hsl(var(--primary)/0.7)] transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_32px_-16px_hsl(var(--primary)/0.72)]'
 
 export function ListingPageHeader({
     title,
@@ -39,7 +38,7 @@ export function ListingPageHeader({
             {mobileStickyHeader ? (
                 <div
                     className={cn(
-                        '-mx-4 sticky top-0 z-40 border-b border-border/45 bg-linear-to-b from-background/97 via-background/93 to-background/84 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] shadow-[0_18px_40px_-28px_rgba(0,0,0,0.62)] backdrop-blur-xl sm:static sm:mx-0 sm:mb-4 sm:rounded-2xl sm:bg-linear-to-r sm:from-background/98 sm:via-card/92 sm:to-background/98 sm:px-5 sm:pt-4 sm:shadow-[0_20px_44px_-30px_rgba(0,0,0,0.55)] sm:ring-1 sm:ring-border/35 sm:backdrop-blur-none',
+                        '-mx-4 sticky top-0 z-40 border-b border-white/35 bg-[linear-gradient(to_bottom,hsl(var(--background)/0.9),hsl(var(--background)/0.82)),var(--glass-surface)] px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] shadow-(--neu-shadow-raised) backdrop-blur-xl dark:border-white/14 sm:static sm:mx-0 sm:mb-4 sm:rounded-2xl sm:bg-[linear-gradient(to_right,hsl(var(--background)/0.9),hsl(var(--background)/0.84)),var(--glass-surface)] sm:px-5 sm:pt-4 sm:shadow-(--neu-shadow-raised) sm:ring-1 sm:ring-border/30 sm:backdrop-blur-none',
                         mobileFilters ? 'mb-4' : 'mb-0'
                     )}
                 >
@@ -88,7 +87,7 @@ export function ListingDesktopFilterRow({ children, className }: ListingFilterRo
     return (
         <div
             className={cn(
-                'mb-4 hidden items-center gap-3 rounded-2xl border border-border/70 bg-background/85 p-3 shadow-lg backdrop-blur sm:flex',
+                'mb-4 hidden items-center gap-3 rounded-2xl border border-white/35 bg-(--glass-surface) p-3 shadow-(--neu-shadow-raised-sm) backdrop-blur dark:border-white/14 sm:flex',
                 className
             )}
         >

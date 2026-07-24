@@ -35,8 +35,8 @@ function FormActions({
       {showReset ? (
         <Button
           type="reset"
-          variant="secondary"
-          className={cn('h-11 w-full rounded-xl border border-border/65 bg-background/80 px-6 text-sm font-semibold uppercase tracking-[0.08em] text-foreground shadow-sm transition-colors hover:bg-muted/55 sm:w-auto', resetClassName)}
+          variant="outline"
+          className={cn('h-11 w-full rounded-xl px-6 text-sm font-semibold uppercase tracking-[0.08em] sm:w-auto', resetClassName)}
           disabled={isSubmitting}
         >
           {resetLabel}

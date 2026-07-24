@@ -107,13 +107,13 @@ export function CardMobileFilters() {
                 onToggleDesktopFilters={() => setDesktopOpen((prev) => !prev)}
                 desktopExpandedClassName=""
                 desktopPanel={
-                    <ListingFilterDesktopPanel className="mt-0 rounded-none bg-transparent p-0 shadow-none ring-0 sm:p-0">
+                    <ListingFilterDesktopPanel>
                         <div className="grid grid-cols-1 gap-4">
                             <ListingFilterDesktopSection label="Card type" className="space-y-2">
                                 <CardTypeButtonGroup
                                     selectedType={selectedType}
                                     onSelect={(type) => setFilters({ typeFilter: type })}
-                                    className="h-10 w-full max-w-none rounded-xl border-border/60 bg-background/90"
+                                    className="h-10 w-full max-w-none rounded-xl"
                                 />
                             </ListingFilterDesktopSection>
 
@@ -291,7 +291,6 @@ export function CardMobileFilters() {
                             hasActiveControls={meta.hasActiveControls}
                             onReset={resetFilters}
                             collapseLabel="Save"
-                            className="sticky bottom-0 z-10 -mx-1 mt-1 rounded-xl border border-border/45 bg-background/92 p-2 backdrop-blur-sm"
                             onCollapse={() => setDesktopOpen(false)}
                         />
                     </ListingFilterDesktopPanel>
@@ -305,7 +304,7 @@ export function CardMobileFilters() {
                 description="Apply filters, sorting, and grouping in one place."
             >
                 <ListingFilterMobileSection label="Type" icon={<CreditCard className="h-3.5 w-3.5" />}>
-                    <CardTypeButtonGroup selectedType={selectedType} onSelect={(type) => setFilters({ typeFilter: type })} className="h-10 max-w-none rounded-xl border-border/60 bg-background/90" />
+                    <CardTypeButtonGroup selectedType={selectedType} onSelect={(type) => setFilters({ typeFilter: type })} className="h-10 max-w-none rounded-xl" />
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Network" icon={<Network className="h-3.5 w-3.5" />}>

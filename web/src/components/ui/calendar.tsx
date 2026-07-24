@@ -24,7 +24,7 @@ function Calendar({
       captionLayout={captionLayout}
       numberOfMonths={1}
       className={cn(
-        'rounded-2xl border border-transparent bg-card p-3 shadow-[12px_12px_24px_hsl(220_18%_82%),-12px_-12px_24px_hsl(220_40%_98%)] dark:shadow-[12px_12px_24px_hsl(224_24%_12%),-12px_-12px_24px_hsl(224_16%_24%)]',
+        'rounded-2xl border border-white/42 bg-(--glass-surface) p-3 shadow-(--neu-shadow-raised) backdrop-blur-md dark:border-white/12',
         className
       )}
       classNames={{
@@ -34,7 +34,7 @@ function Calendar({
         caption_label: cn('text-xs font-semibold tracking-wide text-foreground', isDropdownCaption && 'sr-only'),
         dropdowns: 'mx-4 flex items-center gap-1',
         dropdown_root:
-          'relative flex h-8 items-center rounded-md border border-transparent bg-background text-xs text-foreground shadow-[inset_3px_3px_8px_hsl(220_16%_84%),inset_-3px_-3px_8px_hsl(220_40%_98%)] dark:shadow-[inset_3px_3px_8px_hsl(224_24%_12%),inset_-3px_-3px_8px_hsl(224_16%_24%)]',
+          'relative flex h-8 items-center rounded-md border border-white/35 bg-(--glass-surface) text-xs text-foreground shadow-(--neu-shadow-inset-sm) backdrop-blur-sm dark:border-white/12',
         dropdown: 'h-8 bg-transparent px-1 pr-3 text-xs font-medium text-foreground focus:outline-none',
         months_dropdown: 'min-w-[4.75rem]',
         years_dropdown: 'min-w-[3rem]',
@@ -60,15 +60,15 @@ function Calendar({
         ),
         day_button: cn(
           buttonVariants({ variant: 'ghost' }),
-          'size-8 rounded-md border border-transparent bg-background p-0 font-medium text-foreground shadow-[6px_6px_10px_hsl(220_18%_84%),-6px_-6px_10px_hsl(220_40%_98%)] transition hover:brightness-105 aria-selected:opacity-100 dark:shadow-[5px_5px_10px_hsl(224_24%_12%),-5px_-5px_10px_hsl(224_16%_24%)]'
+          'size-8 rounded-md border border-white/35 bg-(--glass-surface) p-0 font-medium text-foreground shadow-(--neu-shadow-raised-sm) transition hover:bg-(--glass-surface-strong) aria-selected:opacity-100 dark:border-white/12'
         ),
         range_start: 'day-range-start',
         range_end: 'day-range-end',
         selected:
-          'bg-primary text-primary-foreground shadow-[inset_3px_3px_7px_hsl(226_40%_44%),inset_-3px_-3px_7px_hsl(226_52%_64%)] hover:bg-primary focus:bg-primary',
-        today: 'bg-secondary text-secondary-foreground',
+          'bg-linear-to-r from-primary/95 via-primary/88 to-primary/78 text-primary-foreground shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),0_8px_16px_-10px_hsl(var(--primary)/0.7)] hover:brightness-110 focus:brightness-110',
+        today: 'bg-primary/22 text-foreground',
         outside:
-          'day-outside text-muted-foreground opacity-60 aria-selected:bg-secondary aria-selected:text-muted-foreground aria-selected:opacity-50',
+          'day-outside text-muted-foreground opacity-60 aria-selected:bg-primary/24 aria-selected:text-muted-foreground aria-selected:opacity-50',
         disabled: 'text-muted-foreground opacity-60',
         hidden: 'invisible',
         ...classNames,

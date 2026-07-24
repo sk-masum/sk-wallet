@@ -21,8 +21,8 @@ export function BottomTabBar({ addHref, addLabel = 'Add' }: BottomTabBarProps) {
       className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4"
     >
       <div className="pointer-events-auto flex items-center">
-        <div className="relative flex w-fit max-w-full items-center justify-center gap-1.5 rounded-4xl bg-white/70 p-1.5 shadow-[0_22px_40px_-28px_rgba(0,0,0,0.85)] backdrop-blur-xl dark:bg-neutral-900/72">
-          <div className="pointer-events-none absolute inset-0 rounded-4xl bg-linear-to-b from-white/46 via-transparent to-transparent dark:from-white/12" />
+        <div className="relative flex w-fit max-w-full items-center justify-center gap-1.5 rounded-4xl border border-white/45 bg-(--glass-surface) p-1.5 shadow-(--neu-shadow-raised-sm) backdrop-blur-lg dark:border-white/12">
+          <div className="pointer-events-none absolute inset-0 rounded-4xl bg-linear-to-b from-white/50 via-transparent to-transparent dark:from-white/12" />
 
           {BOTTOM_TABS.map((tab) => {
             const active = tab.match(pathname)
@@ -35,11 +35,8 @@ export function BottomTabBar({ addHref, addLabel = 'Add' }: BottomTabBarProps) {
                 className={cn(
                   'relative inline-flex h-12 items-center justify-center rounded-full text-sm transition-colors',
                   active
-                    ? 'gap-2 px-4 text-neutral-900 dark:text-neutral-50'
-                    : 'w-12 bg-white/88 text-neutral-700 shadow-[0_8px_16px_-12px_rgba(0,0,0,0.6)] dark:bg-neutral-800/90 dark:text-neutral-100',
-                  active
-                    ? 'hover:bg-black/5 dark:hover:bg-white/10'
-                    : 'hover:bg-white dark:hover:bg-neutral-700/90'
+                    ? 'gap-2 px-4 border border-white/40 bg-(--glass-surface-strong) text-primary shadow-(--neu-shadow-inset-sm) dark:border-white/15'
+                    : 'w-12 border border-white/35 bg-(--glass-surface) text-muted-foreground shadow-(--neu-shadow-raised-sm) hover:bg-(--glass-surface-strong) dark:border-white/12'
                 )}
                 aria-current={active ? 'page' : undefined}
                 aria-label={tab.label}
@@ -55,7 +52,7 @@ export function BottomTabBar({ addHref, addLabel = 'Add' }: BottomTabBarProps) {
         {addHref ? (
           <Link
             href={addHref}
-            className="group relative ml-3 inline-flex h-15 w-15 items-center justify-center overflow-hidden rounded-4xl bg-linear-to-br from-primary via-primary to-primary/82 text-primary-foreground shadow-[0_18px_34px_-16px_hsl(var(--primary))] ring-1 ring-primary/40 transition-all duration-200 hover:-translate-y-0.5 hover:from-primary/95 hover:to-primary hover:shadow-[0_24px_40px_-18px_hsl(var(--primary))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 dark:from-primary/92 dark:via-primary/85 dark:to-primary/70 dark:shadow-[0_22px_40px_-16px_rgba(0,0,0,0.85)] dark:ring-primary/55 dark:hover:from-primary dark:hover:via-primary/92 dark:hover:to-primary/78 dark:hover:shadow-[0_28px_44px_-18px_rgba(0,0,0,0.92)] dark:focus-visible:ring-primary/85"
+            className="group relative ml-3 inline-flex h-15 w-15 items-center justify-center overflow-hidden rounded-4xl bg-linear-to-br from-primary via-primary to-primary/85 text-primary-foreground shadow-[0_18px_34px_-16px_hsl(var(--primary)/0.8)] ring-1 ring-primary/35 transition-all duration-200 hover:-translate-y-0.5 hover:from-primary/95 hover:to-primary hover:shadow-[0_24px_40px_-18px_hsl(var(--primary)/0.85)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 dark:shadow-[0_22px_40px_-16px_rgba(0,0,0,0.85)] dark:ring-primary/55 dark:hover:shadow-[0_28px_44px_-18px_rgba(0,0,0,0.92)] dark:focus-visible:ring-primary/85"
             aria-label={addLabel}
             title={addLabel}
           >

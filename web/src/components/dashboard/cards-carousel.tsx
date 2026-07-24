@@ -156,7 +156,7 @@ export function CardsCarousel({ cards }: CardsCarouselProps) {
                             </div>
 
                             <div className="rounded-2xl border border-border/65 bg-background/95 px-4 py-3">
-                                <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                                <div className="inline-flex items-center gap-2 text-sm text-muted-foreground dark:text-foreground/78">
                                     <LoaderCircle className="h-4 w-4 animate-spin" />
                                     Preparing secure card details...
                                 </div>
@@ -164,7 +164,7 @@ export function CardsCarousel({ cards }: CardsCarouselProps) {
                         </div>
                     ) : detailsError ? (
                         <div className="mx-auto flex min-h-64 w-full max-w-120 flex-col items-center justify-center gap-4 rounded-2xl border border-border/65 bg-background/95 px-6 py-8 text-center">
-                            <p className="text-sm text-muted-foreground">{detailsError}</p>
+                            <p className="text-sm text-muted-foreground dark:text-foreground/78">{detailsError}</p>
                             <Button
                                 type="button"
                                 variant="outline"

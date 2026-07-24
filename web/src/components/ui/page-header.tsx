@@ -41,7 +41,7 @@ export function PageHeader({
 
         <div>
           <h1 className="text-3xl font-semibold">{title}</h1>
-          {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
+          {description ? <p className="mt-1 text-sm text-muted-foreground dark:text-foreground/82">{description}</p> : null}
         </div>
       </div>
     </header>

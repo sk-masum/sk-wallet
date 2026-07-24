@@ -33,7 +33,7 @@ export function ListingPageLoading({
                         <Skeleton className="h-12 w-full rounded-2xl" />
                     </div>
 
-                    <div className="mb-4 hidden items-center gap-3 rounded-2xl border border-border/70 bg-background/85 p-3 shadow-lg backdrop-blur sm:flex">
+                    <div className="mb-4 hidden items-center gap-3 rounded-2xl border border-white/35 bg-(--glass-surface) p-3 shadow-(--neu-shadow-raised-sm) backdrop-blur dark:border-white/14 sm:flex">
                         <Skeleton className="h-10 flex-1 rounded-xl" />
                         <Skeleton className="h-10 w-84 rounded-xl" />
                         <Skeleton className="h-10 w-48 rounded-xl" />

@@ -9,17 +9,17 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'border border-transparent bg-background text-foreground shadow-[7px_7px_14px_hsl(220_18%_82%),-7px_-7px_14px_hsl(220_40%_98%)] hover:bg-secondary active:translate-y-[1px] active:shadow-[inset_4px_4px_10px_hsl(220_18%_82%),inset_-4px_-4px_10px_hsl(220_40%_98%)] dark:shadow-[6px_6px_14px_hsl(224_24%_12%),-6px_-6px_14px_hsl(224_16%_24%)] dark:active:shadow-[inset_3px_3px_8px_hsl(224_24%_12%),inset_-3px_-3px_8px_hsl(224_16%_24%)]',
+          'border border-white/45 bg-(--glass-surface) text-foreground shadow-(--neu-shadow-raised-sm) backdrop-blur-md hover:bg-(--glass-surface-strong) active:translate-y-[1px] active:shadow-(--neu-shadow-inset) dark:border-white/14',
         primary:
-          'border border-transparent bg-primary text-primary-foreground shadow-[7px_7px_14px_hsl(224_24%_76%),-7px_-7px_14px_hsl(226_52%_88%)] hover:brightness-105 active:translate-y-[1px] active:shadow-[inset_4px_4px_10px_hsl(226_38%_44%),inset_-4px_-4px_10px_hsl(226_48%_62%)] dark:shadow-[6px_6px_14px_hsl(224_24%_10%),-6px_-6px_14px_hsl(224_20%_22%)]',
+          'border border-white/20 bg-linear-to-r from-primary/95 via-primary/88 to-primary/78 text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_14px_26px_-16px_hsl(var(--primary)/0.74)] hover:brightness-110 active:translate-y-[1px] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.28)]',
         destructive:
-          'border border-transparent bg-destructive text-destructive-foreground shadow-[7px_7px_14px_rgba(153,27,27,0.3),-7px_-7px_14px_rgba(254,202,202,0.4)] hover:brightness-105 active:translate-y-[1px]',
+          'border border-red-900/35 bg-linear-to-b from-red-500 to-red-700 text-destructive-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_10px_20px_-14px_rgba(127,29,29,0.6)] hover:brightness-105 active:translate-y-[1px]',
         outline:
-          'border border-border/30 bg-background text-foreground shadow-[inset_3px_3px_8px_hsl(220_16%_84%),inset_-3px_-3px_8px_hsl(220_42%_98%)] hover:bg-secondary dark:shadow-[inset_3px_3px_8px_hsl(224_22%_13%),inset_-3px_-3px_8px_hsl(224_16%_24%)]',
+          'border border-white/45 bg-(--glass-surface) text-foreground shadow-(--neu-shadow-inset-sm) backdrop-blur-md hover:bg-(--glass-surface-strong) dark:border-white/14',
         secondary:
-          'border border-transparent bg-secondary text-secondary-foreground shadow-[6px_6px_12px_hsl(220_18%_82%),-6px_-6px_12px_hsl(220_40%_98%)] hover:brightness-105 dark:shadow-[5px_5px_12px_hsl(224_24%_12%),-5px_-5px_12px_hsl(224_16%_24%)]',
+          'border border-white/35 bg-linear-to-b from-primary/74 to-primary/62 text-primary-foreground shadow-(--neu-shadow-raised-sm) hover:brightness-110 dark:border-white/12',
         ghost:
-          'border border-transparent bg-transparent shadow-none hover:bg-secondary/70 hover:shadow-[inset_2px_2px_6px_hsl(220_18%_84%),inset_-2px_-2px_6px_hsl(220_40%_98%)] dark:hover:shadow-[inset_2px_2px_6px_hsl(224_24%_12%),inset_-2px_-2px_6px_hsl(224_16%_24%)]',
+          'border border-transparent bg-transparent shadow-none hover:border-white/35 hover:bg-(--glass-surface) hover:shadow-(--neu-shadow-inset-sm) dark:hover:border-white/12',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
