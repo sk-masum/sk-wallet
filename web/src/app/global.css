@@ -48,6 +48,10 @@
   }
 }
 
+.light {
+  --ios-statusbar-bg: #e5eafe;
+}
+
 .dark {
   --ios-statusbar-bg: #0d1333;
   --background: 229 38% 10%;
