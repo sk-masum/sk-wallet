@@ -40,7 +40,7 @@ export function CredentialDetailsCard({
             key: 'identifier',
             label: 'Identifier',
             value: credential.identifier || 'N/A',
-            hidden: !credential.identifier,
+            hasCopy: Boolean(credential.identifier),
         },
         {
             key: 'secret',

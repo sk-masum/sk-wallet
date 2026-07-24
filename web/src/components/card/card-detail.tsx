@@ -1,4 +1,5 @@
 import { Eye, EyeOff } from "lucide-react"
+import type { WalletCard } from "@/models/card"
 import { Button } from "../ui/button"
 import { responsiveIconSizes } from "../ui/icon-sizes"
 import { CardFace } from "./card-face"
@@ -8,12 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { CARD_STATUS_OPTIONS, isCardStatus } from "@/constants/card/status"
 
 interface CardDetailProps {
-    selectedCard: any
+    selectedCard: WalletCard
     showCardNumber: boolean
     isUpdatingStatus: boolean
     isDeleting: boolean
     hydrated: boolean
-    router: any
+    router: { push: (href: string) => void }
     selectedStatus: 'active' | 'inactive' | 'blocked' | 'replaced'
     toggleNumberVisibility: () => void
     setConfirmDeleteOpen: (open: boolean) => void
