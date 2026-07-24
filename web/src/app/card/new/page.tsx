@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { CardForm } from '@/components/card/card-form'
-import { withCardFormPage } from '@/components/card/with-card-form-page'
+import { withCardFormPage } from '@/hoc/with-card-form-page'
 import { serverApiPost } from '@/lib/api/server'
 import { parseCardFormData } from '@/utils/card/form-data'
 import { validateCardForm } from '@/utils/card/validation'

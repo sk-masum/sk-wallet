@@ -178,8 +178,7 @@ export function CardsCarousel({ cards }: CardsCarouselProps) {
                             <CardFace
                                 card={selectedCard}
                                 showCreditLimit
-                                showCvv
-                                showFullNumber
+                                showCardNumber
                                 allowCopyNumber
                                 className="rounded-2xl"
                             />
