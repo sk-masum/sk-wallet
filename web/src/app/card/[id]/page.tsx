@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 
 import { CardForm } from '@/components/card/card-form'
 import { CardStatusForm } from '@/components/card/card-status-form'
-import { withCardFormPage } from '@/components/card/with-card-form-page'
+import { withCardFormPage } from '@/hoc/with-card-form-page'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { isCardStatus } from '@/constants/card/status'
 import { serverApiGet, serverApiPatch, serverApiPut } from '@/lib/api/server'

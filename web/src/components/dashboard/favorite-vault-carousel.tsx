@@ -1,14 +1,15 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { FileText, KeyRound, LoaderCircle } from 'lucide-react'
+import { FileText, KeyRound } from 'lucide-react'
 
 import { CredentialDetailsCard } from '@/components/credential/credential-details-card'
 import { MiniVerticalCarouselCard } from '@/components/dashboard/mini-vertical-carousel-card'
 import { DocumentDetailsCard } from '@/components/doc/document-details-card'
 import { SharedCarouselSection } from '@/components/dashboard/shared-carousel-section'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
+import { useEntityDetailsDialog } from '@/hooks/use-entity-details-dialog'
 import { Button } from '@/components/ui/button'
 import { Dialog } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -60,78 +61,41 @@ export function FavoriteVaultCarousel({
     items,
 }: FavoriteVaultCarouselProps) {
     const router = useRouter()
-    const [selectedItem, setSelectedItem] = useState<SelectedVaultItem | null>(null)
-    const [detailData, setDetailData] = useState<FavoriteDetailData | null>(null)
-    const [loadingDetails, setLoadingDetails] = useState(false)
-    const [detailsError, setDetailsError] = useState<string | null>(null)
+    const fetchDetails = useCallback(async (item: SelectedVaultItem): Promise<FavoriteDetailData> => {
+        if (item.type === 'credential') {
+            const { response, data } = await clientApiGet<CredentialDetailsResponse>(`/api/credential/${item.id}`)
 
-    const detailDialogOpen = Boolean(selectedItem)
-
-    useEffect(() => {
-        if (!selectedItem) {
-            setDetailData(null)
-            setDetailsError(null)
-            setLoadingDetails(false)
-            return
-        }
-
-        let cancelled = false
-
-        const fetchDetails = async () => {
-            setLoadingDetails(true)
-            setDetailsError(null)
-            setDetailData(null)
-
-            try {
-                if (selectedItem.type === 'credential') {
-                    const { response, data } = await clientApiGet<CredentialDetailsResponse>(`/api/credential/${selectedItem.id}`)
-
-                    if (cancelled) return
-
-                    if (!response.ok || !data?.data) {
-                        setDetailsError(data?.error || 'Unable to load credential details.')
-                        return
-                    }
-
-                    setDetailData({ kind: 'credential', credential: data.data })
-                    return
-                }
-
-                const { response, data } = await clientApiGet<DocumentDetailsResponse>(`/api/document/${selectedItem.id}`)
-
-                if (cancelled) return
-
-                if (!response.ok || !data?.data) {
-                    setDetailsError(data?.error || 'Unable to load document details.')
-                    return
-                }
-
-                setDetailData({ kind: 'document', document: data.data })
-            } catch {
-                if (cancelled) return
-                setDetailsError(
-                    selectedItem.type === 'credential'
-                        ? 'Unable to load credential details.'
-                        : 'Unable to load document details.'
-                )
-            } finally {
-                if (!cancelled) {
-                    setLoadingDetails(false)
-                }
+            if (!response.ok || !data?.data) {
+                throw new Error(data?.error || 'Unable to load credential details.')
             }
+
+            return { kind: 'credential', credential: data.data }
         }
 
-        void fetchDetails()
+        const { response, data } = await clientApiGet<DocumentDetailsResponse>(`/api/document/${item.id}`)
 
-        return () => {
-            cancelled = true
+        if (!response.ok || !data?.data) {
+            throw new Error(data?.error || 'Unable to load document details.')
         }
-    }, [selectedItem])
 
-    const dialogTitle = useMemo(() => {
-        if (!selectedItem) return ''
-        return selectedItem.type === 'credential' ? 'Credential details' : 'Document details'
-    }, [selectedItem])
+        return { kind: 'document', document: data.data }
+    }, [])
+
+    const {
+        selectedItem,
+        setSelectedItem,
+        detailData,
+        loadingDetails,
+        detailsError,
+        dialogOpen,
+        closeDialog,
+    } = useEntityDetailsDialog<DashboardFavoriteVaultItem['type'], FavoriteDetailData>({
+        fetchDetails,
+        getErrorMessage: (item) =>
+            item.type === 'credential'
+                ? 'Unable to load credential details.'
+                : 'Unable to load document details.',
+    })
 
 
 
@@ -167,7 +131,7 @@ export function FavoriteVaultCarousel({
                 )}
             />
 
-            <Dialog open={detailDialogOpen} onOpenChange={(open) => !open && setSelectedItem(null)}>
+            <Dialog open={dialogOpen} onOpenChange={(open) => !open && closeDialog()}>
                 <DetailDialogContent>
                     {loadingDetails ? (
                         <div className="mx-auto w-full max-w-120 space-y-3">
@@ -211,13 +175,6 @@ export function FavoriteVaultCarousel({
                                     </div>
                                 </div>
                             </div>
-
-                            <div className="rounded-2xl border border-border/65 bg-background/95 px-4 py-3">
-                                <div className="inline-flex items-center gap-2 text-sm text-muted-foreground dark:text-foreground/78">
-                                    <LoaderCircle className="h-4 w-4 animate-spin" />
-                                    Preparing secure {selectedItem?.type === 'credential' ? 'credential' : 'document'} details...
-                                </div>
-                            </div>
                         </div>
                     ) : detailsError ? (
                         <div className="mx-auto flex min-h-56 w-full max-w-120 flex-col items-center justify-center gap-4 rounded-2xl border border-border/65 bg-background/95 px-6 py-8 text-center motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
@@ -233,25 +190,14 @@ export function FavoriteVaultCarousel({
                     ) : detailData?.kind === 'credential' ? (
                         <CredentialDetailsCard
                             credential={detailData.credential}
-                            title={dialogTitle}
+                            title="Credential details"
                             className="motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300"
-                            primaryAction={(
-                                <Button type="button" variant="outline" onClick={() => selectedItem && router.push(selectedItem.href)}>
-                                    Open full page
-                                </Button>
-                            )}
                         />
                     ) : detailData?.kind === 'document' ? (
                         <DocumentDetailsCard
                             document={detailData.document}
                             className="mx-auto w-full max-w-120 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300"
                             showActions
-                            actionsClassName="flex justify-end pt-1"
-                            actions={(
-                                <Button type="button" variant="outline" onClick={() => selectedItem && router.push(selectedItem.href)}>
-                                    Open full page
-                                </Button>
-                            )}
                         />
                     ) : null}
                 </DetailDialogContent>

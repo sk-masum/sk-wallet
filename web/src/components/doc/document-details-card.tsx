@@ -1,11 +1,9 @@
 import type { ReactNode } from 'react'
-
-import { VaultDetailsBlock, VaultDetailsCard, VaultDetailsGrid } from '@/components/shared/vault-details-ui'
-import { CopyButton } from '@/components/ui/copy-button'
 import { getDocumentCategoryLabel } from '@/constants/document/categories'
 import { cn } from '@/lib/utils'
 import type { UserDocument } from '@/models/document'
 import { getDocumentDisplayTypeLabel } from '@/utils/document/label'
+import { VaultDetailsCard, VaultDetailsFieldList, type VaultDetailsFieldDescriptor } from '../shared/vault-details-ui'
 
 type DocumentDetails = UserDocument & {
     document_number?: string
@@ -15,7 +13,6 @@ type DocumentDetailsCardProps = {
     document: DocumentDetails
     showActions?: boolean
     actions?: ReactNode
-    actionsClassName?: string
     className?: string
 }
 
@@ -75,125 +72,110 @@ function getCategoryBadgeClass(category: string) {
     return 'bg-muted text-muted-foreground border-border'
 }
 
-type FieldBlockProps = {
-    label: string
-    value: string
-    preserveWhitespace?: boolean
-}
-
-function FieldBlock({ label, value, preserveWhitespace = false }: FieldBlockProps) {
-    return (
-        <VaultDetailsBlock
-            label={label}
-            trailing={
-                <CopyButton
-                    value={value}
-                    label={label}
-                    className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
-                    showStatusIcon
-                    copyIconClassName="h-3.5 w-3.5"
-                    checkIconClassName="h-3.5 w-3.5 text-green-600"
-                />
-            }
-        >
-            <p className={cn(preserveWhitespace && 'whitespace-pre-wrap')}>{value}</p>
-        </VaultDetailsBlock>
-    )
-}
 
 export function DocumentDetailsCard({
     document,
     showActions = false,
     actions,
-    actionsClassName,
     className,
 }: DocumentDetailsCardProps) {
     const customMetadata = getCustomMetadataEntries(document.metadata)
     const title = getDocumentDisplayTypeLabel(document.document_type, document.metadata)
     const documentNumber = document.document_number || document.masked_number
     const category = String(document.category ?? 'other')
-
-    return (
-        <VaultDetailsCard title={title} subtitle={`Updated ${formatDateTime(document.updated_at)}`} className={className}>
-            <VaultDetailsBlock
-                label="Category"
-                trailing={
-                    <CopyButton
-                        value={getDocumentCategoryLabel(category)}
-                        label="Category"
-                        className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
-                        showStatusIcon
-                        copyIconClassName="h-3.5 w-3.5"
-                        checkIconClassName="h-3.5 w-3.5 text-green-600"
-                    />
-                }
-            >
+    const fields: VaultDetailsFieldDescriptor[] = [
+        {
+            key: 'category',
+            label: 'Category',
+            children: (
                 <span
                     className={cn(
-                        'inline-flex rounded-full border px-2 py-0.5 text-xs font-medium capitalize',
+                        'mt-1 inline-flex rounded-full border px-2 py-0.5 text-xs font-medium capitalize',
                         getCategoryBadgeClass(category)
                     )}
                 >
                     {getDocumentCategoryLabel(category)}
                 </span>
-            </VaultDetailsBlock>
+            ),
+        },
+        {
+            key: 'document-number',
+            label: 'Document number',
+            value: documentNumber,
+        },
+        {
+            key: 'name-on-document',
+            label: 'Name on document',
+            value: document.name_on_document || 'N/A',
+        },
+        {
+            key: 'issued-date',
+            label: 'Issued date',
+            value: getMetadataText(document.metadata, 'issued_date'),
+            hidden: !getMetadataText(document.metadata, 'issued_date'),
+        },
+        {
+            key: 'expiry-date',
+            label: 'Expiry date',
+            value: getMetadataText(document.metadata, 'expiry_date'),
+            hidden: !getMetadataText(document.metadata, 'expiry_date'),
+        },
+        {
+            key: 'guardian-name',
+            label: 'Guardian name',
+            value: getMetadataText(document.metadata, 'guardian_name'),
+            hidden: !getMetadataText(document.metadata, 'guardian_name'),
+        },
+        {
+            key: 'address',
+            label: 'Address',
+            value: getMetadataText(document.metadata, 'address'),
+            hidden: !getMetadataText(document.metadata, 'address'),
+        },
+        {
+            key: 'other-details',
+            label: 'Other details',
+            value: getMetadataText(document.metadata, 'other_details'),
+            preserveWhitespace: true,
+            hidden: !getMetadataText(document.metadata, 'other_details'),
+        },
+        {
+            key: 'verified-at',
+            label: 'Verified at',
+            value: document.verified_at ? formatDateTime(document.verified_at) : '',
+            hidden: !document.verified_at,
+        },
+        {
+            key: 'expires-at',
+            label: 'Expires at',
+            value: document.expires_at ? formatDateTime(document.expires_at) : '',
+            hidden: !document.expires_at,
+        },
+    ]
+    const customMetadataFields: VaultDetailsFieldDescriptor[] = customMetadata.map((item) => ({
+        key: item.key,
+        label: item.label,
+        value: item.value,
+        preserveWhitespace: true,
+    }))
 
-            <VaultDetailsGrid>
-                <FieldBlock label="Document number" value={documentNumber} />
-                <FieldBlock label="Name on document" value={document.name_on_document || 'N/A'} />
-            </VaultDetailsGrid>
-
-            <VaultDetailsGrid>
-                {getMetadataText(document.metadata, 'issued_date') ? (
-                    <FieldBlock label="Issued date" value={getMetadataText(document.metadata, 'issued_date')} />
-                ) : null}
-
-                {getMetadataText(document.metadata, 'expiry_date') ? (
-                    <FieldBlock label="Expiry date" value={getMetadataText(document.metadata, 'expiry_date')} />
-                ) : null}
-            </VaultDetailsGrid>
-
-            <VaultDetailsGrid>
-                {getMetadataText(document.metadata, 'guardian_name') ? (
-                    <FieldBlock label="Guardian name" value={getMetadataText(document.metadata, 'guardian_name')} />
-                ) : null}
-
-                {getMetadataText(document.metadata, 'address') ? (
-                    <FieldBlock label="Address" value={getMetadataText(document.metadata, 'address')} />
-                ) : null}
-            </VaultDetailsGrid>
-
-            {getMetadataText(document.metadata, 'other_details') ? (
-                <FieldBlock
-                    label="Other details"
-                    value={getMetadataText(document.metadata, 'other_details')}
-                    preserveWhitespace
-                />
-            ) : null}
-
-            <VaultDetailsGrid>
-                {document.verified_at ? (
-                    <FieldBlock label="Verified at" value={formatDateTime(document.verified_at)} />
-                ) : null}
-
-                {document.expires_at ? (
-                    <FieldBlock label="Expires at" value={formatDateTime(document.expires_at)} />
-                ) : null}
-            </VaultDetailsGrid>
+    return (
+        <VaultDetailsCard
+            title={title}
+            subtitle={`Updated ${formatDateTime(document.updated_at)}`}
+            className={className}
+        >
+            <VaultDetailsFieldList fields={fields} />
 
             {customMetadata.length > 0 ? (
                 <div className="space-y-2">
                     <p className="text-xs font-medium text-muted-foreground dark:text-foreground/78">Custom fields</p>
-                    <div className="space-y-2">
-                        {customMetadata.map((item) => (
-                            <FieldBlock key={item.key} label={item.label} value={item.value} preserveWhitespace />
-                        ))}
-                    </div>
+                    <VaultDetailsFieldList fields={customMetadataFields} />
                 </div>
             ) : null}
 
             {showActions && actions ? (
-                <div className={cn('pt-2', actionsClassName)}>{actions}</div>
+                <div className='pt-2 grid gap-2 grid-cols-3'>{actions}</div>
             ) : null}
         </VaultDetailsCard>
     )

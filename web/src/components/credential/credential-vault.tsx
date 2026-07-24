@@ -1,18 +1,21 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { HeartIcon, Pencil, Trash2 } from 'lucide-react'
 
 import { CredentialDetailsCard } from '@/components/credential/credential-details-card'
 import NoDocIcon from '@/components/icons/nodoc-icon'
-import { useDashboardFavorites } from '@/components/dashboard/use-dashboard-favorites'
+import { useDashboardFavorites } from '@/hooks/use-dashboard-favorites'
 import { DeleteConfirmDialog } from '@/components/shared/delete-confirm-dialog'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
-import { Button } from '@/components/ui/button'
+import { withVaultBootstrap } from '@/hoc/with-vault-bootstrap'
+import { useDetailsErrorToast } from '@/hooks/use-details-error-toast'
+import { useEntityDetailsDialog } from '@/hooks/use-entity-details-dialog'
+import { useGroupedItems } from '@/hooks/use-grouped-items'
+import { useResetStateOnChange } from '@/hooks/use-reset-state-on-change'
+import { useSuccessQueryToast } from '@/hooks/use-success-query-toast'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { getCredentialTypeConfig } from '@/constants/credential/types'
 import { clientApiDelete, clientApiGet } from '@/lib/api/client'
 import {
@@ -29,7 +32,6 @@ import { showToast } from '@/lib/toast'
 import { copyToClipboard } from '@/utils/copy'
 import { cn } from '@/lib/utils'
 import type { UserCredential } from '@/models/credential'
-import { responsiveIconSizes } from '../ui/icon-sizes'
 import { DialogActions } from '../shared/dialog-actions'
 
 type CredentialVaultProps = {
@@ -45,11 +47,15 @@ type CredentialSecretResponse = {
     error?: string
 }
 
-export function CredentialVault({ initialCredentials, initialError = '' }: CredentialVaultProps) {
+type CredentialDetailsResponse = {
+    data?: UserCredential
+    error?: string
+}
+
+function CredentialVaultContent({ initialCredentials, initialError = '' }: CredentialVaultProps) {
     const router = useRouter()
     const { hydrated, isFavorite, toggleFavorite } = useDashboardFavorites()
     const searchParams = useSearchParams()
-    const [selectedCredentialId, setSelectedCredentialId] = useState<string | null>(null)
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
     const [isCopyingSecret, setIsCopyingSecret] = useState(false)
@@ -59,12 +65,7 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
     const credentials = useCredentialVaultStore((state) => state.credentials)
     const visibleCredentials = useCredentialVaultStore(selectVisibleCredentials)
     const groupBy = useCredentialVaultStore((state) => state.groupBy)
-    const setCredentials = useCredentialVaultStore((state) => state.setCredentials)
     const removeCredential = useCredentialVaultStore((state) => state.removeCredential)
-
-    useEffect(() => {
-        setCredentials(initialCredentials)
-    }, [initialCredentials, setCredentials])
 
     useEffect(() => {
         return () => {
@@ -74,48 +75,59 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
         }
     }, [])
 
-    useEffect(() => {
-        setConfirmDeleteOpen(false)
-    }, [selectedCredentialId])
+    const {
+        selectedItem,
+        setSelectedItem,
+        detailData: selectedCredentialDetail,
+        detailsError,
+        dialogOpen,
+        closeDialog,
+    } = useEntityDetailsDialog<'credential', UserCredential>({
+        fetchDetails: async (item) => {
+            const { response, data } = await clientApiGet<CredentialDetailsResponse>(`/api/credential/${item.id}`)
+
+            if (!response.ok || !data?.data) {
+                throw new Error(data?.error || 'Failed to load credential details.')
+            }
+
+            return data.data
+        },
+        getErrorMessage: () => 'Failed to load credential details.',
+    })
+
+    useResetStateOnChange(selectedItem?.id, setConfirmDeleteOpen, false)
 
     useEffect(() => {
-        if (initialError) {
-            showToast({ message: initialError, variant: 'error' })
-            return
-        }
+        if (!initialError) return
+        showToast({ message: initialError, variant: 'error' })
+    }, [initialError])
 
-        const success = searchParams.get('success')
-        if (success) {
-            showToast({ message: success, variant: 'success' })
-            router.replace('/credential')
-        }
-    }, [initialError, searchParams, router])
+    const successMessage = initialError ? null : searchParams.get('success')
+    const handleSuccessConsumed = useCallback(() => {
+        router.replace('/credential')
+    }, [router])
+    useSuccessQueryToast({
+        successMessage,
+        onConsumed: handleSuccessConsumed,
+    })
 
-    const selectedCredential = useMemo(
-        () => credentials.find((cred) => cred.id === selectedCredentialId) ?? null,
-        [credentials, selectedCredentialId]
+    const selectedCredential = useMemo(() => {
+        if (selectedCredentialDetail) return selectedCredentialDetail
+        if (!selectedItem) return null
+
+        return credentials.find((cred) => cred.id === selectedItem.id) ?? null
+    }, [credentials, selectedCredentialDetail, selectedItem])
+
+    useDetailsErrorToast(detailsError)
+
+    const getGroupLabel = useCallback(
+        (credential: UserCredential) =>
+            groupBy === 'type'
+                ? (getCredentialTypeConfig(credential.credential_type)?.label ?? credential.credential_type)
+                : (credential.service_name || 'Unknown service'),
+        [groupBy]
     )
-
-    const groupedCredentials = useMemo(() => {
-        if (groupBy === 'none') return []
-
-        const groups = new Map<string, UserCredential[]>()
-
-        for (const credential of visibleCredentials) {
-            const key =
-                groupBy === 'type'
-                    ? (getCredentialTypeConfig(credential.credential_type)?.label ?? credential.credential_type)
-                    : (credential.service_name || 'Unknown service')
-
-            const current = groups.get(key) ?? []
-            current.push(credential)
-            groups.set(key, current)
-        }
-
-        return Array.from(groups.entries())
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([label, items]) => ({ label, items }))
-    }, [visibleCredentials, groupBy])
+    const groupedCredentials = useGroupedItems(visibleCredentials, getGroupLabel)
 
     const renderCredentialCard = (cred: UserCredential, index: number) => {
         const label = getCredentialTypeConfig(cred.credential_type)?.label ?? cred.credential_type
@@ -129,7 +141,7 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
                     'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500'
                 )}
                 style={{ animationDelay: `${Math.min(index, 9) * 65}ms` }}
-                onClick={() => setSelectedCredentialId(cred.id)}
+                onClick={() => setSelectedItem({ id: cred.id, type: 'credential', href: `/credential/${cred.id}` })}
             >
                 <Card className="group transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md">
                     <CardHeader>
@@ -183,7 +195,7 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
 
             showToast({ message: 'Credential deleted successfully.', variant: 'success' })
             setConfirmDeleteOpen(false)
-            setSelectedCredentialId(null)
+            closeDialog()
             removeCredential(selectedCredential.id)
         } finally {
             setIsDeleting(false)
@@ -292,20 +304,18 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
                 </div>
             )}
 
-            <Dialog open={Boolean(selectedCredential)} onOpenChange={(open) => !open && setSelectedCredentialId(null)}>
+            <Dialog open={dialogOpen} onOpenChange={(open) => !open && closeDialog()}>
                 {selectedCredential ? (
                     <DetailDialogContent>
                         <CredentialDetailsCard
                             credential={selectedCredential}
                             title={selectedCredential.service_name}
-                            className="motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300"
                             onCopyActualSecret={() => {
                                 void handleCopyActualSecret()
                             }}
                             isCopyingSecret={isCopyingSecret}
                             secretCopied={secretCopied}
                             showActions
-                            actionsClassName="grid gap-2 grid-cols-3"
                             actions={(
                                 <DialogActions
                                     handleDelete={() => setConfirmDeleteOpen(true)}
@@ -339,3 +349,12 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
         </section>
     )
 }
+
+export const CredentialVault = withVaultBootstrap<CredentialVaultProps, UserCredential>(
+    CredentialVaultContent,
+    {
+        useSetItems: () => useCredentialVaultStore((state) => state.setCredentials),
+        getItems: (props) => props.initialCredentials,
+        getError: (props) => props.initialError,
+    }
+)

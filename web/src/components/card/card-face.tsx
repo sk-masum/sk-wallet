@@ -12,26 +12,22 @@ import { getCardPatternByKey } from '@/constants/card/patterns'
 
 export type CardFaceProps = {
   card: WalletCard
-  onToggleNumberVisibility?: () => void
   allowCopyNumber?: boolean
   allowCopyExpiry?: boolean
   allowCopyCvv?: boolean
   showCreditLimit?: boolean
-  showCvv?: boolean
-  showFullNumber?: boolean
+  showCardNumber?: boolean
   expiryAlignStart?: boolean
   className?: string
 }
 
 export function CardFace({
   card,
-  onToggleNumberVisibility,
   allowCopyNumber = false,
   allowCopyExpiry = false,
   allowCopyCvv = false,
   showCreditLimit = false,
-  showCvv = false,
-  showFullNumber = false,
+  showCardNumber = false,
   expiryAlignStart = false,
   className,
 }: CardFaceProps) {
@@ -41,7 +37,7 @@ export function CardFace({
   const numberDigits = String(card.number ?? '').replace(/\D/g, '')
   const maskedNumber = maskCardNumber(card.number ?? '')
   const fullNumber = numberDigits.replace(/(.{4})/g, '$1 ').trim()
-  const number = showFullNumber ? fullNumber : maskedNumber
+  const number = showCardNumber ? fullNumber : maskedNumber
   const expiry = formatExpiry(card.expiry_month, card.expiry_year)
   const cvv = String(card.cvv ?? '').trim() || 'N/A'
   const creditLimitValue = Number(card.credit_limit)
@@ -108,17 +104,6 @@ export function CardFace({
           >
             <span className="font-mono text-lg tracking-[0.18em]">{number}</span>
           </CopyButton>
-
-          {onToggleNumberVisibility ? (
-            <button
-              type="button"
-              onClick={onToggleNumberVisibility}
-              className="inline-flex items-center justify-center rounded p-1 text-slate-100/90 hover:bg-white/10"
-              aria-label={showFullNumber ? 'Hide full card number' : 'Show full card number'}
-            >
-              {showFullNumber ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          ) : null}
         </div>
       ) : (
         <p className="font-mono text-lg tracking-[0.18em]">{number}</p>
@@ -130,7 +115,7 @@ export function CardFace({
           <p className="mt-1 flex h-5 items-center truncate text-sm leading-4 font-medium tracking-wide">{holder}</p>
         </div>
 
-        {showCvv ? (
+        {showCardNumber ? (
           <div
             className={cn(
               'flex flex-1 flex-col justify-end',
