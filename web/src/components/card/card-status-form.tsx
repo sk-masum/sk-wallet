@@ -20,7 +20,7 @@ export function CardStatusForm({ cardId, initialStatus, action }: CardStatusForm
             <input type="hidden" name="id" value={cardId} />
             <input type="hidden" name="status" value={status} />
             <div className="flex-1 space-y-1.5">
-                <label htmlFor="status-select" className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+                <label htmlFor="status-select" className="text-[11px] font-semibold tracking-[0.08em] text-text-subtle uppercase">
                     Status
                 </label>
                 <Select

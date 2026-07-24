@@ -69,7 +69,7 @@ function getCategoryBadgeClass(category: string) {
     if (category === 'vehicle') return 'bg-red-500/15 text-red-600 border-red-500/30'
     if (category === 'travel') return 'bg-purple-500/15 text-purple-600 border-purple-500/30'
 
-    return 'bg-muted text-muted-foreground border-border'
+    return 'bg-muted text-text-subtle border-border'
 }
 
 
@@ -169,7 +169,7 @@ export function DocumentDetailsCard({
 
             {customMetadata.length > 0 ? (
                 <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground dark:text-foreground/78">Custom fields</p>
+                    <p className="text-xs font-medium text-text-subtle">Custom fields</p>
                     <VaultDetailsFieldList fields={customMetadataFields} />
                 </div>
             ) : null}

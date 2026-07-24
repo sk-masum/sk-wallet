@@ -37,7 +37,7 @@ export function ListingPageHeader({
             {mobileStickyHeader ? (
                 <div
                     className={cn(
-                        '-mx-4 sticky top-0 z-40 border-b border-white/35 bg-[linear-gradient(to_bottom,hsl(var(--background)/0.9),hsl(var(--background)/0.82)),var(--glass-surface)] px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] shadow-(--neu-shadow-raised) backdrop-blur-xl dark:border-white/14 sm:static sm:mx-0 sm:mb-4 sm:border-0 sm:bg-transparent sm:px-0 sm:pt-0 sm:shadow-none sm:ring-0 sm:backdrop-blur-none',
+                        'listing-mobile-sticky-shell sm:mb-4',
                         mobileFilters ? 'mb-4' : 'mb-0'
                     )}
                 >
@@ -88,7 +88,7 @@ export function ListingDesktopFilterRow({ children, className }: ListingFilterRo
     return (
         <div
             className={cn(
-                'mb-4 hidden items-center gap-3 rounded-2xl border border-white/35 bg-(--glass-surface) p-3 shadow-(--neu-shadow-raised-sm) backdrop-blur dark:border-white/14 sm:flex',
+                'mb-4 hidden items-center gap-3 rounded-2xl border border-glass-border-soft bg-glass p-3 shadow-neu-raised-sm backdrop-blur  sm:flex',
                 className
             )}
         >

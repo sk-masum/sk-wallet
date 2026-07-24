@@ -172,10 +172,10 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
                 aria-controls={`card-group-${group.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
                 className="flex w-full items-center justify-between rounded-xl border border-border/65 bg-card/60 px-3 py-2 text-left transition-colors hover:bg-card"
               >
-                <span className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                <span className="text-sm font-semibold tracking-wide text-text-subtle uppercase">
                   {group.title}
                 </span>
-                <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-2 text-xs text-text-subtle">
                   {group.cards.length}
                   {collapsedGroups[group.title] ? (
                     <ChevronRight className="h-4 w-4" />

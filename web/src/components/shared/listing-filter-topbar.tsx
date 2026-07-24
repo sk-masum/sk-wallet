@@ -68,8 +68,8 @@ export function ListingFilterTopBar({
 }: ListingFilterTopBarProps) {
     const renderClearSearchAction = (desktop: boolean) => {
         const className = desktop
-            ? 'absolute right-1 top-1 h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground'
-            : 'absolute right-1 top-1.5 h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground'
+            ? 'absolute right-1 top-1 h-8 w-8 rounded-lg text-text-subtle hover:text-foreground'
+            : 'absolute right-1 top-1.5 h-7 w-7 rounded-lg text-text-subtle hover:text-foreground'
 
         if (searchMode === 'form' && clearSearchHref) {
             return (
@@ -114,7 +114,7 @@ export function ListingFilterTopBar({
                                 }
                                 placeholder={mobileSearchPlaceholder}
                                 aria-label={mobileSearchAriaLabel}
-                                className="h-10 rounded-xl border-white/35 bg-(--glass-surface) pr-10 shadow-(--neu-shadow-inset-sm) dark:border-white/12"
+                                className="h-10 rounded-xl border-glass-border-soft bg-glass pr-10 shadow-neu-inset-sm "
                             />
                             {hasTextQuery ? renderClearSearchAction(false) : null}
                             {searchHiddenFields}
@@ -142,26 +142,26 @@ export function ListingFilterTopBar({
             <div className={cn(defaultDesktopContainerClassName, desktopContainerClassName)}>
                 {searchMode === 'form' ? (
                     <form action={formAction} method="get" className="relative flex-1">
-                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-subtle" />
                         <Input
                             name={searchInputName}
                             defaultValue={searchValue}
                             placeholder={desktopSearchPlaceholder}
                             aria-label={desktopSearchAriaLabel}
-                            className="h-10 rounded-xl border-white/35 bg-(--glass-surface) pl-9 pr-10 shadow-(--neu-shadow-inset-sm) dark:border-white/12"
+                            className="h-10 rounded-xl border-glass-border-soft bg-glass pl-9 pr-10 shadow-neu-inset-sm "
                         />
                         {hasTextQuery ? renderClearSearchAction(true) : null}
                         {searchHiddenFields}
                     </form>
                 ) : (
                     <div className="relative flex-1">
-                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-subtle" />
                         <Input
                             value={searchValue}
                             onChange={onSearchChange ? (event) => onSearchChange(event.target.value) : undefined}
                             placeholder={desktopSearchPlaceholder}
                             aria-label={desktopSearchAriaLabel}
-                            className="h-10 rounded-xl border-white/35 bg-(--glass-surface) pl-9 pr-10 shadow-(--neu-shadow-inset-sm) dark:border-white/12"
+                            className="h-10 rounded-xl border-glass-border-soft bg-glass pl-9 pr-10 shadow-neu-inset-sm "
                         />
                         {hasTextQuery ? renderClearSearchAction(true) : null}
                     </div>
@@ -215,11 +215,11 @@ export function ListingFilterTopBar({
                         onClick={onToggleDesktopFilters}
                     />
 
-                    <aside className="fixed left-0 top-0 flex h-dvh w-[35vw] flex-col border-r border-white/25 bg-[linear-gradient(to_bottom,hsl(var(--background)/0.86),hsl(var(--background)/0.76)),var(--glass-surface)] shadow-2xl backdrop-blur-xl dark:border-white/12">
-                        <div className="flex items-start justify-between border-b border-white/20 px-4 py-3 dark:border-white/10">
+                    <aside className="fixed left-0 top-0 flex h-dvh w-[35vw] flex-col border-r border-glass-border-subtle bg-[linear-gradient(to_bottom,hsl(var(--background)/0.86),hsl(var(--background)/0.76)),var(--color-glass)] shadow-2xl backdrop-blur-xl ">
+                        <div className="flex items-start justify-between border-b border-glass-border-subtle px-4 py-3 ">
                             <div>
                                 <p className="text-lg font-semibold">Filters</p>
-                                <p className="text-sm text-muted-foreground">Refine, sort, and group your cards.</p>
+                                <p className="text-sm text-text-subtle">Refine, sort, and group your cards.</p>
                             </div>
                             <Button
                                 type="button"

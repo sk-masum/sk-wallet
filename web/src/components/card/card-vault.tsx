@@ -81,10 +81,10 @@ export function CardVault({ initialCards, initialError }: CardVaultProps) {
                             <div className="absolute left-1 top-3 h-20 w-32 rounded-xl border border-border/60 bg-background/80" />
                             <div className="absolute right-1 top-0 h-20 w-32 rounded-xl border border-primary/35 bg-linear-to-br from-primary/25 via-primary/10 to-background/70 shadow-md" />
                             <div className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/90">
-                                <WalletCards className="h-4 w-4 text-muted-foreground" />
+                                <WalletCards className="h-4 w-4 text-text-subtle" />
                             </div>
                         </div>
-                        <p className="text-center text-xs text-muted-foreground">
+                        <p className="text-center text-xs text-text-subtle">
                             Your wallet is empty. Tap Add card to create your first card.
                         </p>
                     </div>
@@ -108,7 +108,7 @@ export function CardVault({ initialCards, initialError }: CardVaultProps) {
                             <div className="absolute left-1 top-3 h-20 w-32 rounded-xl border border-border/60 bg-background/80" />
                             <div className="absolute right-1 top-0 h-20 w-32 rounded-xl border border-primary/35 bg-linear-to-br from-primary/25 via-primary/10 to-background/70 shadow-md" />
                             <div className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/90">
-                                <WalletCards className="h-4 w-4 text-muted-foreground" />
+                                <WalletCards className="h-4 w-4 text-text-subtle" />
                             </div>
                         </div>
 
@@ -125,17 +125,17 @@ export function CardVault({ initialCards, initialError }: CardVaultProps) {
         <div className="space-y-4">
             {meta.hasActiveControls ? (
                 <div className="hidden flex-wrap items-center gap-2 sm:flex">
-                    {meta.hasTextQuery ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Query: {query}</span> : null}
-                    {meta.hasTypeFilter ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 capitalize dark:border-white/14">Type: {selectedType}</span> : null}
-                    {meta.hasNetworkFilter ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Network: {selectedNetwork}</span> : null}
-                    {meta.hasProviderFilter ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Provider: {selectedProvider}</span> : null}
-                    {meta.hasTagFilter ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Tag: {selectedTag}</span> : null}
-                    {meta.hasExpiryFilter ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Expiry: Next {EXPIRING_SOON_WINDOW_DAYS} days</span> : null}
-                    {meta.creditLimitFilterActive ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Credit limit: {meta.selectedCreditLimitMin} - {meta.selectedCreditLimitMax}</span> : null}
-                    {meta.hasBillingDateFilter ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Billing date: Day {selectedBillingDate}</span> : null}
-                    {meta.hasPaymentDateFilter ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Payment date: Day {selectedPaymentDate}</span> : null}
-                    {meta.hasSortSelection ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Sort: {CARD_SORT_LABELS[selectedSort]}</span> : null}
-                    {meta.hasGrouping ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Group: {selectedGroup === 'provider' ? 'Provider' : selectedGroup === 'network' ? 'Network' : 'Tags'}</span> : null}
+                    {meta.hasTextQuery ? <span className="filter-chip-glass">Query: {query}</span> : null}
+                    {meta.hasTypeFilter ? <span className="filter-chip-glass capitalize">Type: {selectedType}</span> : null}
+                    {meta.hasNetworkFilter ? <span className="filter-chip-glass">Network: {selectedNetwork}</span> : null}
+                    {meta.hasProviderFilter ? <span className="filter-chip-glass">Provider: {selectedProvider}</span> : null}
+                    {meta.hasTagFilter ? <span className="filter-chip-glass">Tag: {selectedTag}</span> : null}
+                    {meta.hasExpiryFilter ? <span className="filter-chip-glass">Expiry: Next {EXPIRING_SOON_WINDOW_DAYS} days</span> : null}
+                    {meta.creditLimitFilterActive ? <span className="filter-chip-glass">Credit limit: {meta.selectedCreditLimitMin} - {meta.selectedCreditLimitMax}</span> : null}
+                    {meta.hasBillingDateFilter ? <span className="filter-chip-glass">Billing date: Day {selectedBillingDate}</span> : null}
+                    {meta.hasPaymentDateFilter ? <span className="filter-chip-glass">Payment date: Day {selectedPaymentDate}</span> : null}
+                    {meta.hasSortSelection ? <span className="filter-chip-glass">Sort: {CARD_SORT_LABELS[selectedSort]}</span> : null}
+                    {meta.hasGrouping ? <span className="filter-chip-glass">Group: {selectedGroup === 'provider' ? 'Provider' : selectedGroup === 'network' ? 'Network' : 'Tags'}</span> : null}
                     <Button variant="outline" size="chip" onClick={resetFilters}>
                         Reset filters
                     </Button>

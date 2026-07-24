@@ -24,7 +24,7 @@ function Calendar({
       captionLayout={captionLayout}
       numberOfMonths={1}
       className={cn(
-        'rounded-2xl border border-white/42 bg-(--glass-surface) p-3 shadow-(--neu-shadow-raised) backdrop-blur-md dark:border-white/12',
+        'rounded-2xl border border-glass-border bg-glass p-3 shadow-neu-raised backdrop-blur-md ',
         className
       )}
       classNames={{
@@ -34,7 +34,7 @@ function Calendar({
         caption_label: cn('text-xs font-semibold tracking-wide text-foreground', isDropdownCaption && 'sr-only'),
         dropdowns: 'mx-4 flex items-center gap-1',
         dropdown_root:
-          'relative flex h-8 items-center rounded-md border border-white/35 bg-(--glass-surface) text-xs text-foreground shadow-(--neu-shadow-inset-sm) backdrop-blur-sm dark:border-white/12',
+          'relative flex h-8 items-center rounded-md border border-glass-border-soft bg-glass text-xs text-foreground shadow-neu-inset-sm backdrop-blur-sm ',
         dropdown: 'h-8 bg-transparent px-1 pr-3 text-xs font-medium text-foreground focus:outline-none',
         months_dropdown: 'min-w-[4.75rem]',
         years_dropdown: 'min-w-[3rem]',
@@ -50,7 +50,7 @@ function Calendar({
         month_grid: 'w-full border-collapse space-y-1',
         weekdays: 'flex',
         weekday:
-          'w-8 rounded-md text-[0.72rem] font-semibold uppercase tracking-wide text-muted-foreground',
+          'w-8 rounded-md text-[0.72rem] font-semibold uppercase tracking-wide text-text-subtle',
         week: 'flex w-full mt-2',
         day: cn(
           'relative p-0 text-center text-sm focus-within:relative focus-within:z-20',
@@ -60,16 +60,16 @@ function Calendar({
         ),
         day_button: cn(
           buttonVariants({ variant: 'ghost' }),
-          'size-8 rounded-md border border-white/35 bg-(--glass-surface) p-0 font-medium text-foreground shadow-(--neu-shadow-raised-sm) transition hover:bg-(--glass-surface-strong) aria-selected:opacity-100 dark:border-white/12'
+          'size-8 rounded-md border border-glass-border-soft bg-glass p-0 font-medium text-foreground shadow-neu-raised-sm transition hover:bg-glass-strong aria-selected:opacity-100 '
         ),
         range_start: 'day-range-start',
         range_end: 'day-range-end',
         selected:
-          'bg-linear-to-r from-primary/95 via-primary/88 to-primary/78 text-primary-foreground shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),0_8px_16px_-10px_hsl(var(--primary)/0.7)] hover:brightness-110 focus:brightness-110',
+          'bg-linear-to-r from-primary/95 via-primary/88 to-primary/78 text-primary-foreground shadow-brand-raised-sm hover:brightness-110 focus:brightness-110',
         today: 'bg-primary/22 text-foreground',
         outside:
-          'day-outside text-muted-foreground opacity-60 aria-selected:bg-primary/24 aria-selected:text-muted-foreground aria-selected:opacity-50',
-        disabled: 'text-muted-foreground opacity-60',
+          'day-outside text-text-subtle opacity-60 aria-selected:bg-primary/24 aria-selected:text-text-subtle aria-selected:opacity-50',
+        disabled: 'text-text-subtle opacity-60',
         hidden: 'invisible',
         ...classNames,
       }}

@@ -9,27 +9,27 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'border border-white/45 bg-(--glass-surface) text-foreground shadow-(--neu-shadow-raised-sm) backdrop-blur-md hover:bg-(--glass-surface-strong) active:translate-y-[1px] active:shadow-(--neu-shadow-inset) dark:border-white/14',
+          'border border-glass-border-strong bg-glass text-foreground shadow-neu-raised-sm backdrop-blur-md hover:bg-glass-strong active:translate-y-[1px] active:shadow-neu-inset ',
         primary:
-          'border border-white/20 bg-linear-to-r from-primary/95 via-primary/88 to-primary/78 text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_14px_26px_-16px_hsl(var(--primary)/0.74)] hover:brightness-110 active:translate-y-[1px] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.28)]',
+          'border border-glass-border-subtle bg-linear-to-r from-primary/95 via-primary/88 to-primary/78 text-primary-foreground shadow-brand-raised hover:brightness-110 active:translate-y-[1px] active:shadow-brand-inset',
         primaryCta:
-          'border border-white/20 bg-linear-to-r from-primary/95 via-primary/88 to-primary/78 text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_10px_20px_-14px_hsl(var(--primary))] hover:brightness-110 active:translate-y-[1px] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.28)]',
+          'border border-glass-border-subtle bg-linear-to-r from-primary/95 via-primary/88 to-primary/78 text-primary-foreground shadow-brand-raised-sm hover:brightness-110 active:translate-y-[1px] active:shadow-brand-inset',
         destructive:
-          'border border-red-900/35 bg-linear-to-b from-red-500 to-red-700 text-destructive-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_10px_20px_-14px_rgba(127,29,29,0.6)] hover:brightness-105 active:translate-y-[1px]',
+          'border border-red-900/35 bg-linear-to-b from-red-500 to-red-700 text-destructive-foreground shadow-danger-raised hover:brightness-105 active:translate-y-[1px]',
         outline:
-          'border border-white/45 bg-(--glass-surface) text-foreground shadow-(--neu-shadow-inset-sm) backdrop-blur-md hover:bg-(--glass-surface-strong) dark:border-white/14',
+          'border border-glass-border-strong bg-glass text-foreground shadow-neu-inset-sm backdrop-blur-md hover:bg-glass-strong ',
         toolbar:
-          'border border-white/35 bg-(--glass-surface) text-foreground shadow-(--neu-shadow-raised-sm) backdrop-blur-md hover:bg-(--glass-surface-strong) dark:border-white/12',
+          'border border-glass-border-soft bg-glass text-foreground shadow-neu-raised-sm backdrop-blur-md hover:bg-glass-strong ',
         headerIcon:
-          'border border-white/45 bg-(--glass-surface) text-foreground shadow-(--neu-shadow-raised-sm) backdrop-blur-md hover:bg-(--glass-surface-strong) dark:border-white/18 dark:text-foreground',
+          'border border-glass-border-strong bg-glass text-foreground shadow-neu-raised-sm backdrop-blur-md hover:bg-glass-strong  dark:text-foreground',
         action:
           'items-center border border-border/70 bg-background/85 text-foreground shadow-sm hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]',
         neutral:
           'border border-border/70 bg-background/90 text-foreground shadow-sm hover:bg-background',
         secondary:
-          'border border-white/35 bg-linear-to-b from-primary/74 to-primary/62 text-primary-foreground shadow-(--neu-shadow-raised-sm) hover:brightness-110 dark:border-white/12',
+          'border border-glass-border-soft bg-linear-to-b from-primary/74 to-primary/62 text-primary-foreground shadow-neu-raised-sm hover:brightness-110 ',
         ghost:
-          'border border-transparent bg-transparent shadow-none hover:border-white/35 hover:bg-(--glass-surface) hover:shadow-(--neu-shadow-inset-sm) dark:hover:border-white/12',
+          'border border-transparent bg-transparent shadow-none hover:border-glass-border-soft hover:bg-glass hover:shadow-neu-inset-sm ',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {

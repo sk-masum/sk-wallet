@@ -32,7 +32,7 @@ export function DialogActions({
                 <HeartIcon
                     className={cn(
                         responsiveIconSizes.action,
-                        'text-muted-foreground',
+                        'text-text-subtle',
                         isSelectedFavorite ? 'fill-rose-500 text-rose-500' : '',
                     )}
                 />
@@ -40,7 +40,7 @@ export function DialogActions({
 
             <Button type="button" variant="action" size="action" onClick={handleEdit}>
                 <Pencil
-                    className={cn(responsiveIconSizes.action, 'text-muted-foreground')}
+                    className={cn(responsiveIconSizes.action, 'text-text-subtle')}
                 />
             </Button>
 
@@ -53,7 +53,7 @@ export function DialogActions({
                 disabled={isProcessing}
             >
                 <Trash2
-                    className={cn(responsiveIconSizes.action, 'text-muted-foreground')}
+                    className={cn(responsiveIconSizes.action, 'text-text-subtle')}
                 />
             </Button>
         </>

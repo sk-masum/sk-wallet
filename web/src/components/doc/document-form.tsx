@@ -312,7 +312,7 @@ export function DocumentForm({
               variant="outline"
               className={cn(
                 entityFormDateButtonClass,
-                !issuedDateValue && 'text-muted-foreground',
+                !issuedDateValue && 'text-text-subtle',
                 fieldErrors.issuedDate && 'border-destructive'
               )}
               aria-invalid={Boolean(fieldErrors.issuedDate)}
@@ -346,7 +346,7 @@ export function DocumentForm({
               variant="outline"
               className={cn(
                 entityFormDateButtonClass,
-                !expiryDateValue && 'text-muted-foreground',
+                !expiryDateValue && 'text-text-subtle',
                 fieldErrors.expiryDate && 'border-destructive'
               )}
               aria-invalid={Boolean(fieldErrors.expiryDate)}
@@ -432,7 +432,7 @@ export function DocumentForm({
       >
         <div className="space-y-3">
           {customFields.length === 0 ? (
-            <p className="text-xs text-muted-foreground">No custom fields added yet.</p>
+            <p className="text-xs text-text-subtle">No custom fields added yet.</p>
           ) : (
             customFields.map((item, index) => (
               <div key={item.id} className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_40px]">
@@ -464,7 +464,7 @@ export function DocumentForm({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-10 w-10 rounded-xl text-muted-foreground hover:text-destructive"
+                  className="h-10 w-10 rounded-xl text-text-subtle hover:text-destructive"
                   onClick={() => {
                     setCustomFields((prev) => prev.filter((field) => field.id !== item.id))
                     setFieldErrors((prev) => ({ ...prev, customFields: undefined }))

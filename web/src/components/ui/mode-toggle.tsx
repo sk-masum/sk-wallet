@@ -41,7 +41,7 @@ export function ModeToggle({ className }: { className?: string }) {
               'h-8 rounded-full px-2.5 text-[11px] font-medium transition-all',
               isActive
                 ? 'bg-background text-foreground shadow-sm hover:bg-background'
-                : 'text-muted-foreground hover:bg-background/70 hover:text-foreground'
+                : 'text-text-subtle hover:bg-background/70 hover:text-foreground'
             )}
             aria-pressed={isActive}
             disabled={!mounted}

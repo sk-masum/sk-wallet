@@ -278,11 +278,11 @@ export function ServiceWorkerRegister() {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-foreground">Enable billing reminders</p>
-                <p className="text-xs text-muted-foreground">Get a push notification on your card billing date.</p>
+                <p className="text-xs text-text-subtle">Get a push notification on your card billing date.</p>
               </div>
               <button
                 type="button"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border/70 text-muted-foreground hover:bg-muted/40"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border/70 text-text-subtle hover:bg-muted/40"
                 onClick={handleDismissBillingPrompt}
                 aria-label="Dismiss billing reminder prompt"
               >
@@ -304,7 +304,7 @@ export function ServiceWorkerRegister() {
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-foreground">Install SK Wallet</p>
-                <p className="text-xs text-muted-foreground">Add to your home screen for app-like access and offline support.</p>
+                <p className="text-xs text-text-subtle">Add to your home screen for app-like access and offline support.</p>
               </div>
               <Button size="sm" type="button" onClick={handleInstallClick} className="shrink-0">
                 <Download className="h-3.5 w-3.5" />

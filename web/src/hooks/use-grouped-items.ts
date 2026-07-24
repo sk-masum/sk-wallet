@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo } from 'react';
 
 export type GroupedItems<T> = {
