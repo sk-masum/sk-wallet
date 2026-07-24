@@ -39,8 +39,6 @@ export default async function EditDocumentPage({ params }: EditDocumentPageProps
       >
         <DocumentEditForm document={result.data} />
       </EntityFormPageLayout>
-
-      <BottomTabBar />
     </>
   )
 }

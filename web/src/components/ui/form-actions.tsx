@@ -27,7 +27,8 @@ function FormActions({
       <Button
         type="submit"
         variant="primary"
-        className={cn('h-11 w-full rounded-xl px-6 text-sm font-semibold uppercase tracking-[0.08em] shadow-sm sm:w-auto', submitClassName)}
+        size="form"
+        className={cn('w-full sm:w-auto', submitClassName)}
         disabled={isSubmitting}
       >
         {isSubmitting ? submittingLabel : submitLabel}
@@ -36,7 +37,8 @@ function FormActions({
         <Button
           type="reset"
           variant="outline"
-          className={cn('h-11 w-full rounded-xl px-6 text-sm font-semibold uppercase tracking-[0.08em] sm:w-auto', resetClassName)}
+          size="form"
+          className={cn('w-full sm:w-auto', resetClassName)}
           disabled={isSubmitting}
         >
           {resetLabel}

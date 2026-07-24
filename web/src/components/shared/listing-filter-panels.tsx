@@ -76,7 +76,7 @@ export function ListingFilterDesktopActions({
             {resetHref && hasActiveControls ? (
                 <Link
                     href={resetHref}
-                    className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'h-10 rounded-xl px-4')}
+                    className={buttonVariants({ variant: 'toolbar', size: 'md' })}
                     onClick={onCollapse}
                 >
                     Reset all
@@ -85,9 +85,8 @@ export function ListingFilterDesktopActions({
             {!resetHref ? (
                 <Button
                     type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-10 rounded-xl px-4"
+                    variant="toolbar"
+                    size="md"
                     disabled={!hasActiveControls}
                     onClick={() => {
                         if (!hasActiveControls) return
@@ -99,11 +98,11 @@ export function ListingFilterDesktopActions({
                 </Button>
             ) : null}
             {resetHref && !hasActiveControls ? (
-                <Button type="button" variant="outline" size="sm" className="h-10 rounded-xl px-4" disabled>
+                <Button type="button" variant="toolbar" size="md" disabled>
                     Reset all
                 </Button>
             ) : null}
-            <Button type="button" className="h-10 rounded-xl px-5" onClick={onCollapse}>
+            <Button type="button" variant="primary" size="mdWide" onClick={onCollapse}>
                 {collapseLabel}
             </Button>
         </div>
@@ -191,7 +190,7 @@ export function ListingFilterMobileActions({
             {resetHref && hasActiveControls ? (
                 <Link
                     href={resetHref}
-                    className={cn(buttonVariants({ variant: 'outline' }), 'h-10 flex-1 justify-center rounded-xl')}
+                    className={buttonVariants({ variant: 'toolbar', size: 'md' })}
                     onClick={onDone}
                 >
                     Reset all
@@ -200,8 +199,9 @@ export function ListingFilterMobileActions({
             {!resetHref ? (
                 <Button
                     type="button"
-                    variant="outline"
-                    className="h-10 flex-1 justify-center rounded-xl"
+                    variant="toolbar"
+                    size="md"
+                    className="flex-1 justify-center"
                     disabled={!hasActiveControls}
                     onClick={() => {
                         if (!hasActiveControls) return
@@ -215,14 +215,15 @@ export function ListingFilterMobileActions({
             {resetHref && !hasActiveControls ? (
                 <Button
                     type="button"
-                    variant="outline"
-                    className="h-10 flex-1 justify-center rounded-xl"
+                    variant="toolbar"
+                    size="md"
+                    className="flex-1 justify-center"
                     disabled
                 >
                     Reset all
                 </Button>
             ) : null}
-            <Button type="button" className="h-10 flex-1 rounded-xl shadow-[0_10px_20px_-14px_hsl(var(--primary))]" onClick={onDone}>
+            <Button type="button" variant="primaryCta" size="md" className="flex-1" onClick={onDone}>
                 {doneLabel}
             </Button>
         </div>

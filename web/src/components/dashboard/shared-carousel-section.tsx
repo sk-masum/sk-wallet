@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
+import { responsiveIconSizes } from '../ui/icon-sizes'
 
 import { cn } from '@/lib/utils'
 
@@ -35,7 +36,7 @@ export function SharedCarouselSection<T>({
                     <h3 className="text-lg font-semibold text-foreground sm:text-2xl">{title}</h3>
                 </div>
                 <Link href={actionHref} className="inline-flex items-center rounded-full border border-white/45 bg-(--glass-surface) px-3 py-1 text-xs font-semibold text-muted-foreground shadow-(--neu-shadow-raised-sm) backdrop-blur-sm transition-colors hover:bg-(--glass-surface-strong) hover:text-foreground dark:border-white/16 dark:text-foreground/86">
-                    <ArrowUpRight className="mr-1 h-4 w-4" /> {actionLabel}
+                    <ArrowUpRight className={responsiveIconSizes.action} /> {actionLabel}
                 </Link>
             </div>
 

@@ -15,15 +15,27 @@ export type DashboardCardPreview = {
   href: string
 }
 
-export type DashboardFavoriteVaultItem = {
+export type DashboardCredentialFavoriteVaultItem = {
   id: string
-  type: 'credential' | 'document'
+  type: 'credential'
+  title: string
+  subtitle: string
+  href: string
+}
+
+export type DashboardDocumentFavoriteVaultItem = {
+  id: string
+  type: 'document'
   title: string
   subtitle: string
   href: string
   document_type: string
   metadata?: Record<string, unknown> | null
 }
+
+export type DashboardFavoriteVaultItem =
+  | DashboardCredentialFavoriteVaultItem
+  | DashboardDocumentFavoriteVaultItem
 
 export type DashboardRecentBillingCard = {
   id: string

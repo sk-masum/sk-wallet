@@ -5,6 +5,7 @@ import { ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 import { Button, buttonVariants } from '@/components/ui/button'
+import { responsiveIconSizes } from '@/components/ui/icon-sizes'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
@@ -36,8 +37,7 @@ type ListingFilterTopBarProps = {
     desktopContainerClassName?: string
 }
 
-const defaultDesktopContainerClassName =
-    'relative mb-4 hidden flex-wrap items-center gap-3 rounded-2xl border border-white/35 bg-(--glass-surface) p-3.5 shadow-(--neu-shadow-raised-sm) ring-1 ring-border/30 backdrop-blur-xl dark:border-white/14 sm:flex'
+const defaultDesktopContainerClassName = 'mb-4 hidden flex-wrap items-center gap-3 sm:flex'
 
 export function ListingFilterTopBar({
     formAction,
@@ -101,43 +101,40 @@ export function ListingFilterTopBar({
         <>
             <div className={cn(mobileContainerClassName ?? 'sm:hidden')}>
                 <div className={cn('pb-2', mobileInnerClassName)}>
-                    <div className="relative py-2">
-                        <div className="pointer-events-none absolute -top-8 left-1/4 h-16 w-32 rounded-full bg-primary/7 blur-2xl dark:hidden" />
-                        <div className="pointer-events-none absolute -bottom-10 right-2 h-20 w-24 rounded-full bg-primary/3 blur-2xl dark:hidden" />
-                        <div className="relative flex items-center gap-2">
-                            <form action={formAction} method="get" className="relative flex-1">
-                                <Input
-                                    name={searchMode === 'form' ? searchInputName : undefined}
-                                    value={searchMode === 'controlled' ? searchValue : undefined}
-                                    defaultValue={searchMode === 'form' ? searchValue : undefined}
-                                    onChange={
-                                        searchMode === 'controlled' && onSearchChange
-                                            ? (event) => onSearchChange(event.target.value)
-                                            : undefined
-                                    }
-                                    placeholder={mobileSearchPlaceholder}
-                                    aria-label={mobileSearchAriaLabel}
-                                    className="h-10 rounded-xl border-white/35 bg-(--glass-surface) pr-10 shadow-(--neu-shadow-inset-sm) dark:border-white/12"
-                                />
-                                {hasTextQuery ? renderClearSearchAction(false) : null}
-                                {searchHiddenFields}
-                            </form>
+                    <div className="flex items-center gap-2 py-2">
+                        <form action={formAction} method="get" className="relative flex-1">
+                            <Input
+                                name={searchMode === 'form' ? searchInputName : undefined}
+                                value={searchMode === 'controlled' ? searchValue : undefined}
+                                defaultValue={searchMode === 'form' ? searchValue : undefined}
+                                onChange={
+                                    searchMode === 'controlled' && onSearchChange
+                                        ? (event) => onSearchChange(event.target.value)
+                                        : undefined
+                                }
+                                placeholder={mobileSearchPlaceholder}
+                                aria-label={mobileSearchAriaLabel}
+                                className="h-10 rounded-xl border-white/35 bg-(--glass-surface) pr-10 shadow-(--neu-shadow-inset-sm) dark:border-white/12"
+                            />
+                            {hasTextQuery ? renderClearSearchAction(false) : null}
+                            {searchHiddenFields}
+                        </form>
 
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="h-10 gap-2 rounded-xl border-white/35 bg-(--glass-surface) px-3.5 shadow-(--neu-shadow-raised-sm) dark:border-white/12"
-                                onClick={onOpenMobileFilters}
-                            >
-                                <SlidersHorizontal className="h-4 w-4" />
-                                Refine
-                                {mobileFilterCount > 0 ? (
-                                    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-primary-foreground">
-                                        {mobileFilterCount}
-                                    </span>
-                                ) : null}
-                            </Button>
-                        </div>
+                        <Button
+                            type="button"
+                            variant="toolbar"
+                            size="md"
+                            className="gap-2 px-3.5"
+                            onClick={onOpenMobileFilters}
+                        >
+                            <SlidersHorizontal className={responsiveIconSizes.toolbar} />
+
+                            {mobileFilterCount > 0 ? (
+                                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-primary-foreground">
+                                    {mobileFilterCount}
+                                </span>
+                            ) : null}
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -172,18 +169,19 @@ export function ListingFilterTopBar({
 
                 <Button
                     type="button"
-                    variant="outline"
-                    className="h-10 gap-2 rounded-xl border-white/35 bg-(--glass-surface) px-3.5 shadow-(--neu-shadow-raised-sm) ring-1 ring-border/30 dark:border-white/12"
+                    variant="toolbar"
+                    size="md"
+                    className="gap-2 px-3.5 ring-1 ring-border/30"
                     onClick={onToggleDesktopFilters}
                 >
-                    <SlidersHorizontal className="h-4 w-4" />
+                    <SlidersHorizontal className={responsiveIconSizes.toolbar} />
                     Filters
                     {mobileFilterCount > 0 ? (
                         <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-primary-foreground">
                             {mobileFilterCount}
                         </span>
                     ) : null}
-                    <ChevronDown className={cn('h-4 w-4 transition-transform', desktopFilterOpen && 'rotate-180')} />
+                    <ChevronDown className={cn(responsiveIconSizes.toolbar, 'transition-transform', desktopFilterOpen && 'rotate-180')} />
                 </Button>
 
                 {hasActiveControls ? (
@@ -197,9 +195,9 @@ export function ListingFilterTopBar({
                     ) : (
                         <Button
                             type="button"
-                            variant="outline"
-                            size="sm"
-                            className="h-10 rounded-xl px-3.5"
+                            variant="toolbar"
+                            size="md"
+                            className="px-3.5"
                             onClick={onResetAll}
                         >
                             Reset

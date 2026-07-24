@@ -4,16 +4,14 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { FileText, KeyRound, LoaderCircle } from 'lucide-react'
 
+import { CredentialDetailsCard } from '@/components/credential/credential-details-card'
 import { MiniVerticalCarouselCard } from '@/components/dashboard/mini-vertical-carousel-card'
+import { DocumentDetailsCard } from '@/components/doc/document-details-card'
 import { SharedCarouselSection } from '@/components/dashboard/shared-carousel-section'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { CopyButton } from '@/components/ui/copy-button'
 import { Dialog } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getCredentialTypeConfig } from '@/constants/credential/types'
-import { getDocumentCategoryLabel } from '@/constants/document/categories'
 import { clientApiGet } from '@/lib/api/client'
 import type { UserCredential } from '@/models/credential'
 import type { DashboardFavoriteVaultItem } from '@/models/dashboard'
@@ -135,13 +133,6 @@ export function FavoriteVaultCarousel({
         return selectedItem.type === 'credential' ? 'Credential details' : 'Document details'
     }, [selectedItem])
 
-    const formatDateTime = (value: string | null | undefined) => {
-        if (!value) return 'N/A'
-        const parsed = new Date(value)
-        if (Number.isNaN(parsed.getTime())) return 'N/A'
-        return parsed.toLocaleString()
-    }
-
 
 
     return (
@@ -240,116 +231,28 @@ export function FavoriteVaultCarousel({
                             </Button>
                         </div>
                     ) : detailData?.kind === 'credential' ? (
-                        <Card className="mx-auto w-full max-w-120 border-border/70 bg-card/95 shadow-lg motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-base">{dialogTitle}</CardTitle>
-                                <CardDescription>
-                                    {getCredentialTypeConfig(detailData.credential.credential_type)?.label ?? detailData.credential.credential_type}
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-3 text-sm">
-                                <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                    <p className="text-xs text-muted-foreground dark:text-foreground/78">Service</p>
-                                    <p className="mt-1 font-medium text-foreground">{detailData.credential.service_name}</p>
-                                </div>
-
-                                <div className="grid gap-3 sm:grid-cols-2">
-                                    <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Identifier</p>
-                                        <div className="mt-1 flex items-center justify-between gap-2">
-                                            <p className="truncate font-medium text-foreground">{detailData.credential.identifier || 'N/A'}</p>
-                                            {detailData.credential.identifier ? (
-                                                <CopyButton
-                                                    value={detailData.credential.identifier}
-                                                    label="Identifier"
-                                                    className="inline-flex h-7 items-center rounded-md border border-border/65 px-2 text-xs"
-                                                    showStatusIcon
-                                                />
-                                            ) : null}
-                                        </div>
-                                    </div>
-                                    <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Secret</p>
-                                        <p className="mt-1 font-mono text-foreground">{detailData.credential.masked_secret}</p>
-                                    </div>
-                                </div>
-
-                                <div className="grid gap-3 sm:grid-cols-2">
-                                    <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Website</p>
-                                        <p className="mt-1 truncate font-medium text-foreground">{detailData.credential.url || 'N/A'}</p>
-                                    </div>
-                                    <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Updated</p>
-                                        <p className="mt-1 font-medium text-foreground">{formatDateTime(detailData.credential.updated_at)}</p>
-                                    </div>
-                                </div>
-
-                                {detailData.credential.notes ? (
-                                    <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Notes</p>
-                                        <p className="mt-1 whitespace-pre-wrap text-foreground">{detailData.credential.notes}</p>
-                                    </div>
-                                ) : null}
-
-                                <div className="flex justify-end pt-1">
-                                    <Button type="button" variant="outline" onClick={() => selectedItem && router.push(selectedItem.href)}>
-                                        Open full page
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <CredentialDetailsCard
+                            credential={detailData.credential}
+                            title={dialogTitle}
+                            className="motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300"
+                            primaryAction={(
+                                <Button type="button" variant="outline" onClick={() => selectedItem && router.push(selectedItem.href)}>
+                                    Open full page
+                                </Button>
+                            )}
+                        />
                     ) : detailData?.kind === 'document' ? (
-                        <Card className="mx-auto w-full max-w-120 border-border/70 bg-card/95 shadow-lg motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-base">{dialogTitle}</CardTitle>
-                                <CardDescription>
-                                    {getDocumentDisplayTypeLabel(detailData.document.document_type, detailData.document.metadata)}
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-3 text-sm">
-                                <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                    <p className="text-xs text-muted-foreground dark:text-foreground/78">Document number</p>
-                                    <div className="mt-1 flex items-center justify-between gap-2">
-                                        <p className="truncate font-mono text-foreground">{detailData.document.document_number || detailData.document.masked_number}</p>
-                                        <CopyButton
-                                            value={detailData.document.document_number || detailData.document.masked_number}
-                                            label="Document number"
-                                            className="inline-flex h-7 items-center rounded-md border border-border/65 px-2 text-xs"
-                                            showStatusIcon
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="grid gap-3 sm:grid-cols-2">
-                                    <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Name on document</p>
-                                        <p className="mt-1 font-medium text-foreground">{detailData.document.name_on_document || 'N/A'}</p>
-                                    </div>
-                                    <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Category</p>
-                                        <p className="mt-1 font-medium text-foreground">{getDocumentCategoryLabel(detailData.document.category)}</p>
-                                    </div>
-                                </div>
-
-                                <div className="grid gap-3 sm:grid-cols-2">
-                                    <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Verified at</p>
-                                        <p className="mt-1 font-medium text-foreground">{formatDateTime(detailData.document.verified_at)}</p>
-                                    </div>
-                                    <div className="rounded-xl border border-border/65 bg-background/70 p-3">
-                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Expires at</p>
-                                        <p className="mt-1 font-medium text-foreground">{formatDateTime(detailData.document.expires_at)}</p>
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-end pt-1">
-                                    <Button type="button" variant="outline" onClick={() => selectedItem && router.push(selectedItem.href)}>
-                                        Open full page
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <DocumentDetailsCard
+                            document={detailData.document}
+                            className="mx-auto w-full max-w-120 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300"
+                            showActions
+                            actionsClassName="flex justify-end pt-1"
+                            actions={(
+                                <Button type="button" variant="outline" onClick={() => selectedItem && router.push(selectedItem.href)}>
+                                    Open full page
+                                </Button>
+                            )}
+                        />
                     ) : null}
                 </DetailDialogContent>
             </Dialog>

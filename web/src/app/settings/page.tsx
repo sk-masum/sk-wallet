@@ -194,7 +194,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_15%_10%,hsl(var(--primary)/0.12),transparent_32%),radial-gradient(circle_at_85%_20%,hsl(var(--ring)/0.14),transparent_30%),linear-gradient(180deg,hsl(var(--background)),hsl(var(--muted)/0.55))]">
+    <main className="relative min-h-screen overflow-hidden">
       <div className="mx-auto w-full max-w-3xl px-4 pb-28 pt-12 sm:px-6 lg:px-8">
         <PageHeader
           title="Settings"

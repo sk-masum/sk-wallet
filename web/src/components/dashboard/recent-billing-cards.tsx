@@ -4,6 +4,7 @@ import { ArrowUpRight, CalendarClock, CircleDot } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { DashboardRecentBillingCard } from '@/models/dashboard'
+import { responsiveIconSizes } from '../ui/icon-sizes'
 
 type RecentBillingCardsProps = {
     cards: DashboardRecentBillingCard[]
@@ -51,7 +52,7 @@ export function RecentBillingCards({ cards }: RecentBillingCardsProps) {
                     <CardTitle>Latest Bills</CardTitle>
                 </div>
                 <Link href="/card" className="inline-flex items-center rounded-full border border-white/40 bg-[var(--glass-surface)] px-3 py-1 text-xs font-semibold text-muted-foreground shadow-(--neu-shadow-raised-sm) transition-colors hover:bg-[var(--glass-surface-strong)] hover:text-foreground dark:border-white/16 dark:text-foreground/86">
-                    <ArrowUpRight className="mr-1 h-4 w-4" /> All Cards
+                    <ArrowUpRight className={responsiveIconSizes.action} /> All Cards
                 </Link>
             </CardHeader>
             <CardContent className="relative">

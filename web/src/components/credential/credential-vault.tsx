@@ -2,21 +2,16 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Check, Copy, LoaderCircle, Pencil, Star, Trash2 } from 'lucide-react'
+import { HeartIcon, Pencil, Trash2 } from 'lucide-react'
 
+import { CredentialDetailsCard } from '@/components/credential/credential-details-card'
 import NoDocIcon from '@/components/icons/nodoc-icon'
 import { useDashboardFavorites } from '@/components/dashboard/use-dashboard-favorites'
 import { DeleteConfirmDialog } from '@/components/shared/delete-confirm-dialog'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { CopyButton } from '@/components/ui/copy-button'
-import {
-    Dialog,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { getCredentialTypeConfig } from '@/constants/credential/types'
 import { clientApiDelete, clientApiGet } from '@/lib/api/client'
@@ -34,6 +29,8 @@ import { showToast } from '@/lib/toast'
 import { copyToClipboard } from '@/utils/copy'
 import { cn } from '@/lib/utils'
 import type { UserCredential } from '@/models/credential'
+import { responsiveIconSizes } from '../ui/icon-sizes'
+import { DialogActions } from '../shared/dialog-actions'
 
 type CredentialVaultProps = {
     initialCredentials: UserCredential[]
@@ -46,15 +43,6 @@ type CredentialSecretResponse = {
         secret: string
     }
     error?: string
-}
-
-function formatDateTime(value: string | null | undefined) {
-    if (!value) return 'N/A'
-
-    const parsed = new Date(value)
-    if (Number.isNaN(parsed.getTime())) return 'N/A'
-
-    return parsed.toLocaleString()
 }
 
 export function CredentialVault({ initialCredentials, initialError = '' }: CredentialVaultProps) {
@@ -307,142 +295,33 @@ export function CredentialVault({ initialCredentials, initialError = '' }: Crede
             <Dialog open={Boolean(selectedCredential)} onOpenChange={(open) => !open && setSelectedCredentialId(null)}>
                 {selectedCredential ? (
                     <DetailDialogContent>
-                        <div className="space-y-3 rounded-xl border border-border bg-background p-4 text-sm shadow-xl backdrop-blur-md">
-                            <DialogHeader>
-                                <DialogTitle>{selectedCredential.service_name}</DialogTitle>
-                                <DialogDescription>Updated {formatDateTime(selectedCredential.updated_at)}</DialogDescription>
-                            </DialogHeader>
-
-                            <div className="space-y-3 text-sm">
-                                <div>
-                                    <p className="text-xs text-muted-foreground">Credential type</p>
-                                    <p>{getCredentialTypeConfig(selectedCredential.credential_type)?.label ?? selectedCredential.credential_type}</p>
-                                </div>
-
-                                <div>
-                                    <div className="flex items-center justify-between gap-2">
-                                        <p className="text-xs text-muted-foreground">Identifier</p>
-                                        <CopyButton
-                                            value={selectedCredential.identifier || ''}
-                                            label="Identifier"
-                                            className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
-                                            showStatusIcon
-                                            copyIconClassName="h-3.5 w-3.5"
-                                            checkIconClassName="h-3.5 w-3.5 text-green-600"
-                                        />
-                                    </div>
-                                    <p>{selectedCredential.identifier || 'N/A'}</p>
-                                </div>
-
-                                <div>
-                                    <div className="flex items-center justify-between gap-2">
-                                        <p className="text-xs text-muted-foreground">Password</p>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                void handleCopyActualSecret()
-                                            }}
-                                            disabled={isCopyingSecret}
-                                            className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
-                                            aria-label="Copy password"
-                                        >
-                                            {isCopyingSecret ? (
-                                                <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
-                                            ) : secretCopied ? (
-                                                <Check className="h-3.5 w-3.5 text-green-600" />
-                                            ) : (
-                                                <Copy className="h-3.5 w-3.5" />
-                                            )}
-                                        </button>
-                                    </div>
-                                    <p className="font-mono">{selectedCredential.masked_secret}</p>
-                                </div>
-
-                                <div>
-                                    <div className="flex items-center justify-between gap-2">
-                                        <p className="text-xs text-muted-foreground">Website</p>
-                                        <CopyButton
-                                            value={selectedCredential.url || ''}
-                                            label="Website"
-                                            className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
-                                            showStatusIcon
-                                            copyIconClassName="h-3.5 w-3.5"
-                                            checkIconClassName="h-3.5 w-3.5 text-green-600"
-                                        />
-                                    </div>
-                                    {selectedCredential.url ? (
-                                        <a
-                                            className="text-primary hover:underline"
-                                            href={selectedCredential.url}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                        >
-                                            {selectedCredential.url}
-                                        </a>
-                                    ) : (
-                                        <p>N/A</p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <div className="flex items-center justify-between gap-2">
-                                        <p className="text-xs text-muted-foreground">Notes</p>
-                                        <CopyButton
-                                            value={selectedCredential.notes || ''}
-                                            label="Notes"
-                                            className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
-                                            showStatusIcon
-                                            copyIconClassName="h-3.5 w-3.5"
-                                            checkIconClassName="h-3.5 w-3.5 text-green-600"
-                                        />
-                                    </div>
-                                    <p className="whitespace-pre-wrap">{selectedCredential.notes || 'N/A'}</p>
-                                </div>
-
-                                <div className="grid grid-cols-1 gap-2 pt-2 sm:grid-cols-3">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => toggleFavorite(`credential:${selectedCredential.id}`)}
-                                    >
-                                        <Star
-                                            className={cn(
-                                                'mr-1 h-4 w-4',
-                                                hydrated && isFavorite(`credential:${selectedCredential.id}`)
-                                                    ? 'fill-amber-500 text-amber-500'
-                                                    : ''
-                                            )}
-                                        />
-                                        {hydrated && isFavorite(`credential:${selectedCredential.id}`)
-                                            ? 'Unfavourite'
-                                            : 'Favourite'}
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                            setSelectedCredentialId(null)
-                                            router.push(`/credential/${selectedCredential.id}`)
-                                        }}
-                                    >
-                                        <Pencil className="mr-1 h-4 w-4" />
-                                        Edit
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="destructive"
-                                        size="sm"
-                                        onClick={() => setConfirmDeleteOpen(true)}
-                                        disabled={isDeleting}
-                                    >
-                                        <Trash2 className="mr-1 h-4 w-4" />
-                                        {isDeleting ? 'Deleting...' : 'Delete'}
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
+                        <CredentialDetailsCard
+                            credential={selectedCredential}
+                            title={selectedCredential.service_name}
+                            className="motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300"
+                            onCopyActualSecret={() => {
+                                void handleCopyActualSecret()
+                            }}
+                            isCopyingSecret={isCopyingSecret}
+                            secretCopied={secretCopied}
+                            showActions
+                            actionsClassName="grid gap-2 grid-cols-3"
+                            actions={(
+                                <DialogActions
+                                    handleDelete={() => setConfirmDeleteOpen(true)}
+                                    handleEdit={() => {
+                                        if (!selectedCredential) return
+                                        router.push(`/credential/${selectedCredential.id}`)
+                                    }}
+                                    handleToggleFavorite={() => {
+                                        if (!selectedCredential) return
+                                        toggleFavorite(`credential:${selectedCredential.id}`)
+                                    }}
+                                    isSelectedFavorite={hydrated && selectedCredential ? isFavorite(`credential:${selectedCredential.id}`) : false}
+                                    isProcessing={isDeleting}
+                                />
+                            )}
+                        />
                     </DetailDialogContent>
                 ) : null}
             </Dialog>

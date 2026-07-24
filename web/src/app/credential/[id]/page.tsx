@@ -39,8 +39,6 @@ export default async function EditCredentialPage({ params }: EditCredentialPageP
             >
                 <CredentialEditForm credential={result.data} />
             </EntityFormPageLayout>
-
-            <BottomTabBar />
         </>
     )
 }

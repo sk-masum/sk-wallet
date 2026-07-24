@@ -221,7 +221,7 @@ export default function RootLayout({
           </Suspense>
           <AppToaster />
           <BiometricGuard>
-            <div className="min-h-screen bg-[radial-gradient(circle_at_12%_10%,hsl(0_0%_100%/0.52),transparent_36%),radial-gradient(circle_at_85%_18%,hsl(var(--ring)/0.2),transparent_33%),radial-gradient(circle_at_50%_110%,hsl(var(--accent)/0.18),transparent_50%),linear-gradient(180deg,hsl(var(--background)),hsl(var(--muted)/0.56))]">
+            <div className="min-h-screen bg-[radial-gradient(circle_at_8%_0%,hsl(var(--primary)/0.12),transparent_36%),radial-gradient(circle_at_100%_18%,hsl(var(--accent)/0.09),transparent_34%)] dark:bg-[radial-gradient(circle_at_8%_0%,hsl(var(--primary)/0.2),transparent_38%),radial-gradient(circle_at_100%_18%,hsl(var(--accent)/0.14),transparent_36%)]">
               {children}
             </div>
           </BiometricGuard>

@@ -24,8 +24,6 @@ export default async function NewCredentialPage() {
             >
                 <CredentialCreateForm />
             </EntityFormPageLayout>
-
-            <BottomTabBar />
         </>
     )
 }

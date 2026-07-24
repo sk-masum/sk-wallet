@@ -29,7 +29,6 @@ export default async function CredentialPage() {
                 showBackButton
                 backHref="/"
                 backButtonLabel="Back to dashboard"
-                description={`${credentials.length} ${credentials.length === 1 ? 'credential' : 'credentials'}`}
                 addLabel="Add credential"
                 mobileStickyHeader
                 mobileFilters={<CredentialMobileFilters />}

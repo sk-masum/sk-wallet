@@ -7,6 +7,9 @@ import { FavoriteVaultCarousel } from '@/components/dashboard/favorite-vault-car
 import { RecentBillingCards } from '@/components/dashboard/recent-billing-cards'
 import { formatInteger } from '@/components/dashboard/format'
 import { SummaryStatCard } from '@/components/dashboard/summary-stat-card'
+import { buttonVariants } from '@/components/ui/button'
+import { responsiveIconSizes } from '@/components/ui/icon-sizes'
+import { PageHeader } from '@/components/ui/page-header'
 import type { DashboardData } from '@/models/dashboard'
 
 type DashboardOverviewProps = {
@@ -19,28 +22,29 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
 
     return (
         <main className="relative mx-auto w-full max-w-7xl space-y-7 px-4 pb-24 pt-6 sm:space-y-8 sm:px-6 sm:pb-6 lg:px-8">
-            <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_8%_0%,hsl(var(--primary)/0.12),transparent_34%),radial-gradient(circle_at_100%_14%,hsl(var(--ring)/0.12),transparent_32%),radial-gradient(circle_at_50%_100%,hsl(var(--accent)/0.14),transparent_50%)] dark:bg-[radial-gradient(circle_at_8%_0%,hsl(var(--primary)/0.2),transparent_38%),radial-gradient(circle_at_100%_14%,hsl(var(--ring)/0.17),transparent_36%),radial-gradient(circle_at_50%_100%,hsl(var(--accent)/0.14),transparent_54%)]" />
-
             <section className="rounded-2xl py-3 sm:py-7">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Dashboard</h1>
-                    <div className="flex items-center gap-2">
-                        <Link
-                            href="/alerts"
-                            aria-label="Open alerts"
-                            className="rounded-full border border-white/45 bg-(--glass-surface) p-3 text-foreground shadow-(--neu-shadow-raised-sm) backdrop-blur-md dark:border-white/18 dark:text-foreground sm:p-5"
-                        >
-                            <Bell className="sm:h-6 sm:w-6 h-5 w-5" />
-                        </Link>
-                        <Link
-                            href="/settings"
-                            aria-label="Open settings"
-                            className="rounded-full border border-white/45 bg-(--glass-surface) p-3 text-foreground shadow-(--neu-shadow-raised-sm) backdrop-blur-md dark:border-white/18 dark:text-foreground sm:p-5"
-                        >
-                            <Settings className="sm:h-6 sm:w-6 h-5 w-5" />
-                        </Link>
-                    </div>
-                </div>
+                <PageHeader
+                    title="Dashboard"
+                    className="mb-0"
+                    rightSlot={(
+                        <div className="flex items-center gap-2">
+                            <Link
+                                href="/alerts"
+                                aria-label="Open alerts"
+                                className={buttonVariants({ variant: 'headerIcon', size: 'headerIcon' })}
+                            >
+                                <Bell className={responsiveIconSizes.header} />
+                            </Link>
+                            <Link
+                                href="/settings"
+                                aria-label="Open settings"
+                                className={buttonVariants({ variant: 'headerIcon', size: 'headerIcon' })}
+                            >
+                                <Settings className={responsiveIconSizes.header} />
+                            </Link>
+                        </div>
+                    )}
+                />
             </section>
 
             <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">

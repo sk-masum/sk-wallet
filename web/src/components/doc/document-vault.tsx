@@ -2,21 +2,17 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Pencil, Star, Trash2 } from 'lucide-react'
+import { HeartIcon, Pencil, Trash2 } from 'lucide-react'
 
 import { useDashboardFavorites } from '@/components/dashboard/use-dashboard-favorites'
+import { DocumentDetailsCard } from '@/components/doc/document-details-card'
 import NoDocIcon from '@/components/icons/nodoc-icon'
 import { DeleteConfirmDialog } from '@/components/shared/delete-confirm-dialog'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CopyButton } from '@/components/ui/copy-button'
-import {
-  Dialog,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog } from '@/components/ui/dialog'
 import { getDocumentCategoryLabel } from '@/constants/document/categories'
 import { clientApiGet } from '@/lib/api/client'
 import { clientApiDelete } from '@/lib/api/client'
@@ -28,29 +24,12 @@ import { showToast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 import type { UserDocument } from '@/models/document'
 import { getDocumentDisplayTypeLabel } from '@/utils/document/label'
+import { responsiveIconSizes } from '../ui/icon-sizes'
+import { DialogActions } from '../shared/dialog-actions'
 
 type DocumentVaultProps = {
   initialDocuments: UserDocument[]
   initialError?: string
-}
-
-const RESERVED_METADATA_KEYS = new Set([
-  'issued_date',
-  'expiry_date',
-  'address',
-  'guardian_name',
-  'other_details',
-  'other_type_label',
-  'custom_fields',
-])
-
-function formatDateTime(value: string | null | undefined) {
-  if (!value) return 'N/A'
-
-  const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) return 'N/A'
-
-  return parsed.toLocaleString()
 }
 
 function getCategoryBadgeClass(category: string) {
@@ -60,31 +39,15 @@ function getCategoryBadgeClass(category: string) {
   if (category === 'health') return 'bg-rose-500/15 text-rose-600 border-rose-500/30'
   if (category === 'financial') return 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30'
   if (category === 'legal') return 'bg-amber-500/15 text-amber-600 border-amber-500/30'
+
+  if (category === 'family') return 'bg-cyan-500/15 text-cyan-600 border-cyan-500/30'
+
+  if (category === 'vehicle') return 'bg-red-500/15 text-red-600 border-red-500/30'
+
+  if (category === 'travel') return 'bg-purple-500/15 text-purple-600 border-purple-500/30'
   return 'bg-muted text-muted-foreground border-border'
 }
 
-function getMetadataText(metadata: Record<string, unknown> | null | undefined, key: string) {
-  if (!metadata) return ''
-  const value = metadata[key]
-  if (typeof value !== 'string') return ''
-  return value.trim()
-}
-
-function getCustomMetadataEntries(metadata: Record<string, unknown> | null | undefined) {
-  if (!metadata) return []
-
-  return Object.entries(metadata)
-    .filter(([key, value]) => {
-      if (RESERVED_METADATA_KEYS.has(key)) return false
-      return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
-    })
-    .map(([key, value]) => ({
-      key,
-      label: key.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()),
-      value: String(value).trim(),
-    }))
-    .filter((item) => item.value.length > 0)
-}
 
 export function DocumentVault({ initialDocuments, initialError = '' }: DocumentVaultProps) {
   const router = useRouter()
@@ -155,11 +118,6 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
   const selectedDocument = useMemo(
     () => documents.find((doc) => doc.id === selectedDocumentId) ?? null,
     [documents, selectedDocumentId]
-  )
-
-  const detailCustomMetadata = useMemo(
-    () => getCustomMetadataEntries(selectedDocument?.metadata),
-    [selectedDocument?.metadata]
   )
 
   const handleDelete = async () => {
@@ -256,224 +214,29 @@ export function DocumentVault({ initialDocuments, initialError = '' }: DocumentV
       <Dialog open={Boolean(selectedDocument)} onOpenChange={(open) => !open && setSelectedDocumentId(null)}>
         {selectedDocument ? (
           <DetailDialogContent>
-            <div>
-              <div className="space-y-3 rounded-xl border border-border bg-background p-4 text-sm shadow-xl backdrop-blur-md">
-                <DialogHeader>
-                  <DialogTitle>
-                    {getDocumentDisplayTypeLabel(selectedDocument.document_type, selectedDocument.metadata)}
-                  </DialogTitle>
-                  <DialogDescription>Updated {formatDateTime(selectedDocument.updated_at)}</DialogDescription>
-                </DialogHeader>
-
-                <div className="space-y-3 text-sm">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs text-muted-foreground">Category</p>
-                      <CopyButton
-                        value={getDocumentCategoryLabel(String(selectedDocument.category ?? 'other'))}
-                        label="Category"
-                        className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
-                        showStatusIcon
-                        copyIconClassName="h-3.5 w-3.5"
-                        checkIconClassName="h-3.5 w-3.5 text-green-600"
-                      />
-                    </div>
-                    <span
-                      className={cn(
-                        'mt-1 inline-flex rounded-full border px-2 py-0.5 text-xs font-medium capitalize',
-                        getCategoryBadgeClass(String(selectedDocument.category ?? 'other'))
-                      )}
-                    >
-                      {getDocumentCategoryLabel(String(selectedDocument.category ?? 'other'))}
-                    </span>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs text-muted-foreground">Document number</p>
-                      <CopyButton
-                        value={selectedDocumentDetail?.document_number || selectedDocument.masked_number}
-                        label="Document number"
-                        className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
-                        showStatusIcon
-                        copyIconClassName="h-3.5 w-3.5"
-                        checkIconClassName="h-3.5 w-3.5 text-green-600"
-                      />
-                    </div>
-                    <p className="font-mono">
-                      {selectedDocumentDetail?.document_number || selectedDocument.masked_number}
-                    </p>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs text-muted-foreground">Name on document</p>
-                      <CopyButton
-                        value={selectedDocument.name_on_document || ''}
-                        label="Name on document"
-                        className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
-                        showStatusIcon
-                        copyIconClassName="h-3.5 w-3.5"
-                        checkIconClassName="h-3.5 w-3.5 text-green-600"
-                      />
-                    </div>
-                    <p>{selectedDocument.name_on_document || 'N/A'}</p>
-                  </div>
-
-                  {getMetadataText(selectedDocument.metadata, 'issued_date') ? (
-                    <div>
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs text-muted-foreground">Issued date</p>
-                        <CopyButton
-                          value={getMetadataText(selectedDocument.metadata, 'issued_date')}
-                          label="Issued date"
-                          className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
-                          showStatusIcon
-                          copyIconClassName="h-3.5 w-3.5"
-                          checkIconClassName="h-3.5 w-3.5 text-green-600"
-                        />
-                      </div>
-                      <p>{getMetadataText(selectedDocument.metadata, 'issued_date')}</p>
-                    </div>
-                  ) : null}
-
-                  {getMetadataText(selectedDocument.metadata, 'expiry_date') ? (
-                    <div>
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs text-muted-foreground">Expiry date</p>
-                        <CopyButton
-                          value={getMetadataText(selectedDocument.metadata, 'expiry_date')}
-                          label="Expiry date"
-                          className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
-                          showStatusIcon
-                          copyIconClassName="h-3.5 w-3.5"
-                          checkIconClassName="h-3.5 w-3.5 text-green-600"
-                        />
-                      </div>
-                      <p>{getMetadataText(selectedDocument.metadata, 'expiry_date')}</p>
-                    </div>
-                  ) : null}
-
-                  {getMetadataText(selectedDocument.metadata, 'guardian_name') ? (
-                    <div>
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs text-muted-foreground">Guardian name</p>
-                        <CopyButton
-                          value={getMetadataText(selectedDocument.metadata, 'guardian_name')}
-                          label="Guardian name"
-                          className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
-                          showStatusIcon
-                          copyIconClassName="h-3.5 w-3.5"
-                          checkIconClassName="h-3.5 w-3.5 text-green-600"
-                        />
-                      </div>
-                      <p>{getMetadataText(selectedDocument.metadata, 'guardian_name')}</p>
-                    </div>
-                  ) : null}
-
-                  {getMetadataText(selectedDocument.metadata, 'address') ? (
-                    <div>
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs text-muted-foreground">Address</p>
-                        <CopyButton
-                          value={getMetadataText(selectedDocument.metadata, 'address')}
-                          label="Address"
-                          className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
-                          showStatusIcon
-                          copyIconClassName="h-3.5 w-3.5"
-                          checkIconClassName="h-3.5 w-3.5 text-green-600"
-                        />
-                      </div>
-                      <p>{getMetadataText(selectedDocument.metadata, 'address')}</p>
-                    </div>
-                  ) : null}
-
-                  {getMetadataText(selectedDocument.metadata, 'other_details') ? (
-                    <div>
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs text-muted-foreground">Other details</p>
-                        <CopyButton
-                          value={getMetadataText(selectedDocument.metadata, 'other_details')}
-                          label="Other details"
-                          className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
-                          showStatusIcon
-                          copyIconClassName="h-3.5 w-3.5"
-                          checkIconClassName="h-3.5 w-3.5 text-green-600"
-                        />
-                      </div>
-                      <p className="whitespace-pre-wrap">{getMetadataText(selectedDocument.metadata, 'other_details')}</p>
-                    </div>
-                  ) : null}
-
-                  {detailCustomMetadata.length > 0 ? (
-                    <div className="space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground">Custom fields</p>
-                      <div className="space-y-2">
-                        {detailCustomMetadata.map((item) => (
-                          <div key={item.key}>
-                            <div className="flex items-center justify-between gap-2">
-                              <p className="text-xs text-muted-foreground">{item.label}</p>
-                              <CopyButton
-                                value={item.value}
-                                label={item.label}
-                                className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-accent"
-                                showStatusIcon
-                                copyIconClassName="h-3.5 w-3.5"
-                                checkIconClassName="h-3.5 w-3.5 text-green-600"
-                              />
-                            </div>
-                            <p className="whitespace-pre-wrap">{item.value}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <div className="grid grid-cols-1 gap-2 pt-2 sm:grid-cols-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => toggleFavorite(`document:${selectedDocument.id}`)}
-                    >
-                      <Star
-                        className={cn(
-                          'mr-1 h-4 w-4',
-                          hydrated && isFavorite(`document:${selectedDocument.id}`)
-                            ? 'fill-amber-500 text-amber-500'
-                            : ''
-                        )}
-                      />
-                      {hydrated && isFavorite(`document:${selectedDocument.id}`)
-                        ? 'Unfavourite'
-                        : 'Favourite'}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedDocumentId(null)
-                        router.push(`/doc/${selectedDocument.id}`)
-                      }}
-                    >
-                      <Pencil className="mr-1 h-4 w-4" />
-                      Edit
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => setConfirmDeleteOpen(true)}
-                      disabled={isDeleting}
-                    >
-                      <Trash2 className="mr-1 h-4 w-4" />
-                      {isDeleting ? 'Deleting...' : 'Delete'}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <DocumentDetailsCard
+              document={{
+                ...selectedDocument,
+                ...(selectedDocumentDetail ? selectedDocumentDetail : {}),
+              }}
+              showActions
+              actionsClassName="grid gap-2 grid-cols-3"
+              actions={(
+                <DialogActions
+                  handleDelete={() => setConfirmDeleteOpen(true)}
+                  handleEdit={() => {
+                    if (!selectedDocument) return
+                    router.push(`/doc/${selectedDocument.id}`)
+                  }}
+                  handleToggleFavorite={() => {
+                    if (!selectedDocument) return
+                    toggleFavorite(`document:${selectedDocument.id}`)
+                  }}
+                  isSelectedFavorite={hydrated && selectedDocument ? isFavorite(`document:${selectedDocument.id}`) : false}
+                  isProcessing={isDeleting}
+                />
+              )}
+            />
           </DetailDialogContent>
         ) : null}
       </Dialog>

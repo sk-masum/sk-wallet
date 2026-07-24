@@ -41,6 +41,11 @@ type FavoriteRow = {
   feature_key: string
 }
 
+function toMetadataRecordOrNull(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  return value as Record<string, unknown>
+}
+
 export async function GET() {
   const { user, unauthorizedResponse } = await getRouteSupabaseContext()
 
@@ -166,7 +171,7 @@ export async function GET() {
         subtitle: String(document.name_on_document),
         href: `/doc/${document.id}`,
         document_type: document.document_type ?? 'Uncategorized',
-        metadata: document.metadata ?? null,
+        metadata: toMetadataRecordOrNull(document.metadata),
       })),
   ].slice(0, 16)
 

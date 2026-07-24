@@ -112,7 +112,7 @@ export function CardVault({ initialCards, initialError }: CardVaultProps) {
                             </div>
                         </div>
 
-                        <Button variant="outline" size="sm" className="rounded-full px-4" onClick={resetFilters}>
+                        <Button variant="outline" size="chipWide" onClick={resetFilters}>
                             Clear filters
                         </Button>
                     </div>
@@ -136,7 +136,7 @@ export function CardVault({ initialCards, initialError }: CardVaultProps) {
                     {meta.hasPaymentDateFilter ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Payment date: Day {selectedPaymentDate}</span> : null}
                     {meta.hasSortSelection ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Sort: {CARD_SORT_LABELS[selectedSort]}</span> : null}
                     {meta.hasGrouping ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Group: {selectedGroup === 'provider' ? 'Provider' : selectedGroup === 'network' ? 'Network' : 'Tags'}</span> : null}
-                    <Button variant="outline" size="sm" className="h-8 rounded-full px-3 text-xs" onClick={resetFilters}>
+                    <Button variant="outline" size="chip" onClick={resetFilters}>
                         Reset filters
                     </Button>
                 </div>
