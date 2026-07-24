@@ -1,9 +1,10 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --ios-statusbar-bg: #e5eafe;
   --background: 228 58% 96%;
   --foreground: 229 34% 18%;
   --card: 228 56% 96%;
@@ -23,17 +24,32 @@
   --border: 228 34% 78%;
   --input: 228 38% 89%;
   --ring: 229 70% 63%;
-  --neu-shadow-raised: inset 0 1px 0 rgba(255,255,255,0.62), inset 0 -1px 2px rgba(48,64,138,0.2), 0 16px 34px rgba(45,59,136,0.24);
-  --neu-shadow-raised-sm: inset 0 1px 0 rgba(255,255,255,0.58), inset 0 -1px 2px rgba(48,64,138,0.16), 0 8px 18px rgba(45,59,136,0.22);
-  --neu-shadow-inset: inset 0 2px 6px rgba(44,61,145,0.24), inset 0 -1px 1px rgba(255,255,255,0.34);
-  --neu-shadow-inset-sm: inset 0 1px 3px rgba(44,61,145,0.22), inset 0 -1px 1px rgba(255,255,255,0.28);
+  --neu-shadow-raised:
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    inset 0 -1px 2px rgba(48, 64, 138, 0.2), 0 16px 34px rgba(45, 59, 136, 0.24);
+  --neu-shadow-raised-sm:
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    inset 0 -1px 2px rgba(48, 64, 138, 0.16), 0 8px 18px rgba(45, 59, 136, 0.22);
+  --neu-shadow-inset:
+    inset 0 2px 6px rgba(44, 61, 145, 0.24),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.34);
+  --neu-shadow-inset-sm:
+    inset 0 1px 3px rgba(44, 61, 145, 0.22),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.28);
   --glass-surface: hsl(229 82% 98% / 0.34);
   --glass-surface-strong: hsl(229 82% 98% / 0.48);
-  --neu-glow: 0 22px 44px -26px rgba(54,72,170,0.64);
+  --neu-glow: 0 22px 44px -26px rgba(54, 72, 170, 0.64);
   --radius: 1rem;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ios-statusbar-bg: #0d1333;
+  }
+}
+
 .dark {
+  --ios-statusbar-bg: #0d1333;
   --background: 229 38% 10%;
   --foreground: 228 32% 92%;
   --card: 229 30% 16%;
@@ -53,13 +69,21 @@
   --border: 229 22% 32%;
   --input: 229 22% 21%;
   --ring: 229 78% 66%;
-  --neu-shadow-raised: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 2px rgba(0,0,0,0.42), 0 18px 36px rgba(0,0,0,0.52);
-  --neu-shadow-raised-sm: inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 2px rgba(0,0,0,0.38), 0 10px 20px rgba(0,0,0,0.48);
-  --neu-shadow-inset: inset 0 2px 6px rgba(0,0,0,0.45), inset 0 -1px 1px rgba(255,255,255,0.08);
-  --neu-shadow-inset-sm: inset 0 1px 3px rgba(0,0,0,0.42), inset 0 -1px 1px rgba(255,255,255,0.06);
+  --neu-shadow-raised:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.42), 0 18px 36px rgba(0, 0, 0, 0.52);
+  --neu-shadow-raised-sm:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.38), 0 10px 20px rgba(0, 0, 0, 0.48);
+  --neu-shadow-inset:
+    inset 0 2px 6px rgba(0, 0, 0, 0.45),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.08);
+  --neu-shadow-inset-sm:
+    inset 0 1px 3px rgba(0, 0, 0, 0.42),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.06);
   --glass-surface: hsl(229 30% 25% / 0.44);
   --glass-surface-strong: hsl(229 34% 31% / 0.56);
-  --neu-glow: 0 22px 42px -24px rgba(83,108,238,0.76);
+  --neu-glow: 0 22px 42px -24px rgba(83, 108, 238, 0.76);
 }
 
 @theme inline {
@@ -117,13 +141,9 @@ body {
   left: 0;
   right: 0;
   height: env(safe-area-inset-top);
-  background: #e5eafe;
+  background: var(--ios-statusbar-bg);
   pointer-events: none;
   z-index: 80;
-}
-
-.dark .ios-pwa-statusbar-bg {
-  background: #0d1333;
 }
 
 /* Prevent iOS Safari/PWA auto-zoom when focusing small form fields. */
