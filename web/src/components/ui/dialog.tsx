@@ -60,14 +60,14 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 max-sm:data-[state=open]:slide-in-from-bottom-10 max-sm:data-[state=closed]:slide-out-to-bottom-10 fixed top-1/2 left-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-lg border p-6 shadow-lg duration-200',
+          'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 max-sm:data-[state=open]:slide-in-from-bottom-10 max-sm:data-[state=closed]:slide-out-to-bottom-10 fixed top-1/2 left-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border border-transparent bg-card p-6 shadow-[12px_12px_28px_hsl(220_18%_82%),-12px_-12px_28px_hsl(220_40%_98%)] duration-200 dark:shadow-[12px_12px_28px_hsl(224_24%_12%),-12px_-12px_28px_hsl(224_16%_24%)]',
           className
         )}
         {...props}
       >
         {children}
         {showCloseButton ? (
-          <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
+          <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-md border border-transparent bg-background p-1 opacity-95 shadow-[6px_6px_12px_hsl(220_18%_82%),-6px_-6px_12px_hsl(220_40%_98%)] transition-all hover:brightness-105 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none dark:shadow-[5px_5px_10px_hsl(224_24%_12%),-5px_-5px_10px_hsl(224_16%_24%)]">
             <X className="size-4" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>

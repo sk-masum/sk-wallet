@@ -4,48 +4,48 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
-  --primary: 240 5.9% 10%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 240 5.9% 10%;
+  --background: 220 22% 92%;
+  --foreground: 223 18% 24%;
+  --card: 220 22% 92%;
+  --card-foreground: 223 18% 24%;
+  --popover: 220 22% 92%;
+  --popover-foreground: 223 18% 24%;
+  --primary: 226 36% 52%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 18% 88%;
+  --secondary-foreground: 223 18% 26%;
+  --muted: 220 16% 86%;
+  --muted-foreground: 223 12% 40%;
+  --accent: 226 28% 82%;
+  --accent-foreground: 224 20% 22%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 240 5.9% 10%;
-  --radius: 0.5rem;
+  --border: 220 15% 78%;
+  --input: 220 18% 88%;
+  --ring: 226 40% 56%;
+  --radius: 0.7rem;
 }
 
 .dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 240 5.9% 10%;
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
+  --background: 224 18% 16%;
+  --foreground: 220 20% 92%;
+  --card: 224 18% 16%;
+  --card-foreground: 220 20% 92%;
+  --popover: 224 18% 16%;
+  --popover-foreground: 220 20% 92%;
+  --primary: 225 45% 66%;
+  --primary-foreground: 226 35% 14%;
+  --secondary: 224 16% 21%;
+  --secondary-foreground: 220 20% 90%;
+  --muted: 224 14% 24%;
+  --muted-foreground: 220 14% 66%;
+  --accent: 224 20% 30%;
+  --accent-foreground: 220 20% 92%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --ring: 240 4.9% 83.9%;
+  --border: 224 16% 28%;
+  --input: 224 16% 22%;
+  --ring: 225 44% 62%;
 }
 
 @theme inline {
@@ -82,6 +82,10 @@ body {
   margin: 0;
   min-height: 100vh;
   background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(circle at 12% 10%, hsla(0, 0%, 100%, 0.62), transparent 38%),
+    radial-gradient(circle at 82% 4%, hsla(224, 40%, 72%, 0.18), transparent 42%),
+    linear-gradient(to bottom, hsl(220 24% 93%), hsl(220 20% 89%));
   color: hsl(var(--foreground));
 }
 
@@ -99,13 +103,13 @@ body {
   left: 0;
   right: 0;
   height: env(safe-area-inset-top);
-  background: #ffffff;
+  background: #e7ebf4;
   pointer-events: none;
   z-index: 80;
 }
 
 .dark .ios-pwa-statusbar-bg {
-  background: #030816;
+  background: #1f2534;
 }
 
 /* Prevent iOS Safari/PWA auto-zoom when focusing small form fields. */

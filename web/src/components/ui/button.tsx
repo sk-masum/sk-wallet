@@ -4,19 +4,22 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground shadow hover:opacity-90',
+        default:
+          'border border-transparent bg-background text-foreground shadow-[7px_7px_14px_hsl(220_18%_82%),-7px_-7px_14px_hsl(220_40%_98%)] hover:bg-secondary active:translate-y-[1px] active:shadow-[inset_4px_4px_10px_hsl(220_18%_82%),inset_-4px_-4px_10px_hsl(220_40%_98%)] dark:shadow-[6px_6px_14px_hsl(224_24%_12%),-6px_-6px_14px_hsl(224_16%_24%)] dark:active:shadow-[inset_3px_3px_8px_hsl(224_24%_12%),inset_-3px_-3px_8px_hsl(224_16%_24%)]',
         primary:
-          'border border-white/15 bg-linear-to-r from-zinc-950 via-zinc-900 to-zinc-800 text-white shadow-[0_14px_26px_-18px_rgba(0,0,0,0.75)] hover:-translate-y-0.5 hover:from-black hover:via-zinc-900 hover:to-zinc-700 hover:shadow-[0_16px_28px_-16px_rgba(0,0,0,0.85)] active:translate-y-0 dark:border-white/35 dark:bg-linear-to-r dark:from-zinc-100 dark:via-zinc-50 dark:to-white dark:text-zinc-900 dark:shadow-[0_14px_26px_-18px_rgba(0,0,0,0.35)] dark:hover:from-white dark:hover:via-zinc-100 dark:hover:to-zinc-200 dark:hover:shadow-[0_16px_28px_-16px_rgba(0,0,0,0.45)]',
+          'border border-transparent bg-primary text-primary-foreground shadow-[7px_7px_14px_hsl(224_24%_76%),-7px_-7px_14px_hsl(226_52%_88%)] hover:brightness-105 active:translate-y-[1px] active:shadow-[inset_4px_4px_10px_hsl(226_38%_44%),inset_-4px_-4px_10px_hsl(226_48%_62%)] dark:shadow-[6px_6px_14px_hsl(224_24%_10%),-6px_-6px_14px_hsl(224_20%_22%)]',
         destructive:
-          'bg-destructive text-destructive-foreground shadow-sm hover:opacity-90',
+          'border border-transparent bg-destructive text-destructive-foreground shadow-[7px_7px_14px_rgba(153,27,27,0.3),-7px_-7px_14px_rgba(254,202,202,0.4)] hover:brightness-105 active:translate-y-[1px]',
         outline:
-          'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',
-        secondary: 'bg-secondary text-secondary-foreground shadow-sm hover:opacity-90',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
+          'border border-border/30 bg-background text-foreground shadow-[inset_3px_3px_8px_hsl(220_16%_84%),inset_-3px_-3px_8px_hsl(220_42%_98%)] hover:bg-secondary dark:shadow-[inset_3px_3px_8px_hsl(224_22%_13%),inset_-3px_-3px_8px_hsl(224_16%_24%)]',
+        secondary:
+          'border border-transparent bg-secondary text-secondary-foreground shadow-[6px_6px_12px_hsl(220_18%_82%),-6px_-6px_12px_hsl(220_40%_98%)] hover:brightness-105 dark:shadow-[5px_5px_12px_hsl(224_24%_12%),-5px_-5px_12px_hsl(224_16%_24%)]',
+        ghost:
+          'border border-transparent bg-transparent shadow-none hover:bg-secondary/70 hover:shadow-[inset_2px_2px_6px_hsl(220_18%_84%),inset_-2px_-2px_6px_hsl(220_40%_98%)] dark:hover:shadow-[inset_2px_2px_6px_hsl(224_24%_12%),inset_-2px_-2px_6px_hsl(224_16%_24%)]',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
