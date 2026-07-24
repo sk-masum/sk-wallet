@@ -12,7 +12,7 @@ export default function Loading() {
         {Array.from({ length: 6 }).map((_, index) => (
           <div key={index} className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500" style={{ animationDelay: `${Math.min(index, 9) * 65}ms` }}>
             <div className="relative overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm">
-              <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.4s_infinite] bg-linear-to-r from-transparent via-white/16 to-transparent dark:via-white/10" />
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.4s_infinite] bg-linear-to-r from-transparent via-glass-overlay to-transparent dark:via-glass-overlay-soft" />
               <div className="relative space-y-3">
                 <Skeleton className="h-5 w-32" />
                 <Skeleton className="h-4 w-42" />

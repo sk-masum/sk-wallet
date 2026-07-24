@@ -109,7 +109,7 @@ export function BiometricGuard({ children }: BiometricGuardProps) {
               >
                 {isBusy ? 'Verifying...' : 'Unlock with biometrics'}
               </Button>
-              {message ? <p className="text-xs text-muted-foreground">{message}</p> : null}
+              {message ? <p className="text-xs text-text-subtle">{message}</p> : null}
             </CardContent>
           </Card>
         </div>

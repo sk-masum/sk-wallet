@@ -42,11 +42,11 @@ export function ListingFilterDesktopSection({
     return (
         <div
             className={cn(
-                'space-y-1.5 rounded-2xl border border-white/35 bg-(--glass-surface) p-4 shadow-(--neu-shadow-raised-sm) dark:border-white/14',
+                'listing-filter-surface space-y-1.5 p-4',
                 className,
             )}
         >
-            <p className={cn('text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase', labelClassName)}>
+            <p className={cn('text-[11px] font-semibold tracking-[0.08em] text-text-subtle uppercase', labelClassName)}>
                 {label}
             </p>
             {children}
@@ -129,11 +129,11 @@ export function ListingFilterMobileSheet({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DetailDialogContent
-                className={cn('sm:hidden max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:h-[88dvh] max-sm:w-screen max-sm:max-w-screen max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-0 border-white/20 bg-[linear-gradient(to_bottom,hsl(var(--background)/0.9),hsl(var(--background)/0.8)),var(--glass-surface)] backdrop-blur-xl dark:border-white/10', className)}
+                className={cn('sm:hidden max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:h-[88dvh] max-sm:w-screen max-sm:max-w-screen max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-0 border-glass-border-subtle bg-[linear-gradient(to_bottom,hsl(var(--background)/0.9),hsl(var(--background)/0.8)),var(--color-glass)] backdrop-blur-xl ', className)}
                 scrollClassName="h-[88dvh] max-h-[88dvh] px-0 pb-0"
             >
                 <div className="flex h-full flex-col bg-transparent pb-4">
-                    <div className="sticky top-0 z-20 border-b border-white/20 px-3 pb-3 -pt-3 dark:border-white/10">
+                    <div className="sticky top-0 z-20 border-b border-glass-border-subtle px-3 pb-3 -pt-3 ">
                         <DialogHeader>
                             <DialogTitle className="text-left text-2xl">{title}</DialogTitle>
                         </DialogHeader>
@@ -157,11 +157,11 @@ export function ListingFilterMobileSection({ label, icon, children, className }:
     return (
         <div
             className={cn(
-                'space-y-2 rounded-2xl border border-white/35 bg-(--glass-surface) p-3.5 shadow-(--neu-shadow-raised-sm) dark:border-white/14',
+                'listing-filter-surface space-y-2 p-3.5',
                 className,
             )}
         >
-            <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+            <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-text-subtle uppercase">
                 {icon}
                 {label}
             </p>
@@ -186,7 +186,7 @@ export function ListingFilterMobileActions({
     onDone,
 }: ListingFilterMobileActionsProps) {
     return (
-        <div className="fixed inset-x-0 bottom-0 z-50 flex items-center gap-2 border-t border-white/20 bg-[linear-gradient(to_top,hsl(var(--background)/0.92),hsl(var(--background)/0.82)),var(--glass-surface)] p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-xl dark:border-white/10 sm:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-50 flex items-center gap-2 border-t border-glass-border-subtle bg-[linear-gradient(to_top,hsl(var(--background)/0.92),hsl(var(--background)/0.82)),var(--color-glass)] p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-xl  sm:hidden">
             {resetHref && hasActiveControls ? (
                 <Link
                     href={resetHref}

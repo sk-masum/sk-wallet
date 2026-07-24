@@ -41,7 +41,7 @@ function getCategoryBadgeClass(category: string) {
     if (category === 'family') return 'bg-cyan-500/15 text-cyan-600 border-cyan-500/30'
     if (category === 'vehicle') return 'bg-red-500/15 text-red-600 border-red-500/30'
     if (category === 'travel') return 'bg-purple-500/15 text-purple-600 border-purple-500/30'
-    return 'bg-muted text-muted-foreground border-border'
+    return 'bg-muted text-text-subtle border-border'
 }
 
 function DocumentVaultContent({ initialDocuments, initialError = '' }: DocumentVaultProps) {
@@ -119,7 +119,7 @@ function DocumentVaultContent({ initialDocuments, initialError = '' }: DocumentV
     }
 
     return (
-        <section className="mx-auto w-full max-w-5xl space-y-4">
+        <section className="vault-listing-shell">
             {visibleDocuments.length === 0 ? (
                 <Card>
                     <CardHeader>
@@ -139,7 +139,7 @@ function DocumentVaultContent({ initialDocuments, initialError = '' }: DocumentV
                     ) : null}
                 </Card>
             ) : (
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="vault-list-grid">
                     {visibleDocuments.map((doc, index) => {
                         const label = getDocumentDisplayTypeLabel(doc.document_type, doc.metadata)
 
@@ -148,19 +148,18 @@ function DocumentVaultContent({ initialDocuments, initialError = '' }: DocumentV
                                 key={doc.id}
                                 type="button"
                                 className={cn(
-                                    'text-left transition-transform duration-300 ease-out hover:-translate-y-0.5',
-                                    'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500'
+                                    'vault-list-item-trigger'
                                 )}
                                 style={{ animationDelay: `${Math.min(index, 9) * 65}ms` }}
                                 onClick={() => setSelectedItem({ id: doc.id, type: 'document', href: `/doc/${doc.id}` })}
                             >
-                                <Card className="group transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md">
+                                <Card className="vault-list-card">
                                     <CardHeader className="pb-2">
                                         <CardTitle className="line-clamp-1 text-base">{label}</CardTitle>
                                     </CardHeader>
                                     <CardContent className="space-y-2 pt-0">
                                         <p className="font-mono text-sm">{doc.masked_number}</p>
-                                        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                                        <div className="flex items-center justify-between gap-2 text-xs text-text-subtle">
                                             <span className="truncate">{doc.name_on_document || 'No name set'}</span>
                                             <span
                                                 className={cn(

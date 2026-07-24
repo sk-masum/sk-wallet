@@ -36,7 +36,7 @@ export function PageHeader({
       href={backHref}
       className={cn(
         buttonVariants({ variant: 'toolbar', size: 'iconLg' }),
-        'dark:border-white/18 sm:h-12 sm:w-12'
+        ' sm:h-12 sm:w-12'
       )}
       aria-label={backButtonLabel}
       title={backButtonLabel}

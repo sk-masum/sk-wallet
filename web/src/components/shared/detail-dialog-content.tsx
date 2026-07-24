@@ -29,7 +29,7 @@ export function DetailDialogContent({
             <DialogClose
                 className={cn(
                     buttonVariants({ variant: 'secondary', size: 'icon' }),
-                    'absolute -top-12 left-1/2 h-9 w-9 -translate-x-1/2 rounded-full border border-white/30 bg-background/80 backdrop-blur max-sm:hidden'
+                    'absolute -top-12 left-1/2 h-9 w-9 -translate-x-1/2 rounded-full border border-glass-border-subtle bg-background/80 backdrop-blur max-sm:hidden'
                 )}
                 aria-label="Close"
             >

@@ -27,7 +27,7 @@ export function MiniVerticalCarouselCard({
     subtitleClassName,
 }: MiniVerticalCarouselCardProps) {
     const cardClassName = cn(
-        'group relative flex min-h-56 min-w-44 flex-col justify-between overflow-hidden rounded-3xl border border-white/45 bg-[var(--glass-surface)] p-3.5 text-foreground shadow-(--neu-shadow-raised-sm) backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-[var(--glass-surface-strong)] dark:border-white/16 first:ml-2',
+        'group relative flex min-h-56 min-w-44 flex-col justify-between overflow-hidden rounded-3xl border border-glass-border-strong bg-glass p-3.5 text-foreground shadow-neu-raised-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-glass-strong  first:ml-2',
         className
     )
 
@@ -38,7 +38,7 @@ export function MiniVerticalCarouselCard({
                 onClick={onClick}
                 className={cardClassName}
             >
-                <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-white/14 via-transparent to-transparent" />
+                <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-glass-overlay via-transparent to-transparent" />
                 <div className="space-y-3">
                     <div className="flex h-10 items-start justify-between gap-2">
                         <div>{leadingMedia}</div>
@@ -48,7 +48,7 @@ export function MiniVerticalCarouselCard({
 
                 <div className="relative space-y-1 text-left">
                     <p className={cn('line-clamp-2 text-base font-semibold leading-tight text-foreground', titleClassName)}>{title}</p>
-                    {subtitle ? <p className={cn('line-clamp-1 text-xs text-muted-foreground/95 dark:text-foreground/78', subtitleClassName)}>{subtitle}</p> : null}
+                    {subtitle ? <p className={cn('line-clamp-1 text-xs text-text-soft ', subtitleClassName)}>{subtitle}</p> : null}
                 </div>
             </button>
         )
@@ -59,7 +59,7 @@ export function MiniVerticalCarouselCard({
             href={href}
             className={cardClassName}
         >
-            <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-white/14 via-transparent to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-glass-overlay via-transparent to-transparent" />
             <div className="space-y-3">
                 <div className="flex h-10 items-start justify-between gap-2">
                     <div>{leadingMedia}</div>
@@ -69,7 +69,7 @@ export function MiniVerticalCarouselCard({
 
             <div className="relative space-y-1">
                 <p className={cn('line-clamp-2 text-base font-semibold leading-tight text-foreground', titleClassName)}>{title}</p>
-                {subtitle ? <p className={cn('line-clamp-1 text-xs text-muted-foreground/95 dark:text-foreground/78', subtitleClassName)}>{subtitle}</p> : null}
+                {subtitle ? <p className={cn('line-clamp-1 text-xs text-text-soft ', subtitleClassName)}>{subtitle}</p> : null}
             </div>
         </Link>
     )

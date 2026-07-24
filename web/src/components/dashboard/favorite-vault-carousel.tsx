@@ -143,42 +143,42 @@ export function FavoriteVaultCarousel({
                                         : 'bg-linear-to-br from-amber-950 via-orange-900 to-amber-950 text-amber-50',
                                 ].join(' ')}
                             >
-                                <div className="pointer-events-none absolute -inset-x-10 -top-18 h-36 rotate-6 bg-linear-to-r from-transparent via-white/12 to-transparent motion-safe:animate-[pulse_2.4s_ease-in-out_infinite]" />
+                                <div className="pointer-events-none absolute -inset-x-10 -top-18 h-36 rotate-6 bg-linear-to-r from-transparent via-glass-overlay-soft to-transparent motion-safe:animate-[pulse_2.4s_ease-in-out_infinite]" />
 
                                 <div className="relative flex items-start justify-between">
                                     <div className="space-y-2">
-                                        <Skeleton className="h-3 w-28 bg-white/20" />
-                                        <Skeleton className="h-3 w-18 bg-white/15" />
+                                        <Skeleton className="h-3 w-28 bg-glass-overlay" />
+                                        <Skeleton className="h-3 w-18 bg-glass-overlay" />
                                     </div>
-                                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/20 bg-white/10">
+                                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-glass-border-subtle bg-glass-overlay-soft">
                                         {selectedItem?.type === 'credential' ? (
-                                            <KeyRound className="h-4 w-4 text-white/85" />
+                                            <KeyRound className="h-4 w-4 text-media-foreground/85" />
                                         ) : (
-                                            <FileText className="h-4 w-4 text-white/85" />
+                                            <FileText className="h-4 w-4 text-media-foreground/85" />
                                         )}
                                     </div>
                                 </div>
 
                                 <div className="mt-6 space-y-3">
-                                    <Skeleton className="h-5 w-46 rounded bg-white/18" />
-                                    <Skeleton className="h-4 w-34 rounded bg-white/16" />
+                                    <Skeleton className="h-5 w-46 rounded bg-glass-overlay" />
+                                    <Skeleton className="h-4 w-34 rounded bg-glass-overlay" />
                                 </div>
 
                                 <div className="mt-7 grid grid-cols-2 gap-3">
                                     <div className="space-y-1.5">
-                                        <Skeleton className="h-2.5 w-16 bg-white/16" />
-                                        <Skeleton className="h-3.5 w-24 bg-white/18" />
+                                        <Skeleton className="h-2.5 w-16 bg-glass-overlay" />
+                                        <Skeleton className="h-3.5 w-24 bg-glass-overlay" />
                                     </div>
                                     <div className="space-y-1.5 text-right">
-                                        <Skeleton className="ml-auto h-2.5 w-14 bg-white/16" />
-                                        <Skeleton className="ml-auto h-3.5 w-20 bg-white/18" />
+                                        <Skeleton className="ml-auto h-2.5 w-14 bg-glass-overlay" />
+                                        <Skeleton className="ml-auto h-3.5 w-20 bg-glass-overlay" />
                                     </div>
                                 </div>
                             </div>
                         </div>
                     ) : detailsError ? (
                         <div className="mx-auto flex min-h-56 w-full max-w-120 flex-col items-center justify-center gap-4 rounded-2xl border border-border/65 bg-background/95 px-6 py-8 text-center motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
-                            <p className="text-sm text-muted-foreground dark:text-foreground/78">{detailsError}</p>
+                            <p className="text-sm text-text-subtle">{detailsError}</p>
                             <Button
                                 type="button"
                                 variant="outline"

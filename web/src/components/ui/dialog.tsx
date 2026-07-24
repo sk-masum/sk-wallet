@@ -38,7 +38,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/45 backdrop-blur-sm supports-backdrop-filter:backdrop-blur-sm',
+        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-foreground/45 backdrop-blur-sm supports-backdrop-filter:backdrop-blur-sm',
         className
       )}
       {...props}
@@ -60,14 +60,14 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 max-sm:data-[state=open]:slide-in-from-bottom-10 max-sm:data-[state=closed]:slide-out-to-bottom-10 fixed top-1/2 left-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border border-white/42 bg-(--glass-surface) p-6 shadow-(--neu-shadow-raised) backdrop-blur-md duration-200 dark:border-white/12',
+          'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 max-sm:data-[state=open]:slide-in-from-bottom-10 max-sm:data-[state=closed]:slide-out-to-bottom-10 fixed top-1/2 left-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border border-glass-border bg-glass p-6 shadow-neu-raised backdrop-blur-md duration-200 ',
           className
         )}
         {...props}
       >
         {children}
         {showCloseButton ? (
-          <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-md border border-white/42 bg-(--glass-surface) p-1 opacity-95 shadow-(--neu-shadow-raised-sm) backdrop-blur-sm transition-all hover:bg-(--glass-surface-strong) focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none dark:border-white/12">
+          <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:text-text-subtle absolute top-4 right-4 rounded-md border border-glass-border bg-glass p-1 opacity-95 shadow-neu-raised-sm backdrop-blur-sm transition-all hover:bg-glass-strong focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none ">
             <X className="size-4" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
@@ -153,7 +153,7 @@ function DialogDescription({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn('text-muted-foreground text-sm', className)}
+      className={cn('text-text-subtle text-sm', className)}
       {...props}
     />
   )

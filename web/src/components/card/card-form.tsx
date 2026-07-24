@@ -378,12 +378,12 @@ export function CardForm({
               )}
             >
               <span className="inline-flex w-full items-center gap-2.5">
-                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/90 text-muted-foreground peer-checked:border-primary/45 peer-checked:bg-primary/16 peer-checked:text-primary">
+                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/90 text-text-subtle peer-checked:border-primary/45 peer-checked:bg-primary/16 peer-checked:text-primary">
                   <CreditCard className="h-4 w-4" />
                 </span>
                 <span className="leading-tight">
                   <span className="block text-sm font-semibold">Credit</span>
-                  <span className="block text-[11px] text-muted-foreground">Pay later billing cycle</span>
+                  <span className="block text-[11px] text-text-subtle">Pay later billing cycle</span>
                 </span>
               </span>
             </span>
@@ -412,12 +412,12 @@ export function CardForm({
               )}
             >
               <span className="inline-flex w-full items-center gap-2.5">
-                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/90 text-muted-foreground peer-checked:border-primary/45 peer-checked:bg-primary/16 peer-checked:text-primary">
+                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/90 text-text-subtle peer-checked:border-primary/45 peer-checked:bg-primary/16 peer-checked:text-primary">
                   <Landmark className="h-4 w-4" />
                 </span>
                 <span className="leading-tight">
                   <span className="block text-sm font-semibold">Debit</span>
-                  <span className="block text-[11px] text-muted-foreground">Instant balance deduction</span>
+                  <span className="block text-[11px] text-text-subtle">Instant balance deduction</span>
                 </span>
               </span>
             </span>
@@ -530,7 +530,7 @@ export function CardForm({
                 ? 'text-destructive'
                 : isCardNumberLengthMatch
                   ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-muted-foreground'
+                  : 'text-text-subtle'
             )}
           >
             {cardNumberMatchHint}
@@ -566,7 +566,7 @@ export function CardForm({
                   title={theme.colorName}
                 >
                   {isSelected ? (
-                    <span className="absolute inset-0 inline-flex items-center justify-center text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                    <span className="absolute inset-0 inline-flex items-center justify-center text-media-foreground drop-shadow-media-strong">
                       <Check className="h-4 w-4" />
                     </span>
                   ) : null}
@@ -606,7 +606,7 @@ export function CardForm({
                   aria-label={`Select ${pattern.label} pattern`}
                   title={pattern.label}
                 >
-                  <span className="relative z-10 text-foreground drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]">
+                  <span className="relative z-10 text-foreground drop-shadow-media-soft">
                     {pattern.label}
                   </span>
                 </button>
@@ -669,7 +669,7 @@ export function CardForm({
                   className="flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-left text-sm transition-colors hover:bg-accent"
                 >
                   <span>Add "{providerValue.trim()}"</span>
-                  <span className="text-xs text-muted-foreground">new</span>
+                  <span className="text-xs text-text-subtle">new</span>
                 </button>
               ) : null}
               {filteredProviderOptions.map((providerOption) => (
@@ -687,7 +687,7 @@ export function CardForm({
                 </button>
               ))}
               {filteredProviderOptions.length === 0 && !canAddProviderOption ? (
-                <p className="px-2 py-1.5 text-sm text-muted-foreground">No matching providers</p>
+                <p className="px-2 py-1.5 text-sm text-text-subtle">No matching providers</p>
               ) : null}
             </div>
           ) : null}

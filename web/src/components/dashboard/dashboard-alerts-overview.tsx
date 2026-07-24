@@ -47,19 +47,19 @@ export function DashboardAlertsOverview({ data }: DashboardAlertsOverviewProps) 
                     label="Expiring Soon"
                     value={formatInteger(data.summary.expiringCardsSoon)}
                     icon="expiring"
-                    toneClassName="bg-[radial-gradient(circle_at_8%_12%,rgba(244,63,94,0.2),transparent_46%),radial-gradient(circle_at_88%_86%,rgba(239,68,68,0.16),transparent_46%),hsl(var(--background))]"
+                    toneClassName="bg-[radial-gradient(circle_at_8%_12%,hsl(var(--destructive)/0.2),transparent_46%),radial-gradient(circle_at_88%_86%,hsl(var(--destructive)/0.16),transparent_46%),hsl(var(--background))]"
                 />
                 <SummaryStatCard
                     label="Blocked or Replaced"
                     value={formatInteger(data.summary.blockedOrReplacedCards)}
                     icon="blocked"
-                    toneClassName="bg-[radial-gradient(circle_at_8%_12%,rgba(249,115,22,0.2),transparent_46%),radial-gradient(circle_at_88%_86%,rgba(245,158,11,0.16),transparent_46%),hsl(var(--background))]"
+                    toneClassName="bg-[radial-gradient(circle_at_8%_12%,hsl(var(--warning)/0.2),transparent_46%),radial-gradient(circle_at_88%_86%,hsl(var(--warning)/0.16),transparent_46%),hsl(var(--background))]"
                 />
                 <SummaryStatCard
                     label="Billing Configured"
                     value={formatInteger(data.summary.cardsWithBillingConfigured)}
                     icon="billing"
-                    toneClassName="bg-[radial-gradient(circle_at_8%_12%,rgba(14,165,233,0.2),transparent_46%),radial-gradient(circle_at_88%_86%,rgba(59,130,246,0.16),transparent_46%),hsl(var(--background))]"
+                    toneClassName="bg-[radial-gradient(circle_at_8%_12%,hsl(var(--info)/0.2),transparent_46%),radial-gradient(circle_at_88%_86%,hsl(var(--info)/0.16),transparent_46%),hsl(var(--background))]"
                 />
             </section>
 

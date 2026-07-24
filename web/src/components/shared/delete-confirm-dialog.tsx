@@ -38,7 +38,7 @@ export function DeleteConfirmDialog({
 
                     <div className="space-y-1">
                         <h3 className="text-lg font-semibold">{title}</h3>
-                        <p className="text-sm text-muted-foreground">{description}</p>
+                        <p className="text-sm text-text-subtle">{description}</p>
                     </div>
 
                     <div className="flex justify-end gap-2 pt-2">

@@ -44,7 +44,7 @@ export function VaultDetailsBlock({ label, value, children, hasCopy = true, trai
     return (
         <div className={cn('rounded-xl border border-border/65 bg-background/70 p-3', className)}>
             <div className="flex items-center justify-between gap-2">
-                <p className="text-xs text-muted-foreground dark:text-foreground/78">{label}</p>
+                <p className="text-xs text-text-subtle">{label}</p>
                 {(hasCopy && value) ? <CopyButton
                     value={value}
                     label={label}

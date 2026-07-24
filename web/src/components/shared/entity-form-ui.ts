@@ -7,7 +7,7 @@ export const entityFormSectionCardClass =
   'rounded-2xl border border-border/60 bg-muted/35 p-3.5'
 
 export const entityFormLabelClass =
-  'text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase'
+  'text-[11px] font-semibold tracking-[0.08em] text-text-subtle uppercase'
 
 export const entityFormControlClass =
   'h-11 rounded-2xl border-border/65 bg-background/92 px-3.5 text-sm shadow-sm transition-colors'

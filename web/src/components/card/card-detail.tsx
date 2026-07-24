@@ -41,13 +41,13 @@ export function CardDetail({ selectedCard, showCardNumber, toggleNumberVisibilit
                 {(selectedCard.billing_date != null || selectedCard.payment_date != null) ? (
                     <div className="mb-2.5 grid grid-cols-2 gap-2 rounded-xl border border-border/60 bg-background/80 px-3 py-2 text-xs">
                         <div>
-                            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">Billing date</p>
+                            <p className="text-[11px] font-semibold tracking-[0.08em] text-text-subtle uppercase">Billing date</p>
                             <p className="mt-0.5 text-sm font-medium text-foreground">
                                 {selectedCard.billing_date != null ? `${selectedCard.billing_date}` : 'N/A'}
                             </p>
                         </div>
                         <div>
-                            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">Payment date</p>
+                            <p className="text-[11px] font-semibold tracking-[0.08em] text-text-subtle uppercase">Payment date</p>
                             <p className="mt-0.5 text-sm font-medium text-foreground">
                                 {selectedCard.payment_date != null ? `${selectedCard.payment_date}` : 'N/A'}
                             </p>
@@ -63,7 +63,7 @@ export function CardDetail({ selectedCard, showCardNumber, toggleNumberVisibilit
                         onClick={() => toggleNumberVisibility()}
                         disabled={isUpdatingStatus || isDeleting}
                     >
-                        {showCardNumber ? <EyeOff className={cn(responsiveIconSizes.action, 'text-muted-foreground')} /> : <Eye className={cn(responsiveIconSizes.action, 'text-muted-foreground')} />}
+                        {showCardNumber ? <EyeOff className={cn(responsiveIconSizes.action, 'text-text-subtle')} /> : <Eye className={cn(responsiveIconSizes.action, 'text-text-subtle')} />}
                     </Button>
                     <DialogActions
                         handleToggleFavorite={() => {
@@ -82,7 +82,7 @@ export function CardDetail({ selectedCard, showCardNumber, toggleNumberVisibilit
 
                 <div className="mt-2.5 border-t border-border/55 pt-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 sm:mt-3 sm:pt-3">
                     <div className="space-y-2 rounded-xl border border-border/60 bg-background/75 p-4">
-                        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">Card status</p>
+                        <p className="text-[11px] font-semibold tracking-[0.08em] text-text-subtle uppercase">Card status</p>
                         <div className="flex gap-2 flex-row sm:items-center">
                             <Select
                                 value={selectedStatus}

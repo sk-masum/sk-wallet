@@ -137,15 +137,14 @@ function CredentialVaultContent({ initialCredentials, initialError = '' }: Crede
                 key={cred.id}
                 type="button"
                 className={cn(
-                    'text-left transition-transform duration-300 ease-out hover:-translate-y-0.5',
-                    'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500'
+                    'vault-list-item-trigger'
                 )}
                 style={{ animationDelay: `${Math.min(index, 9) * 65}ms` }}
                 onClick={() => setSelectedItem({ id: cred.id, type: 'credential', href: `/credential/${cred.id}` })}
             >
-                <Card className="group transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md">
+                <Card className="vault-list-card">
                     <CardHeader>
-                        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                        <div className="flex items-center justify-between gap-2 text-xs text-text-subtle">
                             <CardTitle className="line-clamp-1 text-base">{cred.service_name}</CardTitle>
                             <span
                                 className={cn(
@@ -176,7 +175,7 @@ function CredentialVaultContent({ initialCredentials, initialError = '' }: Crede
         if (type === 'SERVER') return 'bg-indigo-500/15 text-indigo-600 border-indigo-500/30'
         if (type === 'DATABASE') return 'bg-teal-500/15 text-teal-600 border-teal-500/30'
         if (type === 'WIFI') return 'bg-cyan-500/15 text-cyan-600 border-cyan-500/30'
-        return 'bg-muted text-muted-foreground border-border'
+        return 'bg-muted text-text-subtle border-border'
     }
 
     const handleDelete = async () => {
@@ -266,7 +265,7 @@ function CredentialVaultContent({ initialCredentials, initialError = '' }: Crede
     }
 
     return (
-        <section className="mx-auto w-full max-w-5xl space-y-4">
+        <section className="vault-listing-shell">
             {visibleCredentials.length === 0 ? (
                 <Card>
                     <CardHeader>
@@ -286,17 +285,17 @@ function CredentialVaultContent({ initialCredentials, initialError = '' }: Crede
                     ) : null}
                 </Card>
             ) : groupBy === 'none' ? (
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="vault-list-grid">
                     {visibleCredentials.map((cred, index) => renderCredentialCard(cred, index))}
                 </div>
             ) : (
                 <div className="space-y-5">
                     {groupedCredentials.map((group, groupIndex) => (
                         <section key={group.label} className="space-y-2">
-                            <h3 className="px-1 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+                            <h3 className="px-1 text-xs font-semibold tracking-[0.08em] text-text-subtle uppercase">
                                 {group.label}
                             </h3>
-                            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                            <div className="vault-list-grid">
                                 {group.items.map((cred, index) => renderCredentialCard(cred, groupIndex * 20 + index))}
                             </div>
                         </section>

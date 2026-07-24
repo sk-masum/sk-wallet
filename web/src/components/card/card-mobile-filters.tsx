@@ -179,7 +179,7 @@ export function CardMobileFilters() {
 
                             <ListingFilterDesktopSection label="Credit limit">
                                 <div className="space-y-2">
-                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                    <div className="flex items-center justify-between text-xs text-text-subtle">
                                         <span>Min: {creditLimitRange[0]}</span>
                                         <span>Max: {creditLimitRange[1]}</span>
                                     </div>
@@ -369,7 +369,7 @@ export function CardMobileFilters() {
 
                 <ListingFilterMobileSection label="Credit limit" icon={<CreditCard className="h-3.5 w-3.5" />}>
                     <div className="space-y-2">
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <div className="flex items-center justify-between text-xs text-text-subtle">
                             <span>Min: {creditLimitRange[0]}</span>
                             <span>Max: {creditLimitRange[1]}</span>
                         </div>
