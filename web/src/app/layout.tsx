@@ -130,7 +130,7 @@ export const metadata: Metadata = {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-title': 'Wallet',
-    'apple-mobile-web-app-status-bar-style': 'default',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
   },
   formatDetection: {
     telephone: false,
@@ -156,7 +156,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: 'Wallet',
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
   },
 };
 
@@ -166,8 +166,8 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
   colorScheme: 'light dark',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#030816' },
+    { media: '(prefers-color-scheme: light)', color: '#e5eafe' },
+    { media: '(prefers-color-scheme: dark)', color: '#0d1333' },
   ],
 };
 

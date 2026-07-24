@@ -51,8 +51,8 @@
       "url": "/credential/new"
     }
   ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
+  "theme_color": "#e5eafe",
+  "background_color": "#e5eafe",
   "display": "standalone",
   "prefer_related_applications": false
 }
