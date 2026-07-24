@@ -56,7 +56,7 @@ export default function AuthPage() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_8%_12%,hsl(var(--primary)/0.2),transparent_34%),radial-gradient(circle_at_92%_16%,hsl(var(--ring)/0.16),transparent_28%),radial-gradient(circle_at_50%_100%,hsl(var(--accent)/0.12),transparent_42%),linear-gradient(160deg,hsl(var(--background)),hsl(var(--muted)/0.45))] px-4 py-10 sm:px-6 lg:px-10">
+    <main className="relative min-h-screen overflow-hidden px-4 py-10 sm:px-6 lg:px-10">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-size-[28px_28px]" />
 
       <div className="relative mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-md items-center">
@@ -118,7 +118,7 @@ export default function AuthPage() {
                 </p>
               ) : null}
 
-              <Button type="submit" disabled={loading || !email || !password} className="h-11 w-full gap-2">
+              <Button type="submit" variant="primary" size="action" disabled={loading || !email || !password} className="w-full">
                 {loading ? 'Signing in...' : 'Sign in'}
                 {!loading ? <ArrowRight className="h-4 w-4" /> : null}
               </Button>

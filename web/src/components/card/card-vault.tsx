@@ -53,7 +53,7 @@ export function CardVault({ initialCards, initialError }: CardVaultProps) {
         return (
             <>
                 <CardLoadErrorToast message={initialError} />
-                <Card className="border-destructive/30 bg-card/90 shadow-lg">
+                <Card className="border-destructive/30">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-destructive">
                             <AlertTriangle className="h-4 w-4" />
@@ -68,7 +68,7 @@ export function CardVault({ initialCards, initialError }: CardVaultProps) {
 
     if (!initialCards.length) {
         return (
-            <Card className="border-border/70 bg-card/90 shadow-lg">
+            <Card className="border-border/70">
                 <CardHeader className="pb-2 text-center">
                     <CardTitle className="justify-center">No cards found</CardTitle>
                     <CardDescription>
@@ -95,7 +95,7 @@ export function CardVault({ initialCards, initialError }: CardVaultProps) {
 
     if (meta.hasFilters && !visibleCards.length) {
         return (
-            <Card className="border-border/70 bg-card/90 shadow-lg">
+            <Card className="border-border/70">
                 <CardHeader className="pb-2 text-center">
                     <CardTitle className="justify-center">No matching cards</CardTitle>
                     <CardDescription>
@@ -112,7 +112,7 @@ export function CardVault({ initialCards, initialError }: CardVaultProps) {
                             </div>
                         </div>
 
-                        <Button variant="outline" size="sm" className="rounded-full px-4" onClick={resetFilters}>
+                        <Button variant="outline" size="chipWide" onClick={resetFilters}>
                             Clear filters
                         </Button>
                     </div>
@@ -125,18 +125,18 @@ export function CardVault({ initialCards, initialError }: CardVaultProps) {
         <div className="space-y-4">
             {meta.hasActiveControls ? (
                 <div className="hidden flex-wrap items-center gap-2 sm:flex">
-                    {meta.hasTextQuery ? <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">Query: {query}</span> : null}
-                    {meta.hasTypeFilter ? <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80 capitalize">Type: {selectedType}</span> : null}
-                    {meta.hasNetworkFilter ? <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">Network: {selectedNetwork}</span> : null}
-                    {meta.hasProviderFilter ? <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">Provider: {selectedProvider}</span> : null}
-                    {meta.hasTagFilter ? <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">Tag: {selectedTag}</span> : null}
-                    {meta.hasExpiryFilter ? <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">Expiry: Next {EXPIRING_SOON_WINDOW_DAYS} days</span> : null}
-                    {meta.creditLimitFilterActive ? <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">Credit limit: {meta.selectedCreditLimitMin} - {meta.selectedCreditLimitMax}</span> : null}
-                    {meta.hasBillingDateFilter ? <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">Billing date: Day {selectedBillingDate}</span> : null}
-                    {meta.hasPaymentDateFilter ? <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">Payment date: Day {selectedPaymentDate}</span> : null}
-                    {meta.hasSortSelection ? <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">Sort: {CARD_SORT_LABELS[selectedSort]}</span> : null}
-                    {meta.hasGrouping ? <span className="inline-flex rounded-full border border-border/60 bg-linear-to-r from-muted/45 to-card/75 px-2.5 py-1 text-xs font-medium text-foreground/80">Group: {selectedGroup === 'provider' ? 'Provider' : selectedGroup === 'network' ? 'Network' : 'Tags'}</span> : null}
-                    <Button variant="ghost" size="sm" className="h-8 rounded-full border border-border/60 bg-background/80 px-3 text-xs" onClick={resetFilters}>
+                    {meta.hasTextQuery ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Query: {query}</span> : null}
+                    {meta.hasTypeFilter ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 capitalize dark:border-white/14">Type: {selectedType}</span> : null}
+                    {meta.hasNetworkFilter ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Network: {selectedNetwork}</span> : null}
+                    {meta.hasProviderFilter ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Provider: {selectedProvider}</span> : null}
+                    {meta.hasTagFilter ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Tag: {selectedTag}</span> : null}
+                    {meta.hasExpiryFilter ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Expiry: Next {EXPIRING_SOON_WINDOW_DAYS} days</span> : null}
+                    {meta.creditLimitFilterActive ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Credit limit: {meta.selectedCreditLimitMin} - {meta.selectedCreditLimitMax}</span> : null}
+                    {meta.hasBillingDateFilter ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Billing date: Day {selectedBillingDate}</span> : null}
+                    {meta.hasPaymentDateFilter ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Payment date: Day {selectedPaymentDate}</span> : null}
+                    {meta.hasSortSelection ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Sort: {CARD_SORT_LABELS[selectedSort]}</span> : null}
+                    {meta.hasGrouping ? <span className="inline-flex rounded-full border border-white/35 bg-(--glass-surface) px-2.5 py-1 text-xs font-medium text-foreground/85 dark:border-white/14">Group: {selectedGroup === 'provider' ? 'Provider' : selectedGroup === 'network' ? 'Network' : 'Tags'}</span> : null}
+                    <Button variant="outline" size="chip" onClick={resetFilters}>
                         Reset filters
                     </Button>
                 </div>

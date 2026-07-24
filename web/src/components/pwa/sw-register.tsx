@@ -116,6 +116,22 @@ export function ServiceWorkerRegister() {
       return
     }
 
+    if (process.env.NODE_ENV !== 'production') {
+      void navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+        .catch(() => undefined)
+
+      if ('caches' in window) {
+        void caches
+          .keys()
+          .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+          .catch(() => undefined)
+      }
+
+      return
+    }
+
     let hasReloadedForUpdate = false
 
     const activateWaitingWorker = (registration: ServiceWorkerRegistration) => {

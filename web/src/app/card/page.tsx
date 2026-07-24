@@ -26,7 +26,6 @@ export default async function CardPage() {
                 showBackButton
                 backHref="/"
                 backButtonLabel="Back to dashboard"
-                description={`${allCards.length} ${allCards.length === 1 ? 'card' : 'cards'}`}
                 addLabel="Add card"
                 mobileStickyHeader
                 mobileFilters={<CardMobileFilters />}

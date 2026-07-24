@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation'
 
 import { CardForm } from '@/components/card/card-form'
+import { CardStatusForm } from '@/components/card/card-status-form'
 import { withCardFormPage } from '@/components/card/with-card-form-page'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { CARD_STATUS_OPTIONS, isCardStatus } from '@/constants/card/status'
+import { isCardStatus } from '@/constants/card/status'
 import { serverApiGet, serverApiPatch, serverApiPut } from '@/lib/api/server'
 import { parseCardFormDataWithId } from '@/utils/card/form-data'
 import { validateCardForm } from '@/utils/card/validation'
@@ -177,29 +177,7 @@ export default withCardFormPage<EditCardPageProps>(async function EditCardPage({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={updateCardStatus} className="flex flex-col gap-3 sm:flex-row sm:items-end">
-              <input type="hidden" name="id" value={String(card.id)} />
-              <div className="flex-1 space-y-1.5">
-                <label htmlFor="status" className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
-                  Status
-                </label>
-                <select
-                  id="status"
-                  name="status"
-                  defaultValue={status}
-                  className="h-11 w-full rounded-xl border border-border/65 bg-background/90 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                >
-                  {CARD_STATUS_OPTIONS.map((statusOption) => (
-                    <option key={statusOption.value} value={statusOption.value}>
-                      {statusOption.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <Button type="submit" className="h-11 rounded-xl px-5">
-                Update status
-              </Button>
-            </form>
+            <CardStatusForm cardId={String(card.id)} initialStatus={status} action={updateCardStatus} />
           </CardContent>
         </Card>
 

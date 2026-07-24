@@ -9,12 +9,12 @@ export function CredentialFormLoading() {
             backHref="/credential"
             backButtonLabel="Back to credentials"
             fields={[
-                { className: 'h-10 rounded-xl' },
-                { className: 'h-10 rounded-xl' },
-                { className: 'h-10 rounded-xl' },
-                { className: 'h-10 rounded-xl' },
-                { className: 'h-10 rounded-xl sm:col-span-2' },
-                { className: 'h-24 rounded-xl sm:col-span-2' },
+                { controlClassName: 'h-11 rounded-2xl' },
+                { controlClassName: 'h-11 rounded-2xl' },
+                { controlClassName: 'h-11 rounded-2xl' },
+                { controlClassName: 'h-11 rounded-2xl' },
+                { wrapperClassName: 'sm:col-span-2', controlClassName: 'h-11 rounded-2xl' },
+                { wrapperClassName: 'sm:col-span-2', controlClassName: 'h-26 rounded-2xl' },
             ]}
         />
     )

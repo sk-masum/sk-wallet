@@ -42,7 +42,7 @@ export function ListingFilterDesktopSection({
     return (
         <div
             className={cn(
-                'space-y-1.5 rounded-2xl border border-border/40 bg-card/75 p-4 shadow-[0_10px_22px_-18px_rgba(0,0,0,0.45)] dark:border-border/60 dark:bg-card/65',
+                'space-y-1.5 rounded-2xl border border-white/35 bg-(--glass-surface) p-4 shadow-(--neu-shadow-raised-sm) dark:border-white/14',
                 className,
             )}
         >
@@ -76,7 +76,7 @@ export function ListingFilterDesktopActions({
             {resetHref && hasActiveControls ? (
                 <Link
                     href={resetHref}
-                    className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-10 rounded-xl bg-muted/55 px-4')}
+                    className={buttonVariants({ variant: 'toolbar', size: 'md' })}
                     onClick={onCollapse}
                 >
                     Reset all
@@ -85,9 +85,8 @@ export function ListingFilterDesktopActions({
             {!resetHref ? (
                 <Button
                     type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-10 rounded-xl bg-muted/55 px-4"
+                    variant="toolbar"
+                    size="md"
                     disabled={!hasActiveControls}
                     onClick={() => {
                         if (!hasActiveControls) return
@@ -99,11 +98,11 @@ export function ListingFilterDesktopActions({
                 </Button>
             ) : null}
             {resetHref && !hasActiveControls ? (
-                <Button type="button" variant="ghost" size="sm" className="h-10 rounded-xl bg-muted/55 px-4" disabled>
+                <Button type="button" variant="toolbar" size="md" disabled>
                     Reset all
                 </Button>
             ) : null}
-            <Button type="button" className="h-10 rounded-xl px-5" onClick={onCollapse}>
+            <Button type="button" variant="primary" size="mdWide" onClick={onCollapse}>
                 {collapseLabel}
             </Button>
         </div>
@@ -130,11 +129,11 @@ export function ListingFilterMobileSheet({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DetailDialogContent
-                className={cn('sm:hidden max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:h-[88dvh] max-sm:w-screen max-sm:max-w-screen max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-0 bg-background', className)}
+                className={cn('sm:hidden max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:h-[88dvh] max-sm:w-screen max-sm:max-w-screen max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-0 border-white/20 bg-[linear-gradient(to_bottom,hsl(var(--background)/0.9),hsl(var(--background)/0.8)),var(--glass-surface)] backdrop-blur-xl dark:border-white/10', className)}
                 scrollClassName="h-[88dvh] max-h-[88dvh] px-0 pb-0"
             >
-                <div className="flex h-full flex-col bg-background pb-4 dark:bg-background">
-                    <div className="sticky top-0 z-20 border-b border-border/45 bg-background px-3 pb-3 -pt-3 shadow-[0_14px_24px_-20px_rgba(0,0,0,0.5)] dark:border-border/60 dark:bg-background">
+                <div className="flex h-full flex-col bg-transparent pb-4">
+                    <div className="sticky top-0 z-20 border-b border-white/20 px-3 pb-3 -pt-3 dark:border-white/10">
                         <DialogHeader>
                             <DialogTitle className="text-left text-2xl">{title}</DialogTitle>
                         </DialogHeader>
@@ -158,7 +157,7 @@ export function ListingFilterMobileSection({ label, icon, children, className }:
     return (
         <div
             className={cn(
-                'space-y-2 rounded-2xl border border-border/45 bg-card/76 p-3.5 shadow-[0_16px_28px_-20px_rgba(0,0,0,0.5)] dark:border-border/60 dark:bg-card/66',
+                'space-y-2 rounded-2xl border border-white/35 bg-(--glass-surface) p-3.5 shadow-(--neu-shadow-raised-sm) dark:border-white/14',
                 className,
             )}
         >
@@ -187,11 +186,11 @@ export function ListingFilterMobileActions({
     onDone,
 }: ListingFilterMobileActionsProps) {
     return (
-        <div className="fixed inset-x-0 bottom-0 z-50 flex items-center gap-2 border-t border-border/45 bg-background p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] dark:border-border/60 dark:bg-background sm:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-50 flex items-center gap-2 border-t border-white/20 bg-[linear-gradient(to_top,hsl(var(--background)/0.92),hsl(var(--background)/0.82)),var(--glass-surface)] p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-xl dark:border-white/10 sm:hidden">
             {resetHref && hasActiveControls ? (
                 <Link
                     href={resetHref}
-                    className={cn(buttonVariants({ variant: 'ghost' }), 'h-10 flex-1 justify-center rounded-xl border border-border/60 bg-background/80 hover:bg-background')}
+                    className={buttonVariants({ variant: 'toolbar', size: 'md' })}
                     onClick={onDone}
                 >
                     Reset all
@@ -200,8 +199,9 @@ export function ListingFilterMobileActions({
             {!resetHref ? (
                 <Button
                     type="button"
-                    variant="ghost"
-                    className="h-10 flex-1 justify-center rounded-xl border border-border/60 bg-background/80 hover:bg-background"
+                    variant="toolbar"
+                    size="md"
+                    className="flex-1 justify-center"
                     disabled={!hasActiveControls}
                     onClick={() => {
                         if (!hasActiveControls) return
@@ -215,14 +215,15 @@ export function ListingFilterMobileActions({
             {resetHref && !hasActiveControls ? (
                 <Button
                     type="button"
-                    variant="ghost"
-                    className="h-10 flex-1 justify-center rounded-xl border border-border/60 bg-background/80 hover:bg-background"
+                    variant="toolbar"
+                    size="md"
+                    className="flex-1 justify-center"
                     disabled
                 >
                     Reset all
                 </Button>
             ) : null}
-            <Button type="button" className="h-10 flex-1 rounded-xl shadow-[0_10px_20px_-14px_hsl(var(--primary))]" onClick={onDone}>
+            <Button type="button" variant="primaryCta" size="md" className="flex-1" onClick={onDone}>
                 {doneLabel}
             </Button>
         </div>

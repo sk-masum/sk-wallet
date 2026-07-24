@@ -47,19 +47,19 @@ export function ExpiringCardsList({ cards }: ExpiringCardsListProps) {
             <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-white/7 via-transparent to-transparent" />
             <CardHeader className="flex-row items-end justify-between gap-3 space-y-0">
                 <div className="space-y-1.5">
-                    <p className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background/75 px-2 py-0.5 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+                    <p className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background/75 px-2 py-0.5 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase dark:text-foreground/82">
                         <ShieldAlert className="h-3 w-3" />
                         Expiry Watch
                     </p>
                     <CardTitle>Expiring Cards</CardTitle>
                 </div>
-                <Link href="/card" className="inline-flex items-center rounded-full border border-border/70 px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground">
+                <Link href="/card" className="inline-flex items-center rounded-full border border-border/70 px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground dark:text-foreground/86">
                     <ArrowUpRight className="mr-1 h-3.5 w-3.5" /> All Cards
                 </Link>
             </CardHeader>
             <CardContent className="relative">
                 {cards.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No cards are expiring in the next 45 days.</p>
+                    <p className="text-sm text-muted-foreground dark:text-foreground/78">No cards are expiring in the next 45 days.</p>
                 ) : (
                     <div className="space-y-2.5">
                         {cards.map((card) => {
@@ -74,7 +74,7 @@ export function ExpiringCardsList({ cards }: ExpiringCardsListProps) {
                                 >
                                     <div className="min-w-0">
                                         <p className="text-sm font-semibold text-foreground">{card.name}</p>
-                                        <p className="text-xs text-muted-foreground">Expires on {formatDate(card.expiryDate)}</p>
+                                        <p className="text-xs text-muted-foreground dark:text-foreground/78">Expires on {formatDate(card.expiryDate)}</p>
                                     </div>
                                     <div className="flex shrink-0 items-center gap-2">
                                         <span className={cn('inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-semibold tracking-wide', daysLeftClass)}>

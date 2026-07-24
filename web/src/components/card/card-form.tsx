@@ -171,6 +171,7 @@ export function CardForm({
   const [selectedCardType, setSelectedCardType] = useState<'credit' | 'debit'>(
     values.cardType === 'debit' ? 'debit' : 'credit'
   )
+  const [selectedExpiryMonth, setSelectedExpiryMonth] = useState(values.expiryMonth)
   const [selectedNetwork, setSelectedNetwork] = useState(values.network)
   const [numberValue, setNumberValue] = useState(values.number)
   const [tagsValue, setTagsValue] = useState(values.tags)
@@ -710,24 +711,31 @@ export function CardForm({
       </FormField>
 
       <FormField id="expiry_month" label="EXPIRY MONTH" error={fieldErrors.expiry_month} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
-        <select
-          id="expiry_month"
-          name="expiry_month"
-          defaultValue={values.expiryMonth}
-          onChange={() => validateFields(['expiry_month', 'expiry_year'])}
-          required
-          aria-invalid={Boolean(fieldErrors.expiry_month)}
-          className={cn(entityFormSelectClass, fieldErrors.expiry_month && 'border-destructive focus-visible:ring-destructive')}
-        >
-          <option value="" disabled>
-            Select month
-          </option>
-          {MONTH_OPTIONS.map((month) => (
-            <option key={month.value} value={month.value}>
-              {month.label}
-            </option>
-          ))}
-        </select>
+        <>
+          <input type="hidden" id="expiry_month" name="expiry_month" value={selectedExpiryMonth} />
+          <Select
+            value={selectedExpiryMonth}
+            onValueChange={(value) => {
+              setSelectedExpiryMonth(value)
+              validateFields(['expiry_month', 'expiry_year'])
+            }}
+            required
+          >
+            <SelectTrigger
+              aria-invalid={Boolean(fieldErrors.expiry_month)}
+              className={cn(entityFormSelectClass, fieldErrors.expiry_month && 'border-destructive focus-visible:ring-destructive')}
+            >
+              <SelectValue placeholder="Select month" />
+            </SelectTrigger>
+            <SelectContent>
+              {MONTH_OPTIONS.map((month) => (
+                <SelectItem key={month.value} value={month.value}>
+                  {month.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </>
       </FormField>
 
       <FormField id="expiry_year" label="EXPIRY YEAR" error={fieldErrors.expiry_year} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
@@ -802,27 +810,31 @@ export function CardForm({
         labelClassName={entityFormLabelClass}
         hint="Selecting network improves card number and CVV validation accuracy."
       >
-        <select
-          id="network"
-          name="network"
-          defaultValue={values.network}
-          onChange={(event) => {
-            setSelectedNetwork(event.target.value)
-            validateFields(['network', 'number', 'cvv'])
-          }}
-          required
-          aria-invalid={Boolean(fieldErrors.network)}
-          className={cn(entityFormSelectClass, fieldErrors.network && 'border-destructive focus-visible:ring-destructive')}
-        >
-          <option value="" disabled>
-            Select network
-          </option>
-          {CARD_NETWORK_FORM_OPTIONS.map((networkOption) => (
-            <option key={networkOption.value} value={networkOption.value}>
-              {networkOption.label}
-            </option>
-          ))}
-        </select>
+        <>
+          <input type="hidden" id="network" name="network" value={selectedNetwork} />
+          <Select
+            value={selectedNetwork}
+            onValueChange={(value) => {
+              setSelectedNetwork(value)
+              validateFields(['network', 'number', 'cvv'])
+            }}
+            required
+          >
+            <SelectTrigger
+              aria-invalid={Boolean(fieldErrors.network)}
+              className={cn(entityFormSelectClass, fieldErrors.network && 'border-destructive focus-visible:ring-destructive')}
+            >
+              <SelectValue placeholder="Select network" />
+            </SelectTrigger>
+            <SelectContent>
+              {CARD_NETWORK_FORM_OPTIONS.map((networkOption) => (
+                <SelectItem key={networkOption.value} value={networkOption.value}>
+                  {networkOption.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </>
       </FormField>
 
       <FormField

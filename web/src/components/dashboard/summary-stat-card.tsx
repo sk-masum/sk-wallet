@@ -26,7 +26,7 @@ export function SummaryStatCard({ label, value, icon, toneClassName }: SummarySt
     return (
         <div
             className={cn(
-                'group relative overflow-hidden rounded-2xl border border-border/70 bg-[radial-gradient(circle_at_14%_10%,hsl(var(--primary)/0.14),transparent_44%),radial-gradient(circle_at_88%_88%,hsl(var(--accent)/0.1),transparent_44%),hsl(var(--background))] px-4 py-4 shadow-[0_14px_34px_-28px_rgba(0,0,0,0.7)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-28px_rgba(0,0,0,0.6)] sm:px-5 sm:py-5',
+                'group relative overflow-hidden rounded-3xl border border-white/45 bg-[radial-gradient(circle_at_14%_10%,hsl(var(--primary)/0.12),transparent_44%),radial-gradient(circle_at_88%_88%,hsl(var(--ring)/0.1),transparent_44%),var(--glass-surface)] px-4 py-4 text-foreground shadow-(--neu-shadow-raised-sm) backdrop-blur-sm transition-transform duration-200 hover:-translate-y-0.5 hover:bg-[radial-gradient(circle_at_14%_10%,hsl(var(--primary)/0.15),transparent_44%),radial-gradient(circle_at_88%_88%,hsl(var(--ring)/0.12),transparent_44%),var(--glass-surface-strong)] dark:border-white/16 sm:px-5 sm:py-5',
                 toneClassName
             )}
         >
@@ -35,9 +35,9 @@ export function SummaryStatCard({ label, value, icon, toneClassName }: SummarySt
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/45 to-transparent" />
             <div className="relative space-y-3">
                 <div className="flex items-start justify-between gap-1 sm:gap-2">
-                    <p className="max-w-[50%] sm:max-w-[70%] text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/90">{label}</p>
+                    <p className="max-w-[50%] sm:max-w-[70%] text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground dark:text-foreground/82">{label}</p>
                     {Icon ? (
-                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/30 bg-white/15 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]">
+                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/35 bg-background text-foreground shadow-(--neu-shadow-raised-sm) dark:border-white/14 dark:bg-background/90">
                             <Icon className="h-4 w-4" />
                         </span>
                     ) : null}

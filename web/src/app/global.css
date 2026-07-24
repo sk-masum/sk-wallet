@@ -4,48 +4,62 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
-  --primary: 240 5.9% 10%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 240 5.9% 10%;
+  --background: 228 58% 96%;
+  --foreground: 229 34% 18%;
+  --card: 228 56% 96%;
+  --card-foreground: 229 34% 18%;
+  --popover: 228 56% 96%;
+  --popover-foreground: 229 34% 18%;
+  --primary: 229 70% 63%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 229 70% 63%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 228 37% 89%;
+  --muted-foreground: 229 18% 40%;
+  --accent: 229 70% 63%;
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 240 5.9% 10%;
-  --radius: 0.5rem;
+  --border: 228 34% 78%;
+  --input: 228 38% 89%;
+  --ring: 229 70% 63%;
+  --neu-shadow-raised: inset 0 1px 0 rgba(255,255,255,0.62), inset 0 -1px 2px rgba(48,64,138,0.2), 0 16px 34px rgba(45,59,136,0.24);
+  --neu-shadow-raised-sm: inset 0 1px 0 rgba(255,255,255,0.58), inset 0 -1px 2px rgba(48,64,138,0.16), 0 8px 18px rgba(45,59,136,0.22);
+  --neu-shadow-inset: inset 0 2px 6px rgba(44,61,145,0.24), inset 0 -1px 1px rgba(255,255,255,0.34);
+  --neu-shadow-inset-sm: inset 0 1px 3px rgba(44,61,145,0.22), inset 0 -1px 1px rgba(255,255,255,0.28);
+  --glass-surface: hsl(229 82% 98% / 0.34);
+  --glass-surface-strong: hsl(229 82% 98% / 0.48);
+  --neu-glow: 0 22px 44px -26px rgba(54,72,170,0.64);
+  --radius: 1rem;
 }
 
 .dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 240 5.9% 10%;
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
+  --background: 229 38% 10%;
+  --foreground: 228 32% 92%;
+  --card: 229 30% 16%;
+  --card-foreground: 228 32% 92%;
+  --popover: 229 30% 16%;
+  --popover-foreground: 228 32% 92%;
+  --primary: 229 78% 66%;
+  --primary-foreground: 228 44% 12%;
+  --secondary: 229 78% 66%;
+  --secondary-foreground: 228 44% 12%;
+  --muted: 229 22% 23%;
+  --muted-foreground: 228 20% 76%;
+  --accent: 229 78% 66%;
+  --accent-foreground: 228 44% 12%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --ring: 240 4.9% 83.9%;
+  --border: 229 22% 32%;
+  --input: 229 22% 21%;
+  --ring: 229 78% 66%;
+  --neu-shadow-raised: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 2px rgba(0,0,0,0.42), 0 18px 36px rgba(0,0,0,0.52);
+  --neu-shadow-raised-sm: inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 2px rgba(0,0,0,0.38), 0 10px 20px rgba(0,0,0,0.48);
+  --neu-shadow-inset: inset 0 2px 6px rgba(0,0,0,0.45), inset 0 -1px 1px rgba(255,255,255,0.08);
+  --neu-shadow-inset-sm: inset 0 1px 3px rgba(0,0,0,0.42), inset 0 -1px 1px rgba(255,255,255,0.06);
+  --glass-surface: hsl(229 30% 25% / 0.44);
+  --glass-surface-strong: hsl(229 34% 31% / 0.56);
+  --neu-glow: 0 22px 42px -24px rgba(83,108,238,0.76);
 }
 
 @theme inline {
@@ -85,6 +99,10 @@ body {
   color: hsl(var(--foreground));
 }
 
+.dark body {
+  background-color: hsl(var(--background));
+}
+
 .ios-pwa-body {
   padding-top: env(safe-area-inset-top);
   padding-right: env(safe-area-inset-right);
@@ -99,13 +117,13 @@ body {
   left: 0;
   right: 0;
   height: env(safe-area-inset-top);
-  background: #ffffff;
+  background: #e5eafe;
   pointer-events: none;
   z-index: 80;
 }
 
 .dark .ios-pwa-statusbar-bg {
-  background: #030816;
+  background: #0d1333;
 }
 
 /* Prevent iOS Safari/PWA auto-zoom when focusing small form fields. */

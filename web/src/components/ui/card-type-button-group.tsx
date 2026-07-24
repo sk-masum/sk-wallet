@@ -59,7 +59,7 @@ export function CardTypeButtonGroup({
   return (
     <div
       className={cn(
-        'relative isolate grid h-10 w-full max-w-sm grid-cols-3 rounded-xl border border-border/65 bg-muted/30 p-1 shadow-inner shadow-black/5',
+        'relative isolate grid h-10 w-full max-w-sm grid-cols-3 rounded-xl border border-white/40 bg-(--glass-surface) p-1 shadow-(--neu-shadow-inset) backdrop-blur-md dark:border-white/12',
         className
       )}
       aria-busy={isPending}
@@ -80,8 +80,8 @@ export function CardTypeButtonGroup({
               'inline-flex items-center justify-center gap-1.5 px-2',
               'focus-visible:z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45',
               isActive
-                ? 'bg-linear-to-b from-background to-background/95 text-foreground shadow-[0_7px_14px_-10px_rgba(0,0,0,0.55)] ring-1 ring-border/70'
-                : 'text-muted-foreground hover:bg-background/65 hover:text-foreground'
+                ? 'border border-white/40 bg-(--glass-surface-strong) text-foreground shadow-(--neu-shadow-inset-sm) ring-1 ring-white/30 dark:border-white/12 dark:ring-white/8'
+                : 'text-muted-foreground hover:border hover:border-white/35 hover:bg-(--glass-surface-strong) hover:text-foreground hover:shadow-(--neu-shadow-raised-sm) dark:hover:border-white/12'
             )}
             aria-pressed={isActive}
           >

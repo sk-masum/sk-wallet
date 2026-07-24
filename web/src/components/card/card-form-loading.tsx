@@ -9,15 +9,15 @@ export function CardFormLoading() {
       backHref="/card"
       backButtonLabel="Back to cards"
       fields={[
-        { className: 'h-20 rounded-2xl sm:col-span-2' },
-        { className: 'h-10 rounded-xl' },
-        { className: 'h-10 rounded-xl' },
-        { className: 'h-20 rounded-2xl sm:col-span-2' },
-        { className: 'h-10 rounded-xl' },
-        { className: 'h-10 rounded-xl' },
-        { className: 'h-10 rounded-xl' },
-        { className: 'h-10 rounded-xl' },
-        { className: 'h-10 rounded-xl' },
+        { wrapperClassName: 'sm:col-span-2', controlClassName: 'h-20 rounded-2xl' },
+        { controlClassName: 'h-11 rounded-2xl' },
+        { controlClassName: 'h-11 rounded-2xl' },
+        { wrapperClassName: 'sm:col-span-2', controlClassName: 'h-20 rounded-2xl' },
+        { controlClassName: 'h-11 rounded-2xl' },
+        { controlClassName: 'h-11 rounded-2xl' },
+        { controlClassName: 'h-11 rounded-2xl' },
+        { controlClassName: 'h-11 rounded-2xl' },
+        { controlClassName: 'h-11 rounded-2xl' },
       ]}
     />
   )

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
+import { responsiveIconSizes } from '../ui/icon-sizes'
 
 import { cn } from '@/lib/utils'
 
@@ -28,24 +29,24 @@ export function SharedCarouselSection<T>({
     trackClassName,
 }: SharedCarouselSectionProps<T>) {
     return (
-        <section className={cn('relative overflow-hidden rounded-2xl py-4 sm:py-5', className)}>
+        <section className={cn('relative overflow-hidden sm:px-4 sm:py-5', className)}>
             <div className="pointer-events-none absolute inset-0 " />
             <div className="relative mb-4 flex items-end justify-between gap-3">
                 <div>
                     <h3 className="text-lg font-semibold text-foreground sm:text-2xl">{title}</h3>
                 </div>
-                <Link href={actionHref} className="inline-flex items-center rounded-full border border-border/70 px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground">
-                    <ArrowUpRight className="mr-1 h-4 w-4" /> {actionLabel}
+                <Link href={actionHref} className="inline-flex items-center rounded-full border border-white/45 bg-(--glass-surface) px-3 py-1 text-xs font-semibold text-muted-foreground shadow-(--neu-shadow-raised-sm) backdrop-blur-sm transition-colors hover:bg-(--glass-surface-strong) hover:text-foreground dark:border-white/16 dark:text-foreground/86">
+                    <ArrowUpRight className={responsiveIconSizes.action} /> {actionLabel}
                 </Link>
             </div>
 
             <div className="relative">
                 {items.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">{emptyMessage}</p>
+                    <p className="text-sm text-muted-foreground dark:text-foreground/78">{emptyMessage}</p>
                 ) : (
                     <div
                         className={cn(
-                            '-mx-1 flex snap-x snap-mandatory gap-1 sm:gap-3 overflow-x-auto px-1 pb-2 scrollbar-none [&::-webkit-scrollbar]:hidden',
+                            '-mx-1 flex snap-x snap-mandatory gap-1 sm:gap-3 overflow-x-auto px-1 pb-4 scrollbar-none [&::-webkit-scrollbar]:hidden',
                             trackClassName
                         )}
                     >

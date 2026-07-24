@@ -24,8 +24,6 @@ export default async function NewDocumentPage() {
       >
         <DocumentCreateForm />
       </EntityFormPageLayout>
-
-      <BottomTabBar />
     </>
   )
 }

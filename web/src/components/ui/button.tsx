@@ -4,26 +4,48 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground shadow hover:opacity-90',
+        default:
+          'border border-white/45 bg-(--glass-surface) text-foreground shadow-(--neu-shadow-raised-sm) backdrop-blur-md hover:bg-(--glass-surface-strong) active:translate-y-[1px] active:shadow-(--neu-shadow-inset) dark:border-white/14',
         primary:
-          'border border-white/15 bg-linear-to-r from-zinc-950 via-zinc-900 to-zinc-800 text-white shadow-[0_14px_26px_-18px_rgba(0,0,0,0.75)] hover:-translate-y-0.5 hover:from-black hover:via-zinc-900 hover:to-zinc-700 hover:shadow-[0_16px_28px_-16px_rgba(0,0,0,0.85)] active:translate-y-0 dark:border-white/35 dark:bg-linear-to-r dark:from-zinc-100 dark:via-zinc-50 dark:to-white dark:text-zinc-900 dark:shadow-[0_14px_26px_-18px_rgba(0,0,0,0.35)] dark:hover:from-white dark:hover:via-zinc-100 dark:hover:to-zinc-200 dark:hover:shadow-[0_16px_28px_-16px_rgba(0,0,0,0.45)]',
+          'border border-white/20 bg-linear-to-r from-primary/95 via-primary/88 to-primary/78 text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_14px_26px_-16px_hsl(var(--primary)/0.74)] hover:brightness-110 active:translate-y-[1px] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.28)]',
+        primaryCta:
+          'border border-white/20 bg-linear-to-r from-primary/95 via-primary/88 to-primary/78 text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_10px_20px_-14px_hsl(var(--primary))] hover:brightness-110 active:translate-y-[1px] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.28)]',
         destructive:
-          'bg-destructive text-destructive-foreground shadow-sm hover:opacity-90',
+          'border border-red-900/35 bg-linear-to-b from-red-500 to-red-700 text-destructive-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_10px_20px_-14px_rgba(127,29,29,0.6)] hover:brightness-105 active:translate-y-[1px]',
         outline:
-          'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',
-        secondary: 'bg-secondary text-secondary-foreground shadow-sm hover:opacity-90',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
+          'border border-white/45 bg-(--glass-surface) text-foreground shadow-(--neu-shadow-inset-sm) backdrop-blur-md hover:bg-(--glass-surface-strong) dark:border-white/14',
+        toolbar:
+          'border border-white/35 bg-(--glass-surface) text-foreground shadow-(--neu-shadow-raised-sm) backdrop-blur-md hover:bg-(--glass-surface-strong) dark:border-white/12',
+        headerIcon:
+          'border border-white/45 bg-(--glass-surface) text-foreground shadow-(--neu-shadow-raised-sm) backdrop-blur-md hover:bg-(--glass-surface-strong) dark:border-white/18 dark:text-foreground',
+        action:
+          'items-center border border-border/70 bg-background/85 text-foreground shadow-sm hover:-translate-y-0.5 hover:bg-background hover:shadow-md active:scale-[0.98]',
+        neutral:
+          'border border-border/70 bg-background/90 text-foreground shadow-sm hover:bg-background',
+        secondary:
+          'border border-white/35 bg-linear-to-b from-primary/74 to-primary/62 text-primary-foreground shadow-(--neu-shadow-raised-sm) hover:brightness-110 dark:border-white/12',
+        ghost:
+          'border border-transparent bg-transparent shadow-none hover:border-white/35 hover:bg-(--glass-surface) hover:shadow-(--neu-shadow-inset-sm) dark:hover:border-white/12',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
         default: 'h-9 px-4 py-2',
         sm: 'h-8 rounded-md px-3 text-xs',
+        md: 'h-10 rounded-xl px-4 text-sm',
+        mdWide: 'h-10 rounded-xl px-5 text-sm',
+        action: 'rounded-xl px-3 py-3 text-sm',
+        actionWide: 'h-11 rounded-xl px-5 text-sm',
+        form: 'h-11 rounded-xl px-6 text-sm font-semibold uppercase tracking-[0.08em]',
+        chip: 'h-8 rounded-full px-3 text-xs',
+        chipWide: 'h-8 rounded-full px-4 text-xs',
         lg: 'h-10 rounded-md px-8',
         icon: 'h-9 w-9',
+        iconLg: 'h-11 w-11 rounded-full',
+        headerIcon: 'rounded-full p-3 sm:p-5',
       },
     },
     defaultVariants: {

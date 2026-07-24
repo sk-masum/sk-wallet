@@ -6,6 +6,7 @@ type ListingPageLoadingProps = {
     title: string
     description: string
     contentClassName: string
+    showFilters?: boolean
     showCardFilters?: boolean
     children: React.ReactNode
 }
@@ -14,31 +15,44 @@ export function ListingPageLoading({
     title,
     description,
     contentClassName,
+    showFilters = true,
     showCardFilters = false,
     children,
 }: ListingPageLoadingProps) {
     return (
         <ListingPageLayout contentClassName={contentClassName}>
-            <div className="mb-6 flex items-start justify-between gap-3">
-                <div className="space-y-2">
-                    <h1 className="text-3xl font-semibold">{title}</h1>
-                    <p className="text-sm text-muted-foreground">{description}</p>
+            <div className="-mx-4 sticky top-0 z-40 mb-4 border-b border-white/35 bg-[linear-gradient(to_bottom,hsl(var(--background)/0.9),hsl(var(--background)/0.82)),var(--glass-surface)] px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] shadow-(--neu-shadow-raised) backdrop-blur-xl dark:border-white/14 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:pt-0 sm:shadow-none sm:ring-0 sm:backdrop-blur-none">
+                <div className="mb-3 flex items-center justify-between gap-3 pt-6 sm:mb-4 sm:pt-0">
+                    <div className="flex items-center gap-3">
+                        <Skeleton className="h-11 w-11 shrink-0 rounded-full sm:h-12 sm:w-12" />
+
+                        <div>
+                            <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{title}</h1>
+                            <p className="mt-1 text-sm text-muted-foreground dark:text-foreground/82">{description}</p>
+                        </div>
+                    </div>
                 </div>
-                <Skeleton className="hidden h-10 w-10 rounded-full sm:block" />
+
+                {showFilters ? (
+                    <>
+                        <div className="mb-4 sm:hidden">
+                            <div className="flex items-center gap-2 py-2">
+                                <Skeleton className="h-10 flex-1 rounded-xl" />
+                                <Skeleton className="h-10 w-28 rounded-xl" />
+                            </div>
+                        </div>
+
+                        <div className="mb-4 hidden items-center gap-3 sm:flex">
+                            <Skeleton className="h-10 flex-1 rounded-xl" />
+                            <Skeleton className="h-10 w-26 rounded-xl" />
+                            <Skeleton className="h-10 w-20 rounded-xl" />
+                        </div>
+                    </>
+                ) : null}
             </div>
 
             {showCardFilters ? (
                 <>
-                    <div className="mb-4 sm:hidden">
-                        <Skeleton className="h-12 w-full rounded-2xl" />
-                    </div>
-
-                    <div className="mb-4 hidden items-center gap-3 rounded-2xl border border-border/70 bg-background/85 p-3 shadow-lg backdrop-blur sm:flex">
-                        <Skeleton className="h-10 flex-1 rounded-xl" />
-                        <Skeleton className="h-10 w-84 rounded-xl" />
-                        <Skeleton className="h-10 w-48 rounded-xl" />
-                    </div>
-
                     <div className="mb-5 hidden gap-2 sm:flex">
                         <Skeleton className="h-6 w-28 rounded-full" />
                         <Skeleton className="h-6 w-24 rounded-full" />

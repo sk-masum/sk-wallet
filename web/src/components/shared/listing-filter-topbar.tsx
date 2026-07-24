@@ -5,6 +5,7 @@ import { ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 import { Button, buttonVariants } from '@/components/ui/button'
+import { responsiveIconSizes } from '@/components/ui/icon-sizes'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
@@ -36,8 +37,7 @@ type ListingFilterTopBarProps = {
     desktopContainerClassName?: string
 }
 
-const defaultDesktopContainerClassName =
-    'relative mb-4 hidden flex-wrap items-center gap-3 rounded-2xl bg-background/88 p-3.5 shadow-[0_16px_36px_-24px_rgba(0,0,0,0.5)] ring-1 ring-border/35 backdrop-blur-xl sm:flex'
+const defaultDesktopContainerClassName = 'mb-4 hidden flex-wrap items-center gap-3 sm:flex'
 
 export function ListingFilterTopBar({
     formAction,
@@ -101,43 +101,40 @@ export function ListingFilterTopBar({
         <>
             <div className={cn(mobileContainerClassName ?? 'sm:hidden')}>
                 <div className={cn('pb-2', mobileInnerClassName)}>
-                    <div className="relative overflow-hidden rounded-2xl border border-border/45 bg-linear-to-r from-background/90 via-card/82 to-background/88 p-2.5 shadow-[0_18px_36px_-22px_rgba(0,0,0,0.62)] ring-1 ring-border/30 backdrop-blur-xl dark:border-white/10 dark:from-black/55 dark:via-zinc-900/70 dark:to-black/55 dark:shadow-[0_18px_36px_-22px_rgba(0,0,0,0.9)] dark:ring-white/10">
-                        <div className="pointer-events-none absolute -top-8 left-1/4 h-16 w-32 rounded-full bg-primary/7 blur-2xl dark:hidden" />
-                        <div className="pointer-events-none absolute -bottom-10 right-2 h-20 w-24 rounded-full bg-primary/3 blur-2xl dark:hidden" />
-                        <div className="relative flex items-center gap-2">
-                            <form action={formAction} method="get" className="relative flex-1">
-                                <Input
-                                    name={searchMode === 'form' ? searchInputName : undefined}
-                                    value={searchMode === 'controlled' ? searchValue : undefined}
-                                    defaultValue={searchMode === 'form' ? searchValue : undefined}
-                                    onChange={
-                                        searchMode === 'controlled' && onSearchChange
-                                            ? (event) => onSearchChange(event.target.value)
-                                            : undefined
-                                    }
-                                    placeholder={mobileSearchPlaceholder}
-                                    aria-label={mobileSearchAriaLabel}
-                                    className="h-10 rounded-xl border-border/65 bg-background/90 pr-10 shadow-inner shadow-black/5 dark:border-white/10 dark:bg-black/35 dark:shadow-black/30"
-                                />
-                                {hasTextQuery ? renderClearSearchAction(false) : null}
-                                {searchHiddenFields}
-                            </form>
+                    <div className="flex items-center gap-2 py-2">
+                        <form action={formAction} method="get" className="relative flex-1">
+                            <Input
+                                name={searchMode === 'form' ? searchInputName : undefined}
+                                value={searchMode === 'controlled' ? searchValue : undefined}
+                                defaultValue={searchMode === 'form' ? searchValue : undefined}
+                                onChange={
+                                    searchMode === 'controlled' && onSearchChange
+                                        ? (event) => onSearchChange(event.target.value)
+                                        : undefined
+                                }
+                                placeholder={mobileSearchPlaceholder}
+                                aria-label={mobileSearchAriaLabel}
+                                className="h-10 rounded-xl border-white/35 bg-(--glass-surface) pr-10 shadow-(--neu-shadow-inset-sm) dark:border-white/12"
+                            />
+                            {hasTextQuery ? renderClearSearchAction(false) : null}
+                            {searchHiddenFields}
+                        </form>
 
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="h-10 gap-2 rounded-xl border-border/65 bg-background/88 px-3.5 shadow-sm dark:border-white/10 dark:bg-black/35 dark:shadow-black/30"
-                                onClick={onOpenMobileFilters}
-                            >
-                                <SlidersHorizontal className="h-4 w-4" />
-                                Refine
-                                {mobileFilterCount > 0 ? (
-                                    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-primary-foreground">
-                                        {mobileFilterCount}
-                                    </span>
-                                ) : null}
-                            </Button>
-                        </div>
+                        <Button
+                            type="button"
+                            variant="toolbar"
+                            size="md"
+                            className="gap-2 px-3.5"
+                            onClick={onOpenMobileFilters}
+                        >
+                            <SlidersHorizontal className={responsiveIconSizes.toolbar} />
+
+                            {mobileFilterCount > 0 ? (
+                                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-primary-foreground">
+                                    {mobileFilterCount}
+                                </span>
+                            ) : null}
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -151,7 +148,7 @@ export function ListingFilterTopBar({
                             defaultValue={searchValue}
                             placeholder={desktopSearchPlaceholder}
                             aria-label={desktopSearchAriaLabel}
-                            className="h-10 rounded-xl border-border/45 bg-background/97 pl-9 pr-10 shadow-inner shadow-black/5"
+                            className="h-10 rounded-xl border-white/35 bg-(--glass-surface) pl-9 pr-10 shadow-(--neu-shadow-inset-sm) dark:border-white/12"
                         />
                         {hasTextQuery ? renderClearSearchAction(true) : null}
                         {searchHiddenFields}
@@ -164,7 +161,7 @@ export function ListingFilterTopBar({
                             onChange={onSearchChange ? (event) => onSearchChange(event.target.value) : undefined}
                             placeholder={desktopSearchPlaceholder}
                             aria-label={desktopSearchAriaLabel}
-                            className="h-10 rounded-xl border-border/45 bg-background/97 pl-9 pr-10 shadow-inner shadow-black/5"
+                            className="h-10 rounded-xl border-white/35 bg-(--glass-surface) pl-9 pr-10 shadow-(--neu-shadow-inset-sm) dark:border-white/12"
                         />
                         {hasTextQuery ? renderClearSearchAction(true) : null}
                     </div>
@@ -172,34 +169,35 @@ export function ListingFilterTopBar({
 
                 <Button
                     type="button"
-                    variant="outline"
-                    className="h-10 gap-2 rounded-xl border-transparent bg-card/75 px-3.5 shadow-sm ring-1 ring-border/35"
+                    variant="toolbar"
+                    size="md"
+                    className="gap-2 px-3.5 ring-1 ring-border/30"
                     onClick={onToggleDesktopFilters}
                 >
-                    <SlidersHorizontal className="h-4 w-4" />
+                    <SlidersHorizontal className={responsiveIconSizes.toolbar} />
                     Filters
                     {mobileFilterCount > 0 ? (
                         <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-primary-foreground">
                             {mobileFilterCount}
                         </span>
                     ) : null}
-                    <ChevronDown className={cn('h-4 w-4 transition-transform', desktopFilterOpen && 'rotate-180')} />
+                    <ChevronDown className={cn(responsiveIconSizes.toolbar, 'transition-transform', desktopFilterOpen && 'rotate-180')} />
                 </Button>
 
                 {hasActiveControls ? (
                     resetHref ? (
                         <Link
                             href={resetHref}
-                            className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-10 rounded-xl bg-muted/55 px-3')}
+                            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'h-10 rounded-xl px-3.5')}
                         >
                             Reset
                         </Link>
                     ) : (
                         <Button
                             type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="h-10 rounded-xl bg-muted/55 px-3"
+                            variant="toolbar"
+                            size="md"
+                            className="px-3.5"
                             onClick={onResetAll}
                         >
                             Reset
@@ -213,12 +211,12 @@ export function ListingFilterTopBar({
                     <button
                         type="button"
                         aria-label="Close filters"
-                        className="absolute inset-0 bg-black/15 backdrop-blur-[1px]"
+                        className="absolute inset-0 bg-[hsl(var(--background)/0.32)] backdrop-blur-[1px]"
                         onClick={onToggleDesktopFilters}
                     />
 
-                    <aside className="fixed left-0 top-0 flex h-dvh w-[35vw] flex-col border-r border-border/45 bg-background shadow-2xl">
-                        <div className="flex items-start justify-between border-b border-border/45 px-4 py-3">
+                    <aside className="fixed left-0 top-0 flex h-dvh w-[35vw] flex-col border-r border-white/25 bg-[linear-gradient(to_bottom,hsl(var(--background)/0.86),hsl(var(--background)/0.76)),var(--glass-surface)] shadow-2xl backdrop-blur-xl dark:border-white/12">
+                        <div className="flex items-start justify-between border-b border-white/20 px-4 py-3 dark:border-white/10">
                             <div>
                                 <p className="text-lg font-semibold">Filters</p>
                                 <p className="text-sm text-muted-foreground">Refine, sort, and group your cards.</p>
