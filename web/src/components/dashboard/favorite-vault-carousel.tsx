@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { FileText, KeyRound } from 'lucide-react'
+import { FileText, KeyRound, LoaderCircle } from 'lucide-react'
 
 import { CredentialDetailsCard } from '@/components/credential/credential-details-card'
 import { MiniVerticalCarouselCard } from '@/components/dashboard/mini-vertical-carousel-card'
@@ -135,44 +135,44 @@ export function FavoriteVaultCarousel({
                 <DetailDialogContent>
                     {loadingDetails ? (
                         <div className="mx-auto w-full max-w-120 space-y-3">
-                            <div
-                                className={[
-                                    'relative overflow-hidden rounded-2xl border border-border/65 px-4 pb-5 pt-4 shadow-xl sm:px-5',
-                                    selectedItem?.type === 'credential'
-                                        ? 'bg-linear-to-br from-teal-950 via-emerald-900 to-teal-950 text-emerald-50'
-                                        : 'bg-linear-to-br from-amber-950 via-orange-900 to-amber-950 text-amber-50',
-                                ].join(' ')}
-                            >
-                                <div className="pointer-events-none absolute -inset-x-10 -top-18 h-36 rotate-6 bg-linear-to-r from-transparent via-glass-overlay-soft to-transparent motion-safe:animate-[pulse_2.4s_ease-in-out_infinite]" />
-
-                                <div className="relative flex items-start justify-between">
+                            <div className="rounded-2xl border border-border/65 bg-background/95 px-4 pb-5 pt-4 shadow-xl sm:px-5">
+                                <div className="flex items-start justify-between">
                                     <div className="space-y-2">
-                                        <Skeleton className="h-3 w-28 bg-glass-overlay" />
-                                        <Skeleton className="h-3 w-18 bg-glass-overlay" />
+                                        <Skeleton className="h-3 w-28" />
+                                        <Skeleton className="h-3 w-18" />
                                     </div>
-                                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-glass-border-subtle bg-glass-overlay-soft">
+                                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-muted/40">
                                         {selectedItem?.type === 'credential' ? (
-                                            <KeyRound className="h-4 w-4 text-media-foreground/85" />
+                                            <KeyRound className="h-4 w-4 text-text-subtle" />
                                         ) : (
-                                            <FileText className="h-4 w-4 text-media-foreground/85" />
+                                            <FileText className="h-4 w-4 text-text-subtle" />
                                         )}
                                     </div>
                                 </div>
 
                                 <div className="mt-6 space-y-3">
-                                    <Skeleton className="h-5 w-46 rounded bg-glass-overlay" />
-                                    <Skeleton className="h-4 w-34 rounded bg-glass-overlay" />
+                                    <Skeleton className="h-5 w-46 rounded" />
+                                    <Skeleton className="h-4 w-34 rounded" />
                                 </div>
 
                                 <div className="mt-7 grid grid-cols-2 gap-3">
                                     <div className="space-y-1.5">
-                                        <Skeleton className="h-2.5 w-16 bg-glass-overlay" />
-                                        <Skeleton className="h-3.5 w-24 bg-glass-overlay" />
+                                        <Skeleton className="h-2.5 w-16" />
+                                        <Skeleton className="h-3.5 w-24" />
                                     </div>
                                     <div className="space-y-1.5 text-right">
-                                        <Skeleton className="ml-auto h-2.5 w-14 bg-glass-overlay" />
-                                        <Skeleton className="ml-auto h-3.5 w-20 bg-glass-overlay" />
+                                        <Skeleton className="ml-auto h-2.5 w-14" />
+                                        <Skeleton className="ml-auto h-3.5 w-20" />
                                     </div>
+                                </div>
+                            </div>
+
+                            <div className="rounded-2xl border border-border/65 bg-background/95 px-4 py-3">
+                                <div className="inline-flex items-center gap-2 text-sm text-text-subtle">
+                                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                                    {selectedItem?.type === 'credential'
+                                        ? 'Preparing secure credential details...'
+                                        : 'Preparing secure document details...'}
                                 </div>
                             </div>
                         </div>

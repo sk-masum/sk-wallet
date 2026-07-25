@@ -264,9 +264,14 @@ body {
     margin-right: -1rem;
     padding-left: 1rem;
     padding-right: 1rem;
+    border-bottom: 1px solid rgb(255 255 255 / 0.35);
   }
 
   .dark .listing-mobile-sticky-shell {
+    border-bottom-color: rgb(255 255 255 / 0.14);
+  }
+
+  .dark .listing-mobile-filter-sticky {
     border-bottom-color: rgb(255 255 255 / 0.14);
   }
 
@@ -275,7 +280,6 @@ body {
   }
 
   .listing-filter-scroll-active {
-    border-bottom: 1px solid rgb(255 255 255 / 0.35);
     background: transparent;
     box-shadow: var(--neu-shadow-raised-sm);
     backdrop-filter: blur(24px);
@@ -386,12 +390,14 @@ body {
     }
 
     .listing-desktop-filter-sticky {
-      position: sticky;
-      top: 0;
-      z-index: 30;
-      margin-left: -0.25rem;
-      margin-right: -0.25rem;
-      padding: 0.5rem 0.25rem;
+      position: static;
+      margin-left: 0;
+      margin-right: 0;
+      padding: 0;
+      border: 0;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
     }
 
     .vault-list-grid {

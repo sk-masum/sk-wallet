@@ -18,6 +18,7 @@ export type CardFaceProps = {
   showCreditLimit?: boolean
   showCardNumber?: boolean
   expiryAlignStart?: boolean
+  stackIndex?: number
   className?: string
 }
 
@@ -29,6 +30,7 @@ export function CardFace({
   showCreditLimit = false,
   showCardNumber = false,
   expiryAlignStart = false,
+  stackIndex,
   className,
 }: CardFaceProps) {
   const id = String(card.id ?? 'N/A')
@@ -52,11 +54,39 @@ export function CardFace({
   const status = String(card.status ?? '').trim().toLowerCase()
   const statusLabel =
     status === 'blocked' ? 'Blocked' : status === 'replaced' ? 'Replaced' : null
+  const isStackedCard = typeof stackIndex === 'number'
+  const stackShadowClass = isStackedCard
+    ? [
+      'shadow-[0_8px_16px_-12px_rgba(9,18,48,0.42),0_3px_8px_-6px_rgba(6,12,32,0.3)]',
+      'shadow-[0_10px_20px_-12px_rgba(9,18,48,0.5),0_5px_10px_-7px_rgba(6,12,32,0.36)]',
+      'shadow-[0_12px_24px_-12px_rgba(9,18,48,0.56),0_6px_12px_-8px_rgba(6,12,32,0.4)]',
+      'shadow-[0_14px_28px_-12px_rgba(9,18,48,0.62),0_8px_14px_-9px_rgba(6,12,32,0.46)]',
+      'shadow-[0_16px_32px_-12px_rgba(9,18,48,0.68),0_10px_16px_-10px_rgba(6,12,32,0.52)]',
+      'shadow-[0_18px_36px_-12px_rgba(9,18,48,0.74),0_12px_18px_-11px_rgba(6,12,32,0.58)]',
+      'shadow-[0_20px_40px_-12px_rgba(9,18,48,0.8),0_14px_20px_-12px_rgba(6,12,32,0.64)]',
+      'shadow-[0_22px_44px_-12px_rgba(9,18,48,0.86),0_16px_22px_-13px_rgba(6,12,32,0.7)]',
+    ][Math.abs(stackIndex) % 8]
+    : ''
+  const stackBorderClass = isStackedCard
+    ? [
+      'border border-white/18',
+      'border border-white/20',
+      'border border-white/22',
+      'border border-white/24',
+      'border border-white/26',
+      'border border-white/28',
+      'border border-white/30',
+      'border border-white/32',
+    ][Math.abs(stackIndex) % 8]
+    : ''
 
   return (
     <div
       className={cn(
-        'relative flex min-h-56 flex-col justify-between rounded-3xl border-4 px-3 pt-3 pb-5 text-slate-100 shadow-lg sm:px-5 sm:pt-2 w-full border-muted',
+        'relative flex min-h-56 w-full flex-col justify-between rounded-3xl px-3 pt-3 pb-5 text-slate-100 sm:px-5 sm:pt-2',
+        isStackedCard ? 'transition-shadow duration-300 ease-out' : 'border-4 border-muted shadow-lg',
+        stackShadowClass,
+        stackBorderClass,
         theme.surface,
         className
       )}

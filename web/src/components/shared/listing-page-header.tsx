@@ -67,7 +67,7 @@ export function ListingPageHeader({
                         showAddButton
                         addButtonLabel={addLabel}
                         addButtonClassName={sharedDesktopAddButtonClass}
-                        className={cn('mb-6', className)}
+                        className={cn('mb-3 sm:mb-8', className)}
                     />
                     {mobileFilters}
                 </>

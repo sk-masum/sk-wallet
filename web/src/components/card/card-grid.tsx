@@ -220,7 +220,7 @@ export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
                         isSelected && 'scale-[1.01]'
                       )}
                     >
-                      <CardFace card={card} />
+                      <CardFace card={card} stackIndex={index} className={isSelected ? 'shadow-[0_20px_36px_-18px_rgba(10,20,55,0.9),0_12px_24px_-16px_rgba(6,12,34,0.68)]' : undefined} />
                     </div>
                   </button>
                 )

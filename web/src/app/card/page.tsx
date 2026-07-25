@@ -2,9 +2,7 @@ import { redirect } from 'next/navigation'
 
 import { CardMobileFilters } from '@/components/card/card-mobile-filters'
 import { CardVault } from '@/components/card/card-vault'
-import { ListingPageHeader } from '@/components/shared/listing-page-header'
 import { ListingPageLayout } from '@/components/shared/listing-page-layout'
-import { BottomTabBar } from '@/components/ui/bottom-tab-bar'
 import { serverApiGet } from '@/lib/api/server'
 import type { WalletCard } from '@/models/card'
 
@@ -19,20 +17,8 @@ export default async function CardPage() {
     const error = response.ok ? null : result?.error || 'Failed to load cards'
 
     return (
-        <ListingPageLayout contentClassName="max-w-212.5">
-            <ListingPageHeader
-                title="Cards"
-                className="pt-6"
-                showBackButton
-                backHref="/"
-                backButtonLabel="Back to dashboard"
-                addLabel="Add card"
-                mobileFilters={<CardMobileFilters />}
-            />
-
+        <ListingPageLayout title="Cards" addLabel="Add card" addHref="/card/new" filters={<CardMobileFilters />}>
             <CardVault initialCards={allCards} initialError={error} />
-
-            <BottomTabBar addHref="/card/new" addLabel="Add card" />
         </ListingPageLayout>
     )
 }
