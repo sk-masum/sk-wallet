@@ -27,7 +27,6 @@ export default async function CardPage() {
                 backHref="/"
                 backButtonLabel="Back to dashboard"
                 addLabel="Add card"
-                mobileStickyHeader
                 mobileFilters={<CardMobileFilters />}
             />
 

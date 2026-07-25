@@ -129,8 +129,8 @@ export function ListingFilterMobileSheet({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DetailDialogContent
-                className={cn('sm:hidden max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:h-[88dvh] max-sm:w-screen max-sm:max-w-screen max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-0 border-glass-border-subtle bg-[linear-gradient(to_bottom,hsl(var(--background)/0.9),hsl(var(--background)/0.8)),var(--color-glass)] backdrop-blur-xl ', className)}
-                scrollClassName="h-[88dvh] max-h-[88dvh] px-0 pb-0"
+                className={cn('sm:hidden max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:w-screen max-sm:max-w-screen max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-0 border-glass-border bg-[linear-gradient(to_bottom,hsl(var(--card)/0.5),hsl(var(--surface-elevated)/0.94))] backdrop-blur-xl ', className)}
+                scrollClassName="max-h-[88dvh] px-0 pb-0"
             >
                 <div className="flex h-full flex-col bg-transparent pb-4">
                     <div className="sticky top-0 z-20 border-b border-glass-border-subtle px-3 pb-3 -pt-3 ">
@@ -139,7 +139,7 @@ export function ListingFilterMobileSheet({
                         </DialogHeader>
                     </div>
 
-                    <div className="flex-1 space-y-4 overflow-y-auto py-8 mt-2">{children}</div>
+                    <div className="space-y-4 overflow-y-auto py-8 mt-2 mb-16">{children}</div>
                 </div>
             </DetailDialogContent>
         </Dialog>
@@ -186,7 +186,7 @@ export function ListingFilterMobileActions({
     onDone,
 }: ListingFilterMobileActionsProps) {
     return (
-        <div className="fixed inset-x-0 bottom-0 z-50 flex items-center gap-2 border-t border-glass-border-subtle bg-[linear-gradient(to_top,hsl(var(--background)/0.92),hsl(var(--background)/0.82)),var(--color-glass)] p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-xl  sm:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-50 flex items-center gap-2 border-t border-glass-border bg-[linear-gradient(to_top,hsl(var(--card)/0.98),hsl(var(--surface)/0.95))] p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-xl sm:hidden">
             {resetHref && hasActiveControls ? (
                 <Link
                     href={resetHref}

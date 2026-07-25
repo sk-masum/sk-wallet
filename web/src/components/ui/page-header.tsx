@@ -34,10 +34,7 @@ export function PageHeader({
   const backButton = showBackButton ? (
     <Link
       href={backHref}
-      className={cn(
-        buttonVariants({ variant: 'toolbar', size: 'iconLg' }),
-        ' sm:h-12 sm:w-12'
-      )}
+      className={buttonVariants({ variant: 'headerIcon', size: 'headerIcon' })}
       aria-label={backButtonLabel}
       title={backButtonLabel}
     >

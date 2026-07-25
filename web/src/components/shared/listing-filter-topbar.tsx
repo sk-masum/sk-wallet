@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 
 import { Button, buttonVariants } from '@/components/ui/button'
 import { responsiveIconSizes } from '@/components/ui/icon-sizes'
@@ -37,7 +37,7 @@ type ListingFilterTopBarProps = {
     desktopContainerClassName?: string
 }
 
-const defaultDesktopContainerClassName = 'mb-4 hidden flex-wrap items-center gap-3 sm:flex'
+const defaultDesktopContainerClassName = 'listing-desktop-filter-sticky mb-4 hidden flex-wrap items-center gap-3 sm:flex'
 
 export function ListingFilterTopBar({
     formAction,
@@ -66,6 +66,33 @@ export function ListingFilterTopBar({
     mobileInnerClassName,
     desktopContainerClassName,
 }: ListingFilterTopBarProps) {
+    const [isScrollSurfaceActive, setIsScrollSurfaceActive] = useState(false)
+
+    useEffect(() => {
+        let clearSurfaceTimeout: ReturnType<typeof setTimeout> | null = null
+
+        const handleScroll = () => {
+            setIsScrollSurfaceActive(true)
+
+            if (clearSurfaceTimeout) {
+                clearTimeout(clearSurfaceTimeout)
+            }
+
+            clearSurfaceTimeout = setTimeout(() => {
+                setIsScrollSurfaceActive(false)
+            }, 140)
+        }
+
+        window.addEventListener('scroll', handleScroll, { passive: true })
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll)
+            if (clearSurfaceTimeout) {
+                clearTimeout(clearSurfaceTimeout)
+            }
+        }
+    }, [])
+
     const renderClearSearchAction = (desktop: boolean) => {
         const className = desktop
             ? 'absolute right-1 top-1 h-8 w-8 rounded-lg text-text-subtle hover:text-foreground'
@@ -99,8 +126,8 @@ export function ListingFilterTopBar({
 
     return (
         <>
-            <div className={cn(mobileContainerClassName ?? 'sm:hidden')}>
-                <div className={cn('pb-2', mobileInnerClassName)}>
+            <div className={cn(mobileContainerClassName ?? 'listing-mobile-filter-sticky sm:hidden', isScrollSurfaceActive && 'listing-filter-scroll-active')}>
+                <div className={cn('py-2', mobileInnerClassName)}>
                     <div className="flex items-center gap-2 py-2">
                         <form action={formAction} method="get" className="relative flex-1">
                             <Input
@@ -122,12 +149,12 @@ export function ListingFilterTopBar({
 
                         <Button
                             type="button"
-                            variant="toolbar"
-                            size="md"
+                            variant="headerIcon"
+                            size="headerIcon"
                             className="gap-2 px-3.5"
                             onClick={onOpenMobileFilters}
                         >
-                            <SlidersHorizontal className={responsiveIconSizes.toolbar} />
+                            <SlidersHorizontal className={responsiveIconSizes.header} />
 
                             {mobileFilterCount > 0 ? (
                                 <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-primary-foreground">
@@ -139,7 +166,7 @@ export function ListingFilterTopBar({
                 </div>
             </div>
 
-            <div className={cn(defaultDesktopContainerClassName, desktopContainerClassName)}>
+            <div className={cn(defaultDesktopContainerClassName, desktopContainerClassName, isScrollSurfaceActive && 'listing-filter-scroll-active')}>
                 {searchMode === 'form' ? (
                     <form action={formAction} method="get" className="relative flex-1">
                         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-subtle" />
@@ -169,9 +196,9 @@ export function ListingFilterTopBar({
 
                 <Button
                     type="button"
-                    variant="toolbar"
+                    variant="headerIcon"
                     size="md"
-                    className="gap-2 px-3.5 ring-1 ring-border/30"
+                    className="gap-2 px-3.5"
                     onClick={onToggleDesktopFilters}
                 >
                     <SlidersHorizontal className={responsiveIconSizes.toolbar} />
@@ -211,11 +238,11 @@ export function ListingFilterTopBar({
                     <button
                         type="button"
                         aria-label="Close filters"
-                        className="absolute inset-0 bg-[hsl(var(--background)/0.32)] backdrop-blur-[1px]"
+                        className="absolute inset-0 bg-[hsl(var(--background)/0.62)] backdrop-blur-[2px]"
                         onClick={onToggleDesktopFilters}
                     />
 
-                    <aside className="fixed left-0 top-0 flex h-dvh w-[35vw] flex-col border-r border-glass-border-subtle bg-[linear-gradient(to_bottom,hsl(var(--background)/0.86),hsl(var(--background)/0.76)),var(--color-glass)] shadow-2xl backdrop-blur-xl ">
+                    <aside className="fixed left-0 top-0 flex h-dvh w-[35vw] flex-col border-r border-glass-border bg-[linear-gradient(to_bottom,hsl(var(--card)/0.98),hsl(var(--surface-elevated)/0.94))] shadow-2xl backdrop-blur-xl ">
                         <div className="flex items-start justify-between border-b border-glass-border-subtle px-4 py-3 ">
                             <div>
                                 <p className="text-lg font-semibold">Filters</p>
