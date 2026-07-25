@@ -9,10 +9,15 @@ import { MiniVerticalCarouselCard } from '@/components/dashboard/mini-vertical-c
 import { DocumentDetailsCard } from '@/components/doc/document-details-card'
 import { SharedCarouselSection } from '@/components/dashboard/shared-carousel-section'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
+import {
+    DetailDialogBody,
+    DetailDialogErrorState,
+    DetailDialogLoadingNotice,
+} from '@/components/shared/detail-dialog-states'
 import { useEntityDetailsDialog } from '@/hooks/use-entity-details-dialog'
-import { Button } from '@/components/ui/button'
 import { Dialog } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
+import { SURFACE_REVEAL_CLASS } from '@/constants/ui/animation'
 import { clientApiGet } from '@/lib/api/client'
 import type { UserCredential } from '@/models/credential'
 import type { DashboardFavoriteVaultItem } from '@/models/dashboard'
@@ -134,7 +139,7 @@ export function FavoriteVaultCarousel({
             <Dialog open={dialogOpen} onOpenChange={(open) => !open && closeDialog()}>
                 <DetailDialogContent>
                     {loadingDetails ? (
-                        <div className="mx-auto w-full max-w-120 space-y-3">
+                        <DetailDialogBody>
                             <div className="rounded-2xl border border-border/65 bg-background/95 px-4 pb-5 pt-4 shadow-xl sm:px-5">
                                 <div className="flex items-start justify-between">
                                     <div className="space-y-2">
@@ -167,36 +172,30 @@ export function FavoriteVaultCarousel({
                                 </div>
                             </div>
 
-                            <div className="rounded-2xl border border-border/65 bg-background/95 px-4 py-3">
-                                <div className="inline-flex items-center gap-2 text-sm text-text-subtle">
-                                    <LoaderCircle className="h-4 w-4 animate-spin" />
-                                    {selectedItem?.type === 'credential'
+                            <DetailDialogLoadingNotice
+                                message={
+                                    selectedItem?.type === 'credential'
                                         ? 'Preparing secure credential details...'
-                                        : 'Preparing secure document details...'}
-                                </div>
-                            </div>
-                        </div>
+                                        : 'Preparing secure document details...'
+                                }
+                            />
+                        </DetailDialogBody>
                     ) : detailsError ? (
-                        <div className="mx-auto flex min-h-56 w-full max-w-120 flex-col items-center justify-center gap-4 rounded-2xl border border-border/65 bg-background/95 px-6 py-8 text-center motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
-                            <p className="text-sm text-text-subtle">{detailsError}</p>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => selectedItem && router.push(selectedItem.href)}
-                            >
-                                Open full page
-                            </Button>
-                        </div>
+                        <DetailDialogErrorState
+                            message={detailsError}
+                            actionLabel="Open full page"
+                            onAction={() => selectedItem && router.push(selectedItem.href)}
+                        />
                     ) : detailData?.kind === 'credential' ? (
                         <CredentialDetailsCard
                             credential={detailData.credential}
                             title="Credential details"
-                            className="motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300"
+                            className={SURFACE_REVEAL_CLASS}
                         />
                     ) : detailData?.kind === 'document' ? (
                         <DocumentDetailsCard
                             document={detailData.document}
-                            className="mx-auto w-full max-w-120 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300"
+                            className={`mx-auto w-full max-w-120 ${SURFACE_REVEAL_CLASS}`}
                             showActions
                         />
                     ) : null}

@@ -11,41 +11,34 @@ import {
     ListingFilterMobileSection,
     ListingFilterMobileSheet,
 } from '@/components/shared/listing-filter-panels'
+import { ListingFilterSelect } from '@/components/shared/listing-filter-select'
 import { ListingFilterTopBar } from '@/components/shared/listing-filter-topbar'
 import { CardTypeButtonGroup } from '@/components/ui/card-type-button-group'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+    CARD_EXPIRY_OPTIONS,
+    CARD_GROUP_OPTIONS,
+    CARD_SORT_OPTIONS,
+} from '@/constants/card/filters'
+import { ALL_FILTER_VALUE, DAY_OF_MONTH_FILTER_OPTIONS } from '@/constants/ui/filter'
+import { useFilterDialogState } from '@/hooks/use-filter-dialog-state'
 import {
     selectCardFilterMeta,
     useCardVaultStore,
     type CardGroup,
+    type CardExpiryFilter,
     type CardSort,
 } from '@/lib/stores/card-vault-store'
-
-const CARD_GROUP_OPTIONS = [
-    { value: 'none', label: 'No grouping' },
-    { value: 'provider', label: 'Group by provider' },
-    { value: 'network', label: 'Group by network' },
-    { value: 'tags', label: 'Group by tags' },
-] as const
-
-const CARD_SORT_OPTIONS = [
-    { value: 'newest', label: 'Newest first' },
-    { value: 'oldest', label: 'Oldest first' },
-    { value: 'name-asc', label: 'Name (A-Z)' },
-    { value: 'name-desc', label: 'Name (Z-A)' },
-    { value: 'expiry-asc', label: 'Expiry (Soonest)' },
-    { value: 'expiry-desc', label: 'Expiry (Latest)' },
-    { value: 'credit-limit-asc', label: 'Credit limit (Low-High)' },
-    { value: 'credit-limit-desc', label: 'Credit limit (High-Low)' },
-    { value: 'billing-date-asc', label: 'Billing date (Earliest)' },
-    { value: 'billing-date-desc', label: 'Billing date (Latest)' },
-    { value: 'payment-date-asc', label: 'Payment date (Earliest)' },
-    { value: 'payment-date-desc', label: 'Payment date (Latest)' },
-] as const
+import { fromFilterSelectValue, toFilterSelectValue, toTypedFilterValue } from '@/utils/filter/value'
 
 export function CardMobileFilters() {
-    const [mobileOpen, setMobileOpen] = useState(false)
-    const [desktopOpen, setDesktopOpen] = useState(false)
+    const {
+        mobileOpen,
+        desktopOpen,
+        openMobileFilters,
+        setMobileOpen,
+        toggleDesktopFilters,
+        closeDesktopFilters,
+    } = useFilterDialogState()
     const [creditLimitRange, setCreditLimitRange] = useState<[number, number]>([0, 0])
 
     const query = useCardVaultStore((state) => state.query)
@@ -99,12 +92,12 @@ export function CardMobileFilters() {
                 mobileSearchAriaLabel="Search cards"
                 desktopSearchAriaLabel="Search cards by name, provider, or number"
                 mobileFilterCount={meta.activeFilterCount}
-                onOpenMobileFilters={() => setMobileOpen(true)}
+                onOpenMobileFilters={openMobileFilters}
                 hasTextQuery={meta.hasTextQuery}
                 hasActiveControls={meta.hasActiveControls}
                 onResetAll={resetFilters}
                 desktopFilterOpen={desktopOpen}
-                onToggleDesktopFilters={() => setDesktopOpen((prev) => !prev)}
+                onToggleDesktopFilters={toggleDesktopFilters}
                 desktopExpandedClassName=""
                 desktopPanel={
                     <ListingFilterDesktopPanel>
@@ -118,63 +111,46 @@ export function CardMobileFilters() {
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Network">
-                                <Select value={selectedNetwork || 'ALL'} onValueChange={(value) => setFilters({ networkFilter: value === 'ALL' ? '' : value })}>
-                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by network">
-                                        <SelectValue placeholder="All networks" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="ALL">All networks</SelectItem>
-                                        {meta.networkOptions.map((network) => (
-                                            <SelectItem key={network} value={network}>
-                                                {network}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <ListingFilterSelect
+                                    value={toFilterSelectValue(selectedNetwork)}
+                                    onValueChange={(value) => setFilters({ networkFilter: fromFilterSelectValue(value) })}
+                                    ariaLabel="Filter by network"
+                                    placeholder="All networks"
+                                    allOption={{ value: ALL_FILTER_VALUE, label: 'All networks' }}
+                                    options={meta.networkOptions.map((network) => ({ value: network, label: network }))}
+                                />
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Provider">
-                                <Select value={selectedProvider || 'ALL'} onValueChange={(value) => setFilters({ providerFilter: value === 'ALL' ? '' : value })}>
-                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by provider">
-                                        <SelectValue placeholder="All providers" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="ALL">All providers</SelectItem>
-                                        {meta.providerOptions.map((provider) => (
-                                            <SelectItem key={provider} value={provider}>
-                                                {provider}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <ListingFilterSelect
+                                    value={toFilterSelectValue(selectedProvider)}
+                                    onValueChange={(value) => setFilters({ providerFilter: fromFilterSelectValue(value) })}
+                                    ariaLabel="Filter by provider"
+                                    placeholder="All providers"
+                                    allOption={{ value: ALL_FILTER_VALUE, label: 'All providers' }}
+                                    options={meta.providerOptions.map((provider) => ({ value: provider, label: provider }))}
+                                />
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Tag">
-                                <Select value={selectedTag || 'ALL'} onValueChange={(value) => setFilters({ tagFilter: value === 'ALL' ? '' : value })}>
-                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by tag">
-                                        <SelectValue placeholder="All tags" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="ALL">All tags</SelectItem>
-                                        {meta.tagOptions.map((tag) => (
-                                            <SelectItem key={tag} value={tag}>
-                                                {tag}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <ListingFilterSelect
+                                    value={toFilterSelectValue(selectedTag)}
+                                    onValueChange={(value) => setFilters({ tagFilter: fromFilterSelectValue(value) })}
+                                    ariaLabel="Filter by tag"
+                                    placeholder="All tags"
+                                    allOption={{ value: ALL_FILTER_VALUE, label: 'All tags' }}
+                                    options={meta.tagOptions.map((tag) => ({ value: tag, label: tag }))}
+                                />
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Expiry">
-                                <Select value={selectedExpiry} onValueChange={(value) => setFilters({ expiryFilter: value as 'all' | 'soon' })}>
-                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by expiry">
-                                        <SelectValue placeholder="All cards" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All cards</SelectItem>
-                                        <SelectItem value="soon">Expiring soon</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <ListingFilterSelect
+                                    value={selectedExpiry}
+                                    onValueChange={(value) => setFilters({ expiryFilter: toTypedFilterValue<CardExpiryFilter>(value) })}
+                                    ariaLabel="Filter by expiry"
+                                    placeholder="All cards"
+                                    options={CARD_EXPIRY_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                                />
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Credit limit">
@@ -219,71 +195,45 @@ export function CardMobileFilters() {
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Billing date">
-                                <Select value={selectedBillingDate || 'ALL'} onValueChange={(value) => setFilters({ billingDate: value === 'ALL' ? '' : value })}>
-                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by billing date">
-                                        <SelectValue placeholder="All dates" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="ALL">All dates</SelectItem>
-                                        {Array.from({ length: 31 }, (_, index) => {
-                                            const day = String(index + 1)
-                                            return (
-                                                <SelectItem key={day} value={day}>
-                                                    Day {day}
-                                                </SelectItem>
-                                            )
-                                        })}
-                                    </SelectContent>
-                                </Select>
+                                <ListingFilterSelect
+                                    value={toFilterSelectValue(selectedBillingDate)}
+                                    onValueChange={(value) => setFilters({ billingDate: fromFilterSelectValue(value) })}
+                                    ariaLabel="Filter by billing date"
+                                    placeholder="All dates"
+                                    allOption={{ value: ALL_FILTER_VALUE, label: 'All dates' }}
+                                    options={DAY_OF_MONTH_FILTER_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                                />
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Payment date">
-                                <Select value={selectedPaymentDate || 'ALL'} onValueChange={(value) => setFilters({ paymentDate: value === 'ALL' ? '' : value })}>
-                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by payment date">
-                                        <SelectValue placeholder="All dates" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="ALL">All dates</SelectItem>
-                                        {Array.from({ length: 31 }, (_, index) => {
-                                            const day = String(index + 1)
-                                            return (
-                                                <SelectItem key={day} value={day}>
-                                                    Day {day}
-                                                </SelectItem>
-                                            )
-                                        })}
-                                    </SelectContent>
-                                </Select>
+                                <ListingFilterSelect
+                                    value={toFilterSelectValue(selectedPaymentDate)}
+                                    onValueChange={(value) => setFilters({ paymentDate: fromFilterSelectValue(value) })}
+                                    ariaLabel="Filter by payment date"
+                                    placeholder="All dates"
+                                    allOption={{ value: ALL_FILTER_VALUE, label: 'All dates' }}
+                                    options={DAY_OF_MONTH_FILTER_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                                />
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Sort">
-                                <Select value={selectedSort} onValueChange={(value) => setSortBy(value as CardSort)}>
-                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Sort cards">
-                                        <SelectValue placeholder="Newest first" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {CARD_SORT_OPTIONS.map((option) => (
-                                            <SelectItem key={option.value} value={option.value}>
-                                                {option.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <ListingFilterSelect
+                                    value={selectedSort}
+                                    onValueChange={(value) => setSortBy(value as CardSort)}
+                                    ariaLabel="Sort cards"
+                                    placeholder="Newest first"
+                                    options={CARD_SORT_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                                />
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Group">
-                                <Select value={selectedGroup} onValueChange={(value) => setGroupBy(value as CardGroup)}>
-                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Group cards">
-                                        <SelectValue placeholder="No grouping" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {CARD_GROUP_OPTIONS.map((option) => (
-                                            <SelectItem key={option.value} value={option.value}>
-                                                {option.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <ListingFilterSelect
+                                    value={selectedGroup}
+                                    onValueChange={(value) => setGroupBy(value as CardGroup)}
+                                    ariaLabel="Group cards"
+                                    placeholder="No grouping"
+                                    options={CARD_GROUP_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                                />
                             </ListingFilterDesktopSection>
                         </div>
 
@@ -291,7 +241,7 @@ export function CardMobileFilters() {
                             hasActiveControls={meta.hasActiveControls}
                             onReset={resetFilters}
                             collapseLabel="Save"
-                            onCollapse={() => setDesktopOpen(false)}
+                            onCollapse={closeDesktopFilters}
                         />
                     </ListingFilterDesktopPanel>
                 }
@@ -308,63 +258,46 @@ export function CardMobileFilters() {
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Network" icon={<Network className="h-3.5 w-3.5" />}>
-                    <Select value={selectedNetwork || 'ALL'} onValueChange={(value) => setFilters({ networkFilter: value === 'ALL' ? '' : value })}>
-                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by network">
-                            <SelectValue placeholder="All networks" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="ALL">All networks</SelectItem>
-                            {meta.networkOptions.map((network) => (
-                                <SelectItem key={network} value={network}>
-                                    {network}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <ListingFilterSelect
+                        value={toFilterSelectValue(selectedNetwork)}
+                        onValueChange={(value) => setFilters({ networkFilter: fromFilterSelectValue(value) })}
+                        ariaLabel="Filter by network"
+                        placeholder="All networks"
+                        allOption={{ value: ALL_FILTER_VALUE, label: 'All networks' }}
+                        options={meta.networkOptions.map((network) => ({ value: network, label: network }))}
+                    />
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Provider" icon={<CreditCard className="h-3.5 w-3.5" />}>
-                    <Select value={selectedProvider || 'ALL'} onValueChange={(value) => setFilters({ providerFilter: value === 'ALL' ? '' : value })}>
-                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by provider">
-                            <SelectValue placeholder="All providers" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="ALL">All providers</SelectItem>
-                            {meta.providerOptions.map((provider) => (
-                                <SelectItem key={provider} value={provider}>
-                                    {provider}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <ListingFilterSelect
+                        value={toFilterSelectValue(selectedProvider)}
+                        onValueChange={(value) => setFilters({ providerFilter: fromFilterSelectValue(value) })}
+                        ariaLabel="Filter by provider"
+                        placeholder="All providers"
+                        allOption={{ value: ALL_FILTER_VALUE, label: 'All providers' }}
+                        options={meta.providerOptions.map((provider) => ({ value: provider, label: provider }))}
+                    />
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Tag" icon={<CreditCard className="h-3.5 w-3.5" />}>
-                    <Select value={selectedTag || 'ALL'} onValueChange={(value) => setFilters({ tagFilter: value === 'ALL' ? '' : value })}>
-                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by tag">
-                            <SelectValue placeholder="All tags" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="ALL">All tags</SelectItem>
-                            {meta.tagOptions.map((tag) => (
-                                <SelectItem key={tag} value={tag}>
-                                    {tag}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <ListingFilterSelect
+                        value={toFilterSelectValue(selectedTag)}
+                        onValueChange={(value) => setFilters({ tagFilter: fromFilterSelectValue(value) })}
+                        ariaLabel="Filter by tag"
+                        placeholder="All tags"
+                        allOption={{ value: ALL_FILTER_VALUE, label: 'All tags' }}
+                        options={meta.tagOptions.map((tag) => ({ value: tag, label: tag }))}
+                    />
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Expiry" icon={<CreditCard className="h-3.5 w-3.5" />}>
-                    <Select value={selectedExpiry} onValueChange={(value) => setFilters({ expiryFilter: value as 'all' | 'soon' })}>
-                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by expiry">
-                            <SelectValue placeholder="All cards" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All cards</SelectItem>
-                            <SelectItem value="soon">Expiring soon</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <ListingFilterSelect
+                        value={selectedExpiry}
+                        onValueChange={(value) => setFilters({ expiryFilter: toTypedFilterValue<CardExpiryFilter>(value) })}
+                        ariaLabel="Filter by expiry"
+                        placeholder="All cards"
+                        options={CARD_EXPIRY_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                    />
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Credit limit" icon={<CreditCard className="h-3.5 w-3.5" />}>
@@ -409,71 +342,45 @@ export function CardMobileFilters() {
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Billing date" icon={<CreditCard className="h-3.5 w-3.5" />}>
-                    <Select value={selectedBillingDate || 'ALL'} onValueChange={(value) => setFilters({ billingDate: value === 'ALL' ? '' : value })}>
-                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by billing date">
-                            <SelectValue placeholder="All dates" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="ALL">All dates</SelectItem>
-                            {Array.from({ length: 31 }, (_, index) => {
-                                const day = String(index + 1)
-                                return (
-                                    <SelectItem key={day} value={day}>
-                                        Day {day}
-                                    </SelectItem>
-                                )
-                            })}
-                        </SelectContent>
-                    </Select>
+                    <ListingFilterSelect
+                        value={toFilterSelectValue(selectedBillingDate)}
+                        onValueChange={(value) => setFilters({ billingDate: fromFilterSelectValue(value) })}
+                        ariaLabel="Filter by billing date"
+                        placeholder="All dates"
+                        allOption={{ value: ALL_FILTER_VALUE, label: 'All dates' }}
+                        options={DAY_OF_MONTH_FILTER_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                    />
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Payment date" icon={<CreditCard className="h-3.5 w-3.5" />}>
-                    <Select value={selectedPaymentDate || 'ALL'} onValueChange={(value) => setFilters({ paymentDate: value === 'ALL' ? '' : value })}>
-                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by payment date">
-                            <SelectValue placeholder="All dates" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="ALL">All dates</SelectItem>
-                            {Array.from({ length: 31 }, (_, index) => {
-                                const day = String(index + 1)
-                                return (
-                                    <SelectItem key={day} value={day}>
-                                        Day {day}
-                                    </SelectItem>
-                                )
-                            })}
-                        </SelectContent>
-                    </Select>
+                    <ListingFilterSelect
+                        value={toFilterSelectValue(selectedPaymentDate)}
+                        onValueChange={(value) => setFilters({ paymentDate: fromFilterSelectValue(value) })}
+                        ariaLabel="Filter by payment date"
+                        placeholder="All dates"
+                        allOption={{ value: ALL_FILTER_VALUE, label: 'All dates' }}
+                        options={DAY_OF_MONTH_FILTER_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                    />
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Sort" icon={<ArrowUpDown className="h-3.5 w-3.5" />}>
-                    <Select value={selectedSort} onValueChange={(value) => setSortBy(value as CardSort)}>
-                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Sort cards">
-                            <SelectValue placeholder="Newest first" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {CARD_SORT_OPTIONS.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <ListingFilterSelect
+                        value={selectedSort}
+                        onValueChange={(value) => setSortBy(value as CardSort)}
+                        ariaLabel="Sort cards"
+                        placeholder="Newest first"
+                        options={CARD_SORT_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                    />
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Group" icon={<Layers3 className="h-3.5 w-3.5" />}>
-                    <Select value={selectedGroup} onValueChange={(value) => setGroupBy(value as CardGroup)}>
-                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Group cards">
-                            <SelectValue placeholder="No grouping" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {CARD_GROUP_OPTIONS.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <ListingFilterSelect
+                        value={selectedGroup}
+                        onValueChange={(value) => setGroupBy(value as CardGroup)}
+                        ariaLabel="Group cards"
+                        placeholder="No grouping"
+                        options={CARD_GROUP_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                    />
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileActions

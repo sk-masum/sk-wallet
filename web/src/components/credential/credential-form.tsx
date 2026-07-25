@@ -14,13 +14,7 @@ import {
     entityFormSelectClass,
     entityFormTextareaClass,
 } from '@/components/shared/entity-form-ui'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
+import { AppSelectField } from '@/components/shared/app-select-field'
 import { Textarea } from '@/components/ui/textarea'
 import { CREDENTIAL_TYPE_OPTIONS, getCredentialTypeConfig } from '@/constants/credential/types'
 import type { CredentialFormFieldErrors, CredentialFormPayload } from '@/models/credential'
@@ -99,25 +93,18 @@ export function CredentialForm({
     return (
         <form onSubmit={handleSubmit} className={entityFormGridClass}>
             <FormField id="cred-type" label="Credential type" error={fieldErrors.type} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
-                <Select
+                <AppSelectField
+                    id="cred-type"
                     disabled={lockTypeField}
                     value={values.type}
                     onValueChange={(value) => {
                         setValues((prev) => ({ ...prev, type: value }))
                         setFieldErrors((prev) => ({ ...prev, type: undefined }))
                     }}
-                >
-                    <SelectTrigger id="cred-type" className={cn(entityFormSelectClass, fieldErrors.type && 'border-destructive')}>
-                        <SelectValue placeholder="Select credential type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {CREDENTIAL_TYPE_OPTIONS.map((item) => (
-                            <SelectItem key={item.code} value={item.code}>
-                                {item.label}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                    placeholder="Select credential type"
+                    triggerClassName={cn(entityFormSelectClass, fieldErrors.type && 'border-destructive')}
+                    options={CREDENTIAL_TYPE_OPTIONS.map((item) => ({ value: item.code, label: item.label }))}
+                />
             </FormField>
 
             <FormField id="cred-service" label="Service name" error={fieldErrors.serviceName} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>

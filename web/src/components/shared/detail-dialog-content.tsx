@@ -38,7 +38,7 @@ export function DetailDialogContent({
 
             <DialogClose
                 aria-label="Close"
-                className="mx-auto my-2 h-1.5 w-10 rounded-full bg-foreground/25 transition-opacity hover:opacity-80 sm:hidden"
+                className="mx-auto my-2 h-1.5 w-10 rounded-full bg-background/50 dark:bg-foreground/25 transition-opacity hover:opacity-80 sm:hidden"
             />
 
             <div className={cn('max-h-[calc(90dvh-2rem)] overflow-y-auto px-0 sm:px-0', scrollClassName)}>

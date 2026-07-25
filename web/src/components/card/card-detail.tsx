@@ -5,8 +5,9 @@ import { responsiveIconSizes } from "../ui/icon-sizes"
 import { CardFace } from "./card-face"
 import { cn } from "@/lib/utils"
 import { DialogActions } from "../shared/dialog-actions"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
-import { CARD_STATUS_OPTIONS, isCardStatus } from "@/constants/card/status"
+import { CardStatusSelect } from "./card-status-select"
+import type { CardStatus } from "@/models/card"
+import { SURFACE_REVEAL_CLASS } from "@/constants/ui/animation"
 
 interface CardDetailProps {
     selectedCard: WalletCard
@@ -15,12 +16,12 @@ interface CardDetailProps {
     isDeleting: boolean
     hydrated: boolean
     router: { push: (href: string) => void }
-    selectedStatus: 'active' | 'inactive' | 'blocked' | 'replaced'
+    selectedStatus: CardStatus
     toggleNumberVisibility: () => void
     setConfirmDeleteOpen: (open: boolean) => void
     isFavorite: (itemId: string) => boolean
     toggleFavorite: (itemId: string) => void
-    setSelectedStatus: (status: 'active' | 'inactive' | 'blocked' | 'replaced') => void
+    setSelectedStatus: (status: CardStatus) => void
     handleStatusUpdate: () => void
 }
 
@@ -56,7 +57,7 @@ export function CardDetail({ selectedCard, showCardNumber, toggleNumberVisibilit
                     </div>
                 ) : null}
 
-                <div className="grid grid-cols-4 gap-2 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
+                <div className={cn('grid grid-cols-4 gap-2', SURFACE_REVEAL_CLASS)}>
                     <Button
                         type="button"
                         variant="action"
@@ -81,30 +82,16 @@ export function CardDetail({ selectedCard, showCardNumber, toggleNumberVisibilit
                     />
                 </div>
 
-                <div className="mt-2.5 border-t border-border/55 pt-2.5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 sm:mt-3 sm:pt-3">
+                <div className={cn('mt-2.5 border-t border-border/55 pt-2.5 sm:mt-3 sm:pt-3', SURFACE_REVEAL_CLASS)}>
                     <div className="space-y-2 rounded-xl border border-border/60 bg-background/75 p-4">
                         <p className="text-[11px] font-semibold tracking-[0.08em] text-text-subtle uppercase">Card status</p>
                         <div className="flex gap-2 flex-row sm:items-center">
-                            <Select
+                            <CardStatusSelect
                                 value={selectedStatus}
-                                onValueChange={(value) => {
-                                    if (isCardStatus(value)) {
-                                        setSelectedStatus(value)
-                                    }
-                                }}
+                                onStatusChange={setSelectedStatus}
                                 disabled={isUpdatingStatus || isDeleting}
-                            >
-                                <SelectTrigger className="h-10 flex-1 rounded-lg border border-border/65 bg-background px-3 text-sm">
-                                    <SelectValue placeholder="Select status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {CARD_STATUS_OPTIONS.map((statusOption) => (
-                                        <SelectItem key={statusOption.value} value={statusOption.value}>
-                                            {statusOption.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                triggerClassName="h-10 flex-1 rounded-lg border border-border/65 bg-background px-3 text-sm"
+                            />
                             <Button
                                 type="button"
                                 variant="neutral"

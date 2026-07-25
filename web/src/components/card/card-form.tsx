@@ -8,7 +8,7 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { FormActions } from '@/components/ui/form-actions'
 import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { AppSelectField } from '@/components/shared/app-select-field'
 import { CardNumberInput } from '@/components/card/card-number-input'
 import { CvvOtpInput } from '@/components/card/cvv-otp-input'
 import { CARD_PATTERNS, getRandomCardPatternKey } from '@/constants/card/patterns'
@@ -493,21 +493,14 @@ export function CardForm({
             ))}
           </datalist>
 
-          <Select
+          <AppSelectField
             value={tagPickerValue === TAG_PICKER_PLACEHOLDER ? undefined : tagPickerValue}
             onValueChange={handleTagPickerChange}
-          >
-            <SelectTrigger className={cn(entityFormSelectClass, 'h-10')} aria-label="Quick add tag">
-              <SelectValue placeholder="Quick add tag" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableTagSuggestions.map((tag) => (
-                <SelectItem key={tag} value={tag}>
-                  {tag}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            ariaLabel="Quick add tag"
+            placeholder="Quick add tag"
+            triggerClassName={cn(entityFormSelectClass, 'h-10')}
+            options={availableTagSuggestions.map((tag) => ({ value: tag, label: tag }))}
+          />
         </div>
       </FormField>
       <FormField id="number" label="CARD NUMBER" error={fieldErrors.number} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
@@ -713,28 +706,18 @@ export function CardForm({
       <FormField id="expiry_month" label="EXPIRY MONTH" error={fieldErrors.expiry_month} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
         <>
           <input type="hidden" id="expiry_month" name="expiry_month" value={selectedExpiryMonth} />
-          <Select
+          <AppSelectField
             value={selectedExpiryMonth}
             onValueChange={(value) => {
               setSelectedExpiryMonth(value)
               validateFields(['expiry_month', 'expiry_year'])
             }}
             required
-          >
-            <SelectTrigger
-              aria-invalid={Boolean(fieldErrors.expiry_month)}
-              className={cn(entityFormSelectClass, fieldErrors.expiry_month && 'border-destructive focus-visible:ring-destructive')}
-            >
-              <SelectValue placeholder="Select month" />
-            </SelectTrigger>
-            <SelectContent>
-              {MONTH_OPTIONS.map((month) => (
-                <SelectItem key={month.value} value={month.value}>
-                  {month.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            ariaInvalid={Boolean(fieldErrors.expiry_month)}
+            placeholder="Select month"
+            triggerClassName={cn(entityFormSelectClass, fieldErrors.expiry_month && 'border-destructive focus-visible:ring-destructive')}
+            options={MONTH_OPTIONS.map((month) => ({ value: month.value, label: month.label }))}
+          />
         </>
       </FormField>
 
@@ -812,28 +795,18 @@ export function CardForm({
       >
         <>
           <input type="hidden" id="network" name="network" value={selectedNetwork} />
-          <Select
+          <AppSelectField
             value={selectedNetwork}
             onValueChange={(value) => {
               setSelectedNetwork(value)
               validateFields(['network', 'number', 'cvv'])
             }}
             required
-          >
-            <SelectTrigger
-              aria-invalid={Boolean(fieldErrors.network)}
-              className={cn(entityFormSelectClass, fieldErrors.network && 'border-destructive focus-visible:ring-destructive')}
-            >
-              <SelectValue placeholder="Select network" />
-            </SelectTrigger>
-            <SelectContent>
-              {CARD_NETWORK_FORM_OPTIONS.map((networkOption) => (
-                <SelectItem key={networkOption.value} value={networkOption.value}>
-                  {networkOption.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            ariaInvalid={Boolean(fieldErrors.network)}
+            placeholder="Select network"
+            triggerClassName={cn(entityFormSelectClass, fieldErrors.network && 'border-destructive focus-visible:ring-destructive')}
+            options={CARD_NETWORK_FORM_OPTIONS.map((networkOption) => ({ value: networkOption.value, label: networkOption.label }))}
+          />
         </>
       </FormField>
 

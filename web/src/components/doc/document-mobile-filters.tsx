@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { CreditCard } from 'lucide-react'
 
@@ -12,26 +11,34 @@ import {
     ListingFilterMobileSection,
     ListingFilterMobileSheet,
 } from '@/components/shared/listing-filter-panels'
+import { ListingFilterSelect } from '@/components/shared/listing-filter-select'
 import { ListingFilterTopBar } from '@/components/shared/listing-filter-topbar'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useFilterDialogState } from '@/hooks/use-filter-dialog-state'
+import { DOCUMENT_SORT_OPTIONS } from '@/constants/doc/filters'
 import { DOCUMENT_CATEGORY_OPTIONS } from '@/constants/document/categories'
 import { DOCUMENT_TYPE_OPTIONS } from '@/constants/document/types'
+import { ALL_CATEGORY_FILTER_VALUE, ALL_FILTER_VALUE } from '@/constants/ui/filter'
 import {
     DEFAULT_DOCUMENT_SORT,
     type DocumentSort,
     useDocumentVaultStore,
 } from '@/lib/stores/document-vault-store'
-
-const DOCUMENT_SORT_OPTIONS = [
-    { value: 'newest', label: 'Newest first' },
-    { value: 'oldest', label: 'Oldest first' },
-    { value: 'name-asc', label: 'Name (A-Z)' },
-    { value: 'name-desc', label: 'Name (Z-A)' },
-] as const
+import { useActiveFilterControls } from '@/hooks/use-active-filter-controls'
+import {
+    hasNonDefaultFilterValue,
+    hasSpecificFilterValue,
+    toTypedFilterValue,
+} from '@/utils/filter/value'
 
 export function DocumentMobileFilters() {
-    const [mobileOpen, setMobileOpen] = useState(false)
-    const [desktopOpen, setDesktopOpen] = useState(false)
+    const {
+        mobileOpen,
+        desktopOpen,
+        openMobileFilters,
+        setMobileOpen,
+        toggleDesktopFilters,
+        closeDesktopFilters,
+    } = useFilterDialogState()
     const pathname = usePathname()
     const query = useDocumentVaultStore((state) => state.query)
     const selectedType = useDocumentVaultStore((state) => state.typeFilter)
@@ -40,14 +47,16 @@ export function DocumentMobileFilters() {
     const setFilters = useDocumentVaultStore((state) => state.setFilters)
     const setSortBy = useDocumentVaultStore((state) => state.setSortBy)
 
-    const hasTextQuery = query.length > 0
-    const hasTypeFilter = selectedType !== 'ALL'
-    const hasCategoryFilter = selectedCategory !== 'all'
-    const hasSortSelection = selectedSort !== DEFAULT_DOCUMENT_SORT
-    const hasActiveControls = hasTextQuery || hasTypeFilter || hasCategoryFilter || hasSortSelection
+    const hasTypeFilter = hasSpecificFilterValue(selectedType, ALL_FILTER_VALUE)
+    const hasCategoryFilter = hasSpecificFilterValue(selectedCategory, ALL_CATEGORY_FILTER_VALUE)
+    const hasSortSelection = hasNonDefaultFilterValue(selectedSort, DEFAULT_DOCUMENT_SORT)
+    const { hasTextQuery, hasActiveControls, activeFilterCount } = useActiveFilterControls({
+        query,
+        activityFlags: [hasTypeFilter, hasCategoryFilter, hasSortSelection],
+    })
 
     const clearAll = () => {
-        setFilters({ query: '', typeFilter: 'ALL', categoryFilter: 'all' })
+        setFilters({ query: '', typeFilter: ALL_FILTER_VALUE, categoryFilter: ALL_CATEGORY_FILTER_VALUE })
         setSortBy(DEFAULT_DOCUMENT_SORT)
     }
 
@@ -60,7 +69,7 @@ export function DocumentMobileFilters() {
     }
 
     const handleSortChange = (value: string) => {
-        setSortBy(value as DocumentSort)
+        setSortBy(toTypedFilterValue<DocumentSort>(value))
     }
 
     return (
@@ -75,69 +84,54 @@ export function DocumentMobileFilters() {
                 desktopSearchPlaceholder="Search by number, type, or name"
                 mobileSearchAriaLabel="Search documents"
                 desktopSearchAriaLabel="Search documents"
-                mobileFilterCount={Number(hasTypeFilter) + Number(hasCategoryFilter) + Number(hasSortSelection)}
-                onOpenMobileFilters={() => setMobileOpen(true)}
+                mobileFilterCount={activeFilterCount}
+                onOpenMobileFilters={openMobileFilters}
                 hasTextQuery={hasTextQuery}
                 hasActiveControls={hasActiveControls}
                 onResetAll={clearAll}
                 desktopFilterOpen={desktopOpen}
-                onToggleDesktopFilters={() => setDesktopOpen((prev) => !prev)}
+                onToggleDesktopFilters={toggleDesktopFilters}
                 desktopExpandedClassName=""
                 desktopPanel={
                     <ListingFilterDesktopPanel>
                         <div className="grid grid-cols-2 gap-4">
                             <ListingFilterDesktopSection label="Type">
-                                <Select value={selectedType} onValueChange={handleTypeChange}>
-                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by document type">
-                                        <SelectValue placeholder="Filter by type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="ALL">All types</SelectItem>
-                                        {DOCUMENT_TYPE_OPTIONS.map((item) => (
-                                            <SelectItem key={item.code} value={item.code}>
-                                                {item.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <ListingFilterSelect
+                                    value={selectedType}
+                                    onValueChange={handleTypeChange}
+                                    ariaLabel="Filter by document type"
+                                    placeholder="Filter by type"
+                                    allOption={{ value: ALL_FILTER_VALUE, label: 'All types' }}
+                                    options={DOCUMENT_TYPE_OPTIONS.map((item) => ({ value: item.code, label: item.label }))}
+                                />
                             </ListingFilterDesktopSection>
 
                             <ListingFilterDesktopSection label="Category">
-                                <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-                                    <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by document category">
-                                        <SelectValue placeholder="Filter by category" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All categories</SelectItem>
-                                        {DOCUMENT_CATEGORY_OPTIONS.map((item) => (
-                                            <SelectItem key={item.value} value={item.value}>
-                                                {item.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <ListingFilterSelect
+                                    value={selectedCategory}
+                                    onValueChange={handleCategoryChange}
+                                    ariaLabel="Filter by document category"
+                                    placeholder="Filter by category"
+                                    allOption={{ value: ALL_CATEGORY_FILTER_VALUE, label: 'All categories' }}
+                                    options={DOCUMENT_CATEGORY_OPTIONS.map((item) => ({ value: item.value, label: item.label }))}
+                                />
                             </ListingFilterDesktopSection>
                         </div>
 
                         <ListingFilterDesktopSection label="Sort">
-                            <Select value={selectedSort} onValueChange={handleSortChange}>
-                                <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Sort documents">
-                                    <SelectValue placeholder="Newest first" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {DOCUMENT_SORT_OPTIONS.map((option) => (
-                                        <SelectItem key={option.value} value={option.value}>
-                                            {option.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <ListingFilterSelect
+                                value={selectedSort}
+                                onValueChange={handleSortChange}
+                                ariaLabel="Sort documents"
+                                placeholder="Newest first"
+                                options={DOCUMENT_SORT_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                            />
                         </ListingFilterDesktopSection>
 
                         <ListingFilterDesktopActions
                             hasActiveControls={hasActiveControls}
                             onReset={clearAll}
-                            onCollapse={() => setDesktopOpen(false)}
+                            onCollapse={closeDesktopFilters}
                         />
                     </ListingFilterDesktopPanel>
                 }
@@ -150,50 +144,35 @@ export function DocumentMobileFilters() {
                 description="Apply document filters in one place."
             >
                 <ListingFilterMobileSection label="Type" icon={<CreditCard className="h-3.5 w-3.5" />}>
-                    <Select value={selectedType} onValueChange={handleTypeChange}>
-                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by document type">
-                            <SelectValue placeholder="Filter by type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="ALL">All types</SelectItem>
-                            {DOCUMENT_TYPE_OPTIONS.map((item) => (
-                                <SelectItem key={item.code} value={item.code}>
-                                    {item.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <ListingFilterSelect
+                        value={selectedType}
+                        onValueChange={handleTypeChange}
+                        ariaLabel="Filter by document type"
+                        placeholder="Filter by type"
+                        allOption={{ value: ALL_FILTER_VALUE, label: 'All types' }}
+                        options={DOCUMENT_TYPE_OPTIONS.map((item) => ({ value: item.code, label: item.label }))}
+                    />
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Category" icon={<CreditCard className="h-3.5 w-3.5" />}>
-                    <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Filter by document category">
-                            <SelectValue placeholder="Filter by category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All categories</SelectItem>
-                            {DOCUMENT_CATEGORY_OPTIONS.map((item) => (
-                                <SelectItem key={item.value} value={item.value}>
-                                    {item.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <ListingFilterSelect
+                        value={selectedCategory}
+                        onValueChange={handleCategoryChange}
+                        ariaLabel="Filter by document category"
+                        placeholder="Filter by category"
+                        allOption={{ value: ALL_CATEGORY_FILTER_VALUE, label: 'All categories' }}
+                        options={DOCUMENT_CATEGORY_OPTIONS.map((item) => ({ value: item.value, label: item.label }))}
+                    />
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileSection label="Sort" icon={<CreditCard className="h-3.5 w-3.5" />}>
-                    <Select value={selectedSort} onValueChange={handleSortChange}>
-                        <SelectTrigger className="h-10 w-full rounded-xl border-border/60 bg-background/95" aria-label="Sort documents">
-                            <SelectValue placeholder="Newest first" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {DOCUMENT_SORT_OPTIONS.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <ListingFilterSelect
+                        value={selectedSort}
+                        onValueChange={handleSortChange}
+                        ariaLabel="Sort documents"
+                        placeholder="Newest first"
+                        options={DOCUMENT_SORT_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                    />
                 </ListingFilterMobileSection>
 
                 <ListingFilterMobileActions

@@ -27,7 +27,7 @@ export function MiniVerticalCarouselCard({
     subtitleClassName,
 }: MiniVerticalCarouselCardProps) {
     const cardClassName = cn(
-        'group relative flex min-h-56 min-w-44 flex-col justify-between overflow-hidden rounded-3xl border border-glass-border-strong bg-glass p-3.5 text-foreground shadow-neu-raised-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-glass-strong  first:ml-2',
+        'interactive-lift interactive-ring group relative flex min-h-56 min-w-44 flex-col justify-between overflow-hidden rounded-3xl border border-glass-border-strong bg-glass p-3.5 text-foreground shadow-neu-raised-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-glass-strong first:ml-2',
         className
     )
 

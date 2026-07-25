@@ -15,6 +15,7 @@ import { showToast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 import { resolveNetworkLabel } from '@/utils/card/network'
 import { useDashboardFavorites } from '@/hooks/use-dashboard-favorites'
+import { useMediaQuery } from '@/hooks/use-media-query'
 import { CardDetail } from './card-detail'
 
 type CardGridProps = {
@@ -25,22 +26,14 @@ type CardGridProps = {
 export function CardGrid({ cards, groupBy = 'none' }: CardGridProps) {
   const router = useRouter()
   const { hydrated, isFavorite, toggleFavorite } = useDashboardFavorites()
+  const isMobile = useMediaQuery('(max-width: 640px)')
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
   const [showCardNumber, setShowCardNumber] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
   const [selectedStatus, setSelectedStatus] = useState<'active' | 'inactive' | 'blocked' | 'replaced'>('active')
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
-
-  useEffect(() => {
-    const media = window.matchMedia('(max-width: 640px)')
-    const update = () => setIsMobile(media.matches)
-    update()
-    media.addEventListener('change', update)
-    return () => media.removeEventListener('change', update)
-  }, [])
 
   useEffect(() => {
     setShowCardNumber(false)

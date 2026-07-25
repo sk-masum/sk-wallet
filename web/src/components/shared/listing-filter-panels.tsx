@@ -129,7 +129,7 @@ export function ListingFilterMobileSheet({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DetailDialogContent
-                className={cn('sm:hidden max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:w-screen max-sm:max-w-screen max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-0 border-glass-border bg-[linear-gradient(to_bottom,hsl(var(--card)/0.5),hsl(var(--surface-elevated)/0.94))] backdrop-blur-xl ', className)}
+                className={cn('sm:hidden max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:w-screen max-sm:max-w-screen max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-0 border-glass-border bg-[linear-gradient(to_bottom,hsl(var(--card)/0.94),hsl(var(--surface-elevated)/0.92))] backdrop-blur-xl dark:bg-[linear-gradient(to_bottom,hsl(var(--card)/0.98),hsl(var(--surface-elevated)/0.96))] ', className)}
                 scrollClassName="max-h-[88dvh] px-0 pb-0"
             >
                 <div className="flex h-full flex-col bg-transparent pb-4">
@@ -186,7 +186,7 @@ export function ListingFilterMobileActions({
     onDone,
 }: ListingFilterMobileActionsProps) {
     return (
-        <div className="fixed inset-x-0 bottom-0 z-50 flex items-center gap-2 border-t border-glass-border bg-[linear-gradient(to_top,hsl(var(--card)/0.98),hsl(var(--surface)/0.95))] p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-xl sm:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-50 flex items-center gap-2 border-t border-glass-border bg-[linear-gradient(to_top,hsl(var(--card)/0.97),hsl(var(--surface)/0.94))] p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-xl dark:bg-[linear-gradient(to_top,hsl(var(--card)/0.99),hsl(var(--surface-elevated)/0.97))] sm:hidden">
             {resetHref && hasActiveControls ? (
                 <Link
                     href={resetHref}

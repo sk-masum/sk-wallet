@@ -357,8 +357,65 @@ body {
     box-shadow: var(--neu-shadow-raised-sm);
   }
 
+  .listing-filter-select-trigger {
+    height: 2.5rem;
+    width: 100%;
+    border-radius: 0.75rem;
+    border-color: hsl(var(--border) / 0.6);
+    background-color: hsl(var(--background) / 0.95);
+  }
+
+  .interactive-lift {
+    transform: translateZ(0);
+    transition:
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 180ms ease,
+      filter 180ms ease;
+    will-change: transform;
+  }
+
+  .interactive-press {
+    transform: translateZ(0);
+    transition:
+      transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      filter 140ms ease,
+      box-shadow 140ms ease;
+    will-change: transform;
+  }
+
+  .interactive-ring {
+    transition:
+      box-shadow 180ms ease,
+      border-color 180ms ease;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .interactive-lift:hover {
+      transform: translateY(-1px) scale(1.01);
+      filter: saturate(1.03);
+    }
+
+    .interactive-lift:active {
+      transform: translateY(0) scale(0.995);
+      filter: saturate(1);
+    }
+
+    .interactive-press:hover {
+      transform: translateY(-0.5px);
+    }
+
+    .interactive-press:active {
+      transform: translateY(1px) scale(0.985);
+    }
+  }
+
   .dark .listing-filter-surface {
     border-color: rgb(255 255 255 / 0.14);
+  }
+
+  .interactive-ring:hover {
+    border-color: hsl(var(--primary) / 0.45);
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.14);
   }
 
   @media (min-width: 640px) {

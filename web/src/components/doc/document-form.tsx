@@ -19,15 +19,9 @@ import {
   entityFormSelectClass,
   entityFormTextareaClass,
 } from '@/components/shared/entity-form-ui'
+import { AppSelectField } from '@/components/shared/app-select-field'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { isDocumentCategory } from '@/constants/document/categories'
 import { DOCUMENT_CATEGORY_OPTIONS } from '@/constants/document/categories'
 import { DOCUMENT_TYPE_OPTIONS, getDocumentTypeConfig } from '@/constants/document/types'
@@ -186,7 +180,8 @@ export function DocumentForm({
   return (
     <form onSubmit={handleSubmit} className={entityFormGridClass}>
       <FormField id="doc-type" label="Document type" error={fieldErrors.type} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
-        <Select
+        <AppSelectField
+          id="doc-type"
           disabled={lockTypeField}
           value={values.type}
           onValueChange={(value) => {
@@ -201,18 +196,10 @@ export function DocumentForm({
             }))
             setFieldErrors((prev) => ({ ...prev, type: undefined, number: undefined, category: undefined }))
           }}
-        >
-          <SelectTrigger id="doc-type" className={cn(entityFormSelectClass, fieldErrors.type && 'border-destructive')}>
-            <SelectValue placeholder="Select document type" />
-          </SelectTrigger>
-          <SelectContent>
-            {DOCUMENT_TYPE_OPTIONS.map((item) => (
-              <SelectItem key={item.code} value={item.code}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          placeholder="Select document type"
+          triggerClassName={cn(entityFormSelectClass, fieldErrors.type && 'border-destructive')}
+          options={DOCUMENT_TYPE_OPTIONS.map((item) => ({ value: item.code, label: item.label }))}
+        />
       </FormField>
 
       {values.type === DocumentTypeCode.OTHERS ? (
@@ -242,24 +229,17 @@ export function DocumentForm({
 
       {values.type !== DocumentTypeCode.OTHERS ? (
         <FormField id="doc-category" label="Category" error={fieldErrors.category} className={entityFormFieldCardClass} labelClassName={entityFormLabelClass}>
-          <Select
+          <AppSelectField
+            id="doc-category"
             value={values.category}
             onValueChange={(value) => {
               setValues((prev) => ({ ...prev, category: value }))
               setFieldErrors((prev) => ({ ...prev, category: undefined }))
             }}
-          >
-            <SelectTrigger id="doc-category" className={cn(entityFormSelectClass, fieldErrors.category && 'border-destructive')}>
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              {DOCUMENT_CATEGORY_OPTIONS.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            placeholder="Select category"
+            triggerClassName={cn(entityFormSelectClass, fieldErrors.category && 'border-destructive')}
+            options={DOCUMENT_CATEGORY_OPTIONS.map((item) => ({ value: item.value, label: item.label }))}
+          />
         </FormField>
       ) : null}
 

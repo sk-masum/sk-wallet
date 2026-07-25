@@ -7,9 +7,13 @@ import { LoaderCircle } from 'lucide-react'
 import { CardFace } from '@/components/card/card-face'
 import { MiniVerticalCarouselCard } from '@/components/dashboard/mini-vertical-carousel-card'
 import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
+import {
+    DetailDialogBody,
+    DetailDialogErrorState,
+    DetailDialogLoadingNotice,
+} from '@/components/shared/detail-dialog-states'
 import { NetworkLogo } from '@/components/icons/network-logo'
 import { SharedCarouselSection } from '@/components/dashboard/shared-carousel-section'
-import { Button } from '@/components/ui/button'
 import { Dialog } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { clientApiGet } from '@/lib/api/client'
@@ -117,7 +121,7 @@ export function CardsCarousel({ cards }: CardsCarouselProps) {
             <Dialog open={Boolean(selectedCardId)} onOpenChange={(open) => !open && setSelectedCardId(null)}>
                 <DetailDialogContent>
                     {loadingDetails ? (
-                        <div className="mx-auto w-full max-w-120 space-y-3">
+                        <DetailDialogBody>
                             <div className="relative overflow-hidden rounded-2xl border border-border/65 bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 px-4 pb-5 pt-4 text-slate-100 shadow-xl sm:px-5">
                                 <div className="pointer-events-none absolute -inset-x-10 -top-18 h-36 rotate-6 bg-linear-to-r from-transparent via-glass-overlay-soft to-transparent motion-safe:animate-[pulse_2.4s_ease-in-out_infinite]" />
 
@@ -155,26 +159,17 @@ export function CardsCarousel({ cards }: CardsCarouselProps) {
                                 </div>
                             </div>
 
-                            <div className="rounded-2xl border border-border/65 bg-background/95 px-4 py-3">
-                                <div className="inline-flex items-center gap-2 text-sm text-text-subtle">
-                                    <LoaderCircle className="h-4 w-4 animate-spin" />
-                                    Preparing secure card details...
-                                </div>
-                            </div>
-                        </div>
+                            <DetailDialogLoadingNotice message="Preparing secure card details..." />
+                        </DetailDialogBody>
                     ) : detailsError ? (
-                        <div className="mx-auto flex min-h-64 w-full max-w-120 flex-col items-center justify-center gap-4 rounded-2xl border border-border/65 bg-background/95 px-6 py-8 text-center">
-                            <p className="text-sm text-text-subtle">{detailsError}</p>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => selectedCardId && router.push(`/card/${selectedCardId}`)}
-                            >
-                                Open full card page
-                            </Button>
-                        </div>
+                        <DetailDialogErrorState
+                            message={detailsError}
+                            actionLabel="Open full card page"
+                            minHeightClassName="min-h-64"
+                            onAction={() => selectedCardId && router.push(`/card/${selectedCardId}`)}
+                        />
                     ) : selectedCard ? (
-                        <div className="mx-auto w-full max-w-120 space-y-3">
+                        <DetailDialogBody>
                             <CardFace
                                 card={selectedCard}
                                 showCreditLimit
@@ -182,7 +177,7 @@ export function CardsCarousel({ cards }: CardsCarouselProps) {
                                 allowCopyNumber
                                 className="rounded-2xl"
                             />
-                        </div>
+                        </DetailDialogBody>
                     ) : null}
                 </DetailDialogContent>
             </Dialog>

@@ -35,7 +35,7 @@ export function SharedCarouselSection<T>({
                 <div>
                     <h3 className="text-lg font-semibold text-foreground sm:text-2xl">{title}</h3>
                 </div>
-                <Link href={actionHref} className="inline-flex items-center rounded-full border border-glass-border-strong bg-glass px-3 py-1 text-xs font-semibold text-text-subtle shadow-neu-raised-sm backdrop-blur-sm transition-colors hover:bg-glass-strong hover:text-foreground ">
+                <Link href={actionHref} className="interactive-lift interactive-ring inline-flex items-center rounded-full border border-glass-border-strong bg-glass px-3 py-1 text-xs font-semibold text-text-subtle shadow-neu-raised-sm backdrop-blur-sm transition-colors hover:bg-glass-strong hover:text-foreground">
                     <ArrowUpRight className={responsiveIconSizes.action} /> {actionLabel}
                 </Link>
             </div>

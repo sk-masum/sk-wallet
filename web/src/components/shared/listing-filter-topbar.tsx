@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react'
-import { useEffect, useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 import { Button, buttonVariants } from '@/components/ui/button'
 import { responsiveIconSizes } from '@/components/ui/icon-sizes'
 import { Input } from '@/components/ui/input'
+import { useScrollActivity } from '@/hooks/use-scroll-activity'
 import { cn } from '@/lib/utils'
 
 type ListingFilterTopBarProps = {
@@ -66,32 +67,7 @@ export function ListingFilterTopBar({
     mobileInnerClassName,
     desktopContainerClassName,
 }: ListingFilterTopBarProps) {
-    const [isScrollSurfaceActive, setIsScrollSurfaceActive] = useState(false)
-
-    useEffect(() => {
-        let clearSurfaceTimeout: ReturnType<typeof setTimeout> | null = null
-
-        const handleScroll = () => {
-            setIsScrollSurfaceActive(true)
-
-            if (clearSurfaceTimeout) {
-                clearTimeout(clearSurfaceTimeout)
-            }
-
-            clearSurfaceTimeout = setTimeout(() => {
-                setIsScrollSurfaceActive(false)
-            }, 140)
-        }
-
-        window.addEventListener('scroll', handleScroll, { passive: true })
-
-        return () => {
-            window.removeEventListener('scroll', handleScroll)
-            if (clearSurfaceTimeout) {
-                clearTimeout(clearSurfaceTimeout)
-            }
-        }
-    }, [])
+    const isScrollSurfaceActive = useScrollActivity({ idleDelayMs: 140 })
 
     const renderClearSearchAction = (desktop: boolean) => {
         const className = desktop

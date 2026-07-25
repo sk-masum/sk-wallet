@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 
+import { CardStatusSelect } from '@/components/card/card-status-select'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { CARD_STATUS_OPTIONS, isCardStatus } from '@/constants/card/status'
+import type { CardStatus } from '@/models/card'
 
 type CardStatusFormProps = {
     cardId: string
-    initialStatus: 'active' | 'inactive' | 'blocked' | 'replaced'
+    initialStatus: CardStatus
     action: (formData: FormData) => void | Promise<void>
 }
 
@@ -23,25 +23,12 @@ export function CardStatusForm({ cardId, initialStatus, action }: CardStatusForm
                 <label htmlFor="status-select" className="text-[11px] font-semibold tracking-[0.08em] text-text-subtle uppercase">
                     Status
                 </label>
-                <Select
+                <CardStatusSelect
+                    id="status-select"
                     value={status}
-                    onValueChange={(value) => {
-                        if (isCardStatus(value)) {
-                            setStatus(value)
-                        }
-                    }}
-                >
-                    <SelectTrigger id="status-select" className="h-11 w-full rounded-xl border border-border/65 bg-background/90 px-3 text-sm">
-                        <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {CARD_STATUS_OPTIONS.map((statusOption) => (
-                            <SelectItem key={statusOption.value} value={statusOption.value}>
-                                {statusOption.label}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                    onStatusChange={setStatus}
+                    triggerClassName="h-11 w-full rounded-xl border border-border/65 bg-background/90 px-3 text-sm"
+                />
             </div>
             <Button type="submit" variant="primary" size="actionWide">
                 Update status

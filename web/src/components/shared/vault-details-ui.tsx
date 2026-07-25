@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { SURFACE_REVEAL_CLASS } from '@/constants/ui/animation'
 import { cn } from '@/lib/utils'
 import { CopyButton } from '../ui/copy-button'
 
@@ -20,7 +21,7 @@ export function VaultDetailsCard({
     children,
 }: VaultDetailsCardProps) {
     return (
-        <Card className={cn('bg-[linear-gradient(to_bottom,hsl(var(--card)/0.5),hsl(var(--surface-elevated)/0.94))] backdrop-blur-xl mx-auto w-full max-w-120 border-border/70 shadow-lg motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300', className)}>
+        <Card className={cn('bg-[linear-gradient(to_bottom,hsl(var(--card)/0.5),hsl(var(--surface-elevated)/0.94))] backdrop-blur-xl mx-auto w-full max-w-120 border-border/70 shadow-lg', SURFACE_REVEAL_CLASS, className)}>
             <CardHeader>
                 <CardTitle>{title}</CardTitle>
                 {subtitle ? <CardDescription>{subtitle}</CardDescription> : null}
