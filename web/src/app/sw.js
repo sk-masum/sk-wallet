@@ -22,7 +22,8 @@ const serwist = new Serwist({
   runtimeCaching: [
     {
       // App shell: instant cached response, then update quietly in background.
-      matcher: ({ request, url }) => request.mode === 'navigate' && url.origin === self.location.origin,
+      matcher: ({ request, url }) =>
+        request.mode === 'navigate' && url.origin === self.location.origin,
       handler: new StaleWhileRevalidate({
         cacheName: CACHE_NAMES.APP_SHELL,
         plugins: [
@@ -34,8 +35,8 @@ const serwist = new Serwist({
     {
       // Static chunks and fonts: cache-first for fastest startup in installed PWA mode.
       matcher: ({ request, url }) =>
-        url.origin === self.location.origin
-        && ['script', 'style', 'font', 'worker'].includes(request.destination),
+        url.origin === self.location.origin &&
+        ['script', 'style', 'font', 'worker'].includes(request.destination),
       handler: new CacheFirst({
         cacheName: CACHE_NAMES.STATIC_ASSETS,
         plugins: [
@@ -49,7 +50,8 @@ const serwist = new Serwist({
     },
     {
       // Sensitive vault endpoints stay dynamic and only keep a tiny fallback cache.
-      matcher: ({ url }) => url.origin === self.location.origin && url.pathname.startsWith('/api/vault'),
+      matcher: ({ url }) =>
+        url.origin === self.location.origin && url.pathname.startsWith('/api/vault'),
       handler: new NetworkFirst({
         cacheName: CACHE_NAMES.API_VAULT,
         networkTimeoutSeconds: 4,
@@ -94,25 +96,27 @@ self.addEventListener('notificationclick', (event) => {
   const relativeUrl = event.notification?.data?.url || '/card';
   const targetUrl = new URL(relativeUrl, self.location.origin).href;
 
-  event.waitUntil((async () => {
-    const clientList = await self.clients.matchAll({
-      type: 'window',
-      includeUncontrolled: true,
-    });
+  event.waitUntil(
+    (async () => {
+      const clientList = await self.clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true,
+      });
 
-    for (const client of clientList) {
-      if (!('focus' in client)) continue;
+      for (const client of clientList) {
+        if (!('focus' in client)) continue;
 
-      const currentUrl = new URL(client.url);
-      if (currentUrl.origin === self.location.origin) {
-        if ('navigate' in client) {
-          await client.navigate(targetUrl);
+        const currentUrl = new URL(client.url);
+        if (currentUrl.origin === self.location.origin) {
+          if ('navigate' in client) {
+            await client.navigate(targetUrl);
+          }
+          await client.focus();
+          return;
         }
-        await client.focus();
-        return;
       }
-    }
 
-    await self.clients.openWindow(targetUrl);
-  })());
+      await self.clients.openWindow(targetUrl);
+    })(),
+  );
 });

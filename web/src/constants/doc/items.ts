@@ -1,4 +1,4 @@
-import { CreditCard, Lock, Settings2, UserRound } from 'lucide-react'
+import { CreditCard, Lock, Settings2, UserRound } from 'lucide-react';
 
 export const DOC_FEATURE_ITEMS = [
   {
@@ -31,7 +31,7 @@ export const DOC_FEATURE_ITEMS = [
     href: '/doc',
     icon: Lock,
   },
-]
+];
 
 export const DOC_API_ITEMS = [
   {
@@ -64,4 +64,4 @@ export const DOC_API_ITEMS = [
     endpoint: '/api/document',
     curl: 'curl -X POST http://localhost:4200/api/document -H "content-type: application/json" -d "{\"type\":\"PAN\",\"number\":\"ABCDE1234F\",\"nameOnDocument\":\"USER NAME\"}"',
   },
-]
+];

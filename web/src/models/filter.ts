@@ -3,6 +3,4 @@ export type FilterOption<TValue extends string = string> = {
   label: string;
 };
 
-export type FilterOptions<TValue extends string = string> = ReadonlyArray<
-  FilterOption<TValue>
->;
+export type FilterOptions<TValue extends string = string> = ReadonlyArray<FilterOption<TValue>>;

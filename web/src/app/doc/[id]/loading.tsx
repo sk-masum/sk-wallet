@@ -1,5 +1,5 @@
-import { DocumentFormLoading } from '@/components/doc/document-form-loading'
+import { DocumentFormLoading } from '@/components/doc/document-form-loading';
 
 export default function Loading() {
-  return <DocumentFormLoading />
+  return <DocumentFormLoading />;
 }

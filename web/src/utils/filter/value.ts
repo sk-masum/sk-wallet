@@ -1,30 +1,18 @@
 import { ALL_FILTER_VALUE } from '@/constants/ui/filter';
 
-export function toFilterSelectValue(
-  value: string,
-  allValue: string = ALL_FILTER_VALUE,
-) {
+export function toFilterSelectValue(value: string, allValue: string = ALL_FILTER_VALUE) {
   return value || allValue;
 }
 
-export function fromFilterSelectValue(
-  value: string,
-  allValue: string = ALL_FILTER_VALUE,
-) {
+export function fromFilterSelectValue(value: string, allValue: string = ALL_FILTER_VALUE) {
   return value === allValue ? '' : value;
 }
 
-export function isAllFilterValue(
-  value: string,
-  allValue: string = ALL_FILTER_VALUE,
-) {
+export function isAllFilterValue(value: string, allValue: string = ALL_FILTER_VALUE) {
   return value === allValue;
 }
 
-export function hasSpecificFilterValue(
-  value: string,
-  allValue: string = ALL_FILTER_VALUE,
-) {
+export function hasSpecificFilterValue(value: string, allValue: string = ALL_FILTER_VALUE) {
   return !isAllFilterValue(value, allValue);
 }
 

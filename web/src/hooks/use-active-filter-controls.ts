@@ -20,10 +20,7 @@ export function useActiveFilterControls({
   return useMemo(() => {
     const hasTextQuery = query.length > 0;
     const effectiveCountFlags = countFlags ?? activityFlags;
-    const activeFilterCount = effectiveCountFlags.reduce(
-      (count, flag) => count + Number(flag),
-      0,
-    );
+    const activeFilterCount = effectiveCountFlags.reduce((count, flag) => count + Number(flag), 0);
     const hasActiveControls = hasTextQuery || activityFlags.some(Boolean);
 
     return {

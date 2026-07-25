@@ -17,8 +17,7 @@ export function useEntityDetailsDialog<TType extends string, TData>({
   fetchDetails,
   getErrorMessage,
 }: UseEntityDetailsDialogOptions<TType, TData>) {
-  const [selectedItem, setSelectedItem] =
-    useState<EntityDetailsSelection<TType> | null>(null);
+  const [selectedItem, setSelectedItem] = useState<EntityDetailsSelection<TType> | null>(null);
   const [detailData, setDetailData] = useState<TData | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [detailsError, setDetailsError] = useState<string | null>(null);
@@ -53,9 +52,7 @@ export function useEntityDetailsDialog<TType extends string, TData>({
         setDetailData(data);
       } catch {
         if (cancelled) return;
-        setDetailsError(
-          getErrorMessageRef.current?.(activeItem) ?? 'Unable to load details.',
-        );
+        setDetailsError(getErrorMessageRef.current?.(activeItem) ?? 'Unable to load details.');
       } finally {
         if (!cancelled) {
           setLoadingDetails(false);

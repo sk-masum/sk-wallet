@@ -11,4 +11,4 @@ export const CARD_PROVIDER_OPTIONS = [
   { value: 'JS Bank', label: 'JS Bank' },
   { value: 'Bank Al Habib', label: 'Bank Al Habib' },
   { value: 'Silkbank', label: 'Silkbank' },
-] as const
+] as const;

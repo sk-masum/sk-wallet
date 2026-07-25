@@ -1,45 +1,43 @@
-import { redirect } from 'next/navigation'
+import { redirect } from 'next/navigation';
 
-import { DashboardAlertsOverview } from '@/components/dashboard/dashboard-alerts-overview'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { serverApiGet } from '@/lib/api/server'
-import { getServerSupabaseUser } from '@/lib/supabase/server-auth'
-import type { DashboardAlertsData } from '@/models/dashboard'
+import { DashboardAlertsOverview } from '@/components/dashboard/dashboard-alerts-overview';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { serverApiGet } from '@/lib/api/server';
+import { getServerSupabaseUser } from '@/lib/supabase/server-auth';
+import type { DashboardAlertsData } from '@/models/dashboard';
 
 export default async function AlertsPage() {
-    const { user } = await getServerSupabaseUser()
+  const { user } = await getServerSupabaseUser();
 
-    if (!user) {
-        redirect('/auth')
-    }
+  if (!user) {
+    redirect('/auth');
+  }
 
-    const { response, data } = await serverApiGet<{ data?: DashboardAlertsData; error?: string }>(
-        '/api/dashboard/alerts'
-    )
+  const { response, data } = await serverApiGet<{ data?: DashboardAlertsData; error?: string }>(
+    '/api/dashboard/alerts',
+  );
 
-    if (response.status === 401) {
-        redirect('/auth?next=/alerts')
-    }
+  if (response.status === 401) {
+    redirect('/auth?next=/alerts');
+  }
 
-    if (!response.ok || !data?.data) {
-        return (
-            <main className="mx-auto w-full max-w-3xl px-4 py-12">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Alerts unavailable</CardTitle>
-                        <CardDescription>
-                            We could not load your alerts data right now.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground">
-                            {data?.error ?? 'Please refresh and try again.'}
-                        </p>
-                    </CardContent>
-                </Card>
-            </main>
-        )
-    }
+  if (!response.ok || !data?.data) {
+    return (
+      <main className='mx-auto w-full max-w-3xl px-4 py-12'>
+        <Card>
+          <CardHeader>
+            <CardTitle>Alerts unavailable</CardTitle>
+            <CardDescription>We could not load your alerts data right now.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className='text-sm text-muted-foreground'>
+              {data?.error ?? 'Please refresh and try again.'}
+            </p>
+          </CardContent>
+        </Card>
+      </main>
+    );
+  }
 
-    return <DashboardAlertsOverview data={data.data} />
+  return <DashboardAlertsOverview data={data.data} />;
 }

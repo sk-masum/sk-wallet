@@ -39,17 +39,15 @@
   --text-soft: 229 16% 55%;
   --media-foreground: 0 0% 100%;
   --neu-shadow-raised:
-    inset 0 1px 0 rgba(255, 255, 255, 0.62),
-    inset 0 -1px 2px rgba(48, 64, 138, 0.2), 0 16px 34px rgba(45, 59, 136, 0.24);
+    inset 0 1px 0 rgba(255, 255, 255, 0.62), inset 0 -1px 2px rgba(48, 64, 138, 0.2),
+    0 16px 34px rgba(45, 59, 136, 0.24);
   --neu-shadow-raised-sm:
-    inset 0 1px 0 rgba(255, 255, 255, 0.58),
-    inset 0 -1px 2px rgba(48, 64, 138, 0.16), 0 8px 18px rgba(45, 59, 136, 0.22);
+    inset 0 1px 0 rgba(255, 255, 255, 0.58), inset 0 -1px 2px rgba(48, 64, 138, 0.16),
+    0 8px 18px rgba(45, 59, 136, 0.22);
   --neu-shadow-inset:
-    inset 0 2px 6px rgba(44, 61, 145, 0.24),
-    inset 0 -1px 1px rgba(255, 255, 255, 0.34);
+    inset 0 2px 6px rgba(44, 61, 145, 0.24), inset 0 -1px 1px rgba(255, 255, 255, 0.34);
   --neu-shadow-inset-sm:
-    inset 0 1px 3px rgba(44, 61, 145, 0.22),
-    inset 0 -1px 1px rgba(255, 255, 255, 0.28);
+    inset 0 1px 3px rgba(44, 61, 145, 0.22), inset 0 -1px 1px rgba(255, 255, 255, 0.28);
   --glass-surface: hsl(229 82% 98% / 0.34);
   --glass-surface-strong: hsl(229 82% 98% / 0.48);
   --glass-border-subtle: 0 0% 100% / 0.2;
@@ -109,17 +107,15 @@
   --text-soft: 228 18% 66%;
   --media-foreground: 0 0% 100%;
   --neu-shadow-raised:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.42), 0 18px 36px rgba(0, 0, 0, 0.52);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 -1px 2px rgba(0, 0, 0, 0.42),
+    0 18px 36px rgba(0, 0, 0, 0.52);
   --neu-shadow-raised-sm:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.38), 0 10px 20px rgba(0, 0, 0, 0.48);
+    inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 2px rgba(0, 0, 0, 0.38),
+    0 10px 20px rgba(0, 0, 0, 0.48);
   --neu-shadow-inset:
-    inset 0 2px 6px rgba(0, 0, 0, 0.45),
-    inset 0 -1px 1px rgba(255, 255, 255, 0.08);
+    inset 0 2px 6px rgba(0, 0, 0, 0.45), inset 0 -1px 1px rgba(255, 255, 255, 0.08);
   --neu-shadow-inset-sm:
-    inset 0 1px 3px rgba(0, 0, 0, 0.42),
-    inset 0 -1px 1px rgba(255, 255, 255, 0.06);
+    inset 0 1px 3px rgba(0, 0, 0, 0.42), inset 0 -1px 1px rgba(255, 255, 255, 0.06);
   --glass-surface: hsl(229 30% 25% / 0.44);
   --glass-surface-strong: hsl(229 34% 31% / 0.56);
   --glass-border-subtle: 0 0% 100% / 0.1;
@@ -181,15 +177,12 @@
   --shadow-neu-inset-sm: var(--neu-shadow-inset-sm);
   --shadow-neu-glow: var(--neu-glow);
   --shadow-brand-raised:
-    inset 0 1px 0 rgba(255, 255, 255, 0.32),
-    0 14px 26px -16px hsl(var(--primary) / 0.74);
+    inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 14px 26px -16px hsl(var(--primary) / 0.74);
   --shadow-brand-raised-sm:
-    inset 0 1px 0 rgba(255, 255, 255, 0.32),
-    0 10px 20px -14px hsl(var(--primary));
+    inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 10px 20px -14px hsl(var(--primary));
   --shadow-brand-inset: inset 0 2px 4px rgba(0, 0, 0, 0.28);
   --shadow-danger-raised:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    0 10px 20px -14px rgba(127, 29, 29, 0.6);
+    inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 10px 20px -14px rgba(127, 29, 29, 0.6);
   --shadow-fab: 0 18px 34px -16px hsl(var(--primary) / 0.8);
   --shadow-fab-hover: 0 24px 40px -18px hsl(var(--primary) / 0.85);
   --shadow-fab-dark: 0 22px 40px -16px rgba(0, 0, 0, 0.85);
@@ -258,7 +251,7 @@ body {
 
   .listing-mobile-filter-sticky {
     position: sticky;
-    top: 0;
+    top: env(safe-area-inset-top, 0px);
     z-index: 40;
     margin-left: -1rem;
     margin-right: -1rem;

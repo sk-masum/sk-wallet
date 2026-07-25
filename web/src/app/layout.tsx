@@ -12,15 +12,13 @@ type IosSplashAsset = {
   portraitSize: `${number}-${number}`;
 };
 
-const IOS_SPLASH_FALLBACK_LIGHT =
-  '/splash-generated-light/apple-splash-1179-2556.png';
-const IOS_SPLASH_FALLBACK_DARK =
-  '/splash-generated-dark/apple-splash-1179-2556.png';
+const IOS_SPLASH_FALLBACK_LIGHT = '/splash-generated-light/apple-splash-1179-2556.png';
+const IOS_SPLASH_FALLBACK_DARK = '/splash-generated-dark/apple-splash-1179-2556.png';
 
 const splashPath = (
   mode: 'light' | 'dark',
   portraitSize: `${number}-${number}`,
-  orientation: 'portrait' | 'landscape'
+  orientation: 'portrait' | 'landscape',
 ) => {
   const [w, h] = portraitSize.split('-');
   const size = orientation === 'portrait' ? `${w}-${h}` : `${h}-${w}`;
@@ -171,57 +169,53 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang='en' suppressHydrationWarning>
       <head>
-        <link rel="apple-touch-startup-image" href={IOS_SPLASH_FALLBACK_LIGHT} />
+        <link rel='apple-touch-startup-image' href={IOS_SPLASH_FALLBACK_LIGHT} />
         <link
-          rel="apple-touch-startup-image"
-          media="(prefers-color-scheme: dark)"
+          rel='apple-touch-startup-image'
+          media='(prefers-color-scheme: dark)'
           href={IOS_SPLASH_FALLBACK_DARK}
         />
         {IOS_SPLASH_ASSETS.flatMap((asset) => [
           <link
             key={`light-portrait-${asset.media}`}
-            rel="apple-touch-startup-image"
+            rel='apple-touch-startup-image'
             media={`screen and ${asset.media} and (orientation: portrait)`}
             href={splashPath('light', asset.portraitSize, 'portrait')}
           />,
           <link
             key={`dark-portrait-${asset.media}`}
-            rel="apple-touch-startup-image"
+            rel='apple-touch-startup-image'
             media={`screen and ${asset.media} and (orientation: portrait) and (prefers-color-scheme: dark)`}
             href={splashPath('dark', asset.portraitSize, 'portrait')}
           />,
           <link
             key={`light-landscape-${asset.media}`}
-            rel="apple-touch-startup-image"
+            rel='apple-touch-startup-image'
             media={`screen and ${asset.media} and (orientation: landscape)`}
             href={splashPath('light', asset.portraitSize, 'landscape')}
           />,
           <link
             key={`dark-landscape-${asset.media}`}
-            rel="apple-touch-startup-image"
+            rel='apple-touch-startup-image'
             media={`screen and ${asset.media} and (orientation: landscape) and (prefers-color-scheme: dark)`}
             href={splashPath('dark', asset.portraitSize, 'landscape')}
           />,
         ])}
       </head>
-      <body className="ios-pwa-body">
-        <div className="ios-pwa-statusbar-bg" aria-hidden="true" />
+      <body className='ios-pwa-body'>
+        <div className='ios-pwa-statusbar-bg' aria-hidden='true' />
         <ServiceWorkerRegister />
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
           <Suspense fallback={null}>
             <QueryToastBridge />
           </Suspense>
           <AppToaster />
           <BiometricGuard>
-            <div className="min-h-screen bg-[radial-gradient(circle_at_8%_0%,hsl(var(--primary)/0.12),transparent_36%),radial-gradient(circle_at_100%_18%,hsl(var(--accent)/0.09),transparent_34%)] dark:bg-[radial-gradient(circle_at_8%_0%,hsl(var(--primary)/0.2),transparent_38%),radial-gradient(circle_at_100%_18%,hsl(var(--accent)/0.14),transparent_36%)]">
+            <div className='min-h-screen bg-[radial-gradient(circle_at_8%_0%,hsl(var(--primary)/0.12),transparent_36%),radial-gradient(circle_at_100%_18%,hsl(var(--accent)/0.09),transparent_34%)] dark:bg-[radial-gradient(circle_at_8%_0%,hsl(var(--primary)/0.2),transparent_38%),radial-gradient(circle_at_100%_18%,hsl(var(--accent)/0.14),transparent_36%)]'>
               {children}
             </div>
           </BiometricGuard>

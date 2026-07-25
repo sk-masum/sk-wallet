@@ -1,4 +1,4 @@
-import { DocumentCategory } from '@/models/document'
+import { DocumentCategory } from '@/models/document';
 
 export const DOCUMENT_CATEGORY_OPTIONS: Array<{ value: DocumentCategory; label: string }> = [
   { value: DocumentCategory.PERSONAL, label: 'Personal' },
@@ -14,14 +14,14 @@ export const DOCUMENT_CATEGORY_OPTIONS: Array<{ value: DocumentCategory; label: 
   { value: DocumentCategory.VEHICLE, label: 'Vehicle' },
   { value: DocumentCategory.GOVERNMENT, label: 'Government' },
   { value: DocumentCategory.OTHER, label: 'Other' },
-]
+];
 
-const DOCUMENT_CATEGORY_SET = new Set(DOCUMENT_CATEGORY_OPTIONS.map((item) => item.value))
+const DOCUMENT_CATEGORY_SET = new Set(DOCUMENT_CATEGORY_OPTIONS.map((item) => item.value));
 
 export function isDocumentCategory(value: string): value is DocumentCategory {
-  return DOCUMENT_CATEGORY_SET.has(value as DocumentCategory)
+  return DOCUMENT_CATEGORY_SET.has(value as DocumentCategory);
 }
 
 export function getDocumentCategoryLabel(value: string) {
-  return DOCUMENT_CATEGORY_OPTIONS.find((item) => item.value === value)?.label ?? 'Other'
+  return DOCUMENT_CATEGORY_OPTIONS.find((item) => item.value === value)?.label ?? 'Other';
 }

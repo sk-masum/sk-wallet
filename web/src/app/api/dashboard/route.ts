@@ -1,62 +1,62 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
-import { getRequiredPrismaClient } from '@/lib/prisma'
-import { detokenizeCardNumber } from '@/lib/security/card-token'
-import { getRouteSupabaseContext } from '@/lib/supabase/route-auth'
-import type { DashboardData } from '@/models/dashboard'
-import { resolveNetworkLabel } from '@/utils/card/network'
+import { getRequiredPrismaClient } from '@/lib/prisma';
+import { detokenizeCardNumber } from '@/lib/security/card-token';
+import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
+import type { DashboardData } from '@/models/dashboard';
+import { resolveNetworkLabel } from '@/utils/card/network';
 
 function getNextOccurrenceFromDay(day: number, now: Date) {
-  if (!Number.isInteger(day) || day < 1 || day > 31) return null
+  if (!Number.isInteger(day) || day < 1 || day > 31) return null;
 
-  const year = now.getFullYear()
-  const month = now.getMonth()
-  const today = now.getDate()
-  const targetDay = Math.min(day, new Date(year, month + 1, 0).getDate())
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const today = now.getDate();
+  const targetDay = Math.min(day, new Date(year, month + 1, 0).getDate());
 
   if (targetDay >= today) {
-    return new Date(year, month, targetDay)
+    return new Date(year, month, targetDay);
   }
 
-  const nextMonthLastDay = new Date(year, month + 2, 0).getDate()
-  return new Date(year, month + 1, Math.min(day, nextMonthLastDay))
+  const nextMonthLastDay = new Date(year, month + 2, 0).getDate();
+  return new Date(year, month + 1, Math.min(day, nextMonthLastDay));
 }
 
 function decodeCardNumberOrEmpty(value: string) {
   try {
-    return detokenizeCardNumber(value)
+    return detokenizeCardNumber(value);
   } catch {
-    return ''
+    return '';
   }
 }
 
 function toMaskedNumber(value: string) {
-  const digits = value.replace(/\D/g, '')
-  if (!digits) return '•••• ••••'
+  const digits = value.replace(/\D/g, '');
+  if (!digits) return '•••• ••••';
 
-  return `•••• ${digits.slice(-4)}`
+  return `•••• ${digits.slice(-4)}`;
 }
 
 type FavoriteRow = {
-  feature_key: string
-}
+  feature_key: string;
+};
 
 function toMetadataRecordOrNull(value: unknown): Record<string, unknown> | null {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
-  return value as Record<string, unknown>
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  return value as Record<string, unknown>;
 }
 
 export async function GET() {
-  const { user, unauthorizedResponse } = await getRouteSupabaseContext()
+  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
 
   if (unauthorizedResponse || !user) {
-    return unauthorizedResponse
+    return unauthorizedResponse;
   }
 
-  const prisma = getRequiredPrismaClient()
-  const now = new Date()
-  const soonCutoff = new Date(now)
-  soonCutoff.setDate(soonCutoff.getDate() + 45)
+  const prisma = getRequiredPrismaClient();
+  const now = new Date();
+  const soonCutoff = new Date(now);
+  soonCutoff.setDate(soonCutoff.getDate() + 45);
 
   const [cards, credentials, documents] = await Promise.all([
     prisma.card.findMany({
@@ -95,52 +95,52 @@ export async function GET() {
       },
       orderBy: { id: 'desc' },
     }),
-  ])
+  ]);
 
   const expiringDocumentsSoon = documents.filter(
-    (doc) => doc.expires_at && doc.expires_at >= now && doc.expires_at <= soonCutoff
-  )
+    (doc) => doc.expires_at && doc.expires_at >= now && doc.expires_at <= soonCutoff,
+  );
 
   const favoriteRows = await prisma.$queryRaw<FavoriteRow[]>`
     select feature_key
     from public.dashboard_favorite
     where user_id = ${user.id}::uuid
-  `
-  const favoriteKeys = new Set(favoriteRows.map((row) => String(row.feature_key)))
+  `;
+  const favoriteKeys = new Set(favoriteRows.map((row) => String(row.feature_key)));
 
   const expiringCardsSoon = cards.filter((card) => {
-    if (!card.expiry_year || !card.expiry_month) return false
-    const expiryDate = new Date(Number(card.expiry_year), Number(card.expiry_month), 0)
-    return expiryDate >= now && expiryDate <= soonCutoff
-  })
+    if (!card.expiry_year || !card.expiry_month) return false;
+    const expiryDate = new Date(Number(card.expiry_year), Number(card.expiry_month), 0);
+    return expiryDate >= now && expiryDate <= soonCutoff;
+  });
 
-  const expiringSoonCount = expiringDocumentsSoon.length + expiringCardsSoon.length
+  const expiringSoonCount = expiringDocumentsSoon.length + expiringCardsSoon.length;
 
   const totalCreditLimit = cards.reduce((sum, card) => {
-    if (!card.credit_limit) return sum
-    return sum + Number(card.credit_limit)
-  }, 0)
+    if (!card.credit_limit) return sum;
+    return sum + Number(card.credit_limit);
+  }, 0);
 
   const creditPortfolio = cards
     .filter((card) => card.credit_limit)
     .map((card) => {
-      const limit = Number(card.credit_limit)
-      const share = totalCreditLimit > 0 ? (limit / totalCreditLimit) * 100 : 0
+      const limit = Number(card.credit_limit);
+      const share = totalCreditLimit > 0 ? (limit / totalCreditLimit) * 100 : 0;
       return {
         id: String(card.id),
         label: card.card_name || `Card ${String(card.id)}`,
         limit,
         share,
-      }
+      };
     })
     .sort((a, b) => b.limit - a.limit)
-    .slice(0, 6)
+    .slice(0, 6);
 
   const cardsCarousel = cards
     .filter((card) => favoriteKeys.has(`card:${String(card.id)}`))
     .slice(0, 12)
     .map((card) => {
-      const number = decodeCardNumberOrEmpty(card.number)
+      const number = decodeCardNumberOrEmpty(card.number);
       return {
         id: String(card.id),
         name: card.card_name || `Card ${String(card.id)}`,
@@ -149,8 +149,8 @@ export async function GET() {
         network: Number(card.network ?? 1),
         networkLabel: resolveNetworkLabel(Number(card.network ?? 1)),
         href: `/card/${String(card.id)}`,
-      }
-    })
+      };
+    });
 
   const favoriteVaultCarousel = [
     ...credentials
@@ -173,12 +173,12 @@ export async function GET() {
         document_type: document.document_type ?? 'Uncategorized',
         metadata: toMetadataRecordOrNull(document.metadata),
       })),
-  ].slice(0, 16)
+  ].slice(0, 16);
 
   const recentBillingCards = cards
     .map((card) => {
-      const dueDate = getNextOccurrenceFromDay(card.billing_date ?? -1, now)
-      if (!dueDate || card.billing_date == null) return null
+      const dueDate = getNextOccurrenceFromDay(card.billing_date ?? -1, now);
+      if (!dueDate || card.billing_date == null) return null;
 
       return {
         id: String(card.id),
@@ -186,17 +186,21 @@ export async function GET() {
         billingDay: Number(card.billing_date),
         nextBillingDate: dueDate.toISOString(),
         href: `/card/${String(card.id)}`,
-      }
+      };
     })
-    .filter((item): item is {
-      id: string
-      name: string
-      billingDay: number
-      nextBillingDate: string
-      href: string
-    } => Boolean(item))
+    .filter(
+      (
+        item,
+      ): item is {
+        id: string;
+        name: string;
+        billingDay: number;
+        nextBillingDate: string;
+        href: string;
+      } => Boolean(item),
+    )
     .sort((a, b) => new Date(a.nextBillingDate).getTime() - new Date(b.nextBillingDate).getTime())
-    .slice(0, 8)
+    .slice(0, 8);
 
   const payload: DashboardData = {
     summary: {
@@ -214,7 +218,7 @@ export async function GET() {
       favoriteVaultCarousel,
       recentBillingCards,
     },
-  }
+  };
 
-  return NextResponse.json({ data: payload })
+  return NextResponse.json({ data: payload });
 }

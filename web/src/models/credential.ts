@@ -14,42 +14,42 @@ export enum CredentialTypeCode {
 }
 
 export type UserCredential = {
-  id: string
-  user_id: string
-  credential_type: CredentialTypeCode
-  service_name: string
-  identifier: string | null
-  masked_secret: string
-  secret_last4: string
-  url: string | null
-  notes: string | null
-  metadata: Record<string, unknown> | null
-  created_at: string
-  updated_at: string
-}
+  id: string;
+  user_id: string;
+  credential_type: CredentialTypeCode;
+  service_name: string;
+  identifier: string | null;
+  masked_secret: string;
+  secret_last4: string;
+  url: string | null;
+  notes: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+};
 
 export type CredentialTypeFieldConfig = {
-  code: CredentialTypeCode
-  label: string
-  placeholder: string
-  hint: string
-}
+  code: CredentialTypeCode;
+  label: string;
+  placeholder: string;
+  hint: string;
+};
 
 export type CredentialFormPayload = {
-  type: string
-  serviceName: string
-  identifier?: string
-  secret?: string
-  url?: string
-  notes?: string
-  metadata?: Record<string, unknown>
-}
+  type: string;
+  serviceName: string;
+  identifier?: string;
+  secret?: string;
+  url?: string;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+};
 
 export type CredentialFormFieldErrors = Partial<{
-  type: string
-  serviceName: string
-  identifier: string
-  secret: string
-  url: string
-  notes: string
-}>
+  type: string;
+  serviceName: string;
+  identifier: string;
+  secret: string;
+  url: string;
+  notes: string;
+}>;

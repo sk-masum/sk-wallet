@@ -115,10 +115,7 @@ export function useDashboardFavorites() {
     void persistFavoriteKey(normalized, nextActive);
   }, []);
 
-  const isFavorite = useCallback(
-    (key: string) => favorites.has(key),
-    [favorites],
-  );
+  const isFavorite = useCallback((key: string) => favorites.has(key), [favorites]);
 
   const favoriteCount = useMemo(() => favorites.size, [favorites]);
 

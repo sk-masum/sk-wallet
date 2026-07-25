@@ -1,20 +1,20 @@
-import type { ReactNode } from 'react'
+import type { ReactNode } from 'react';
 
-import { EntityFormPageLayout } from '@/components/shared/entity-form-page-layout'
+import { EntityFormPageLayout } from '@/components/shared/entity-form-page-layout';
 
 type CardFormPageLayoutProps = {
-  pageTitle: string
-  cardTitle: string
-  cardDescription: string
-  backHref?: string
-  backButtonLabel?: string
-  children: ReactNode
-}
+  pageTitle: string;
+  cardTitle: string;
+  cardDescription: string;
+  backHref?: string;
+  backButtonLabel?: string;
+  children: ReactNode;
+};
 
 type CardFormPageResolver<TProps> =
   | CardFormPageLayoutProps
   | Promise<CardFormPageLayoutProps>
-  | ((props: TProps) => CardFormPageLayoutProps | Promise<CardFormPageLayoutProps>)
+  | ((props: TProps) => CardFormPageLayoutProps | Promise<CardFormPageLayoutProps>);
 
 function CardFormPageLayout({
   pageTitle,
@@ -31,20 +31,24 @@ function CardFormPageLayout({
       sectionDescription={cardDescription}
       backHref={backHref}
       backButtonLabel={backButtonLabel}
-      maxWidthClassName="max-w-4xl"
+      maxWidthClassName='max-w-4xl'
     >
       {children}
     </EntityFormPageLayout>
-  )
+  );
 }
 
 export function withCardFormPage<TProps>(resolver: CardFormPageResolver<TProps>) {
   return async function WrappedCardFormPage(props: TProps) {
     const layoutProps =
       typeof resolver === 'function'
-        ? await (resolver as (props: TProps) => CardFormPageLayoutProps | Promise<CardFormPageLayoutProps>)(props)
-        : await resolver
+        ? await (
+            resolver as (
+              props: TProps,
+            ) => CardFormPageLayoutProps | Promise<CardFormPageLayoutProps>
+          )(props)
+        : await resolver;
 
-    return <CardFormPageLayout {...layoutProps} />
-  }
+    return <CardFormPageLayout {...layoutProps} />;
+  };
 }

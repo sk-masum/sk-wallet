@@ -1,4 +1,4 @@
-import type { CardFormFieldErrors } from '@/utils/card/validation'
+import type { CardFormFieldErrors } from '@/utils/card/validation';
 
 export const CARD_VALIDATION_ORDERED_FIELDS: Array<keyof CardFormFieldErrors> = [
   'card_type',
@@ -15,4 +15,4 @@ export const CARD_VALIDATION_ORDERED_FIELDS: Array<keyof CardFormFieldErrors> = 
   'billing_date',
   'payment_date',
   'cvv',
-]
+];

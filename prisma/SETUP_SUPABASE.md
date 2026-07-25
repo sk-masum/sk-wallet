@@ -22,9 +22,10 @@ DIRECT_URL=postgresql://postgres:[password]@db.your-project-ref.supabase.co:5432
 ```
 
 Notes:
+
 - `DATABASE_URL`: pooled Supabase connection (runtime queries). Use:
-	`postgresql://...pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1`
-	so serverless functions do not exhaust direct Postgres connections.
+  `postgresql://...pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1`
+  so serverless functions do not exhaust direct Postgres connections.
 - `DIRECT_URL`: direct Supabase connection (schema/introspection/migration operations).
 - `CARD_TOKEN_SECRET`: server-only secret for card token encryption.
 
@@ -57,6 +58,7 @@ npm run prisma:sync
 ```
 
 This runs:
+
 - `prisma db pull` to introspect your Supabase schema into `prisma/schema.prisma`
 - `prisma generate` to regenerate `web/src/generated/prisma`
 

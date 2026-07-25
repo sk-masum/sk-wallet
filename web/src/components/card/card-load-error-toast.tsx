@@ -1,27 +1,27 @@
-'use client'
+'use client';
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react';
 
-import { showToast } from '@/lib/toast'
+import { showToast } from '@/lib/toast';
 
 type CardLoadErrorToastProps = {
-  message: string
-}
+  message: string;
+};
 
 export function CardLoadErrorToast({ message }: CardLoadErrorToastProps) {
-  const lastShownRef = useRef('')
+  const lastShownRef = useRef('');
 
   useEffect(() => {
-    if (!message) return
-    if (lastShownRef.current === message) return
+    if (!message) return;
+    if (lastShownRef.current === message) return;
 
     showToast({
       message,
       variant: 'error',
-    })
+    });
 
-    lastShownRef.current = message
-  }, [message])
+    lastShownRef.current = message;
+  }, [message]);
 
-  return null
+  return null;
 }

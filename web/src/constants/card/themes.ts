@@ -1,4 +1,4 @@
-import type { CardTheme } from '@/models/card'
+import type { CardTheme } from '@/models/card';
 
 export const CARD_THEMES: CardTheme[] = [
   {
@@ -145,4 +145,4 @@ export const CARD_THEMES: CardTheme[] = [
     border: 'rgba(186, 230, 253, 0.86)',
     mutedText: 'text-sky-100/80',
   },
-]
+];

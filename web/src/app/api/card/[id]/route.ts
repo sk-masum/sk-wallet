@@ -3,7 +3,12 @@ import { NextResponse } from 'next/server';
 import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
 import { getRequiredPrismaClient } from '@/lib/prisma';
 import { isCardStatus } from '@/constants/card/status';
-import { detokenizeCardCvv, detokenizeCardNumber, tokenizeCardCvv, tokenizeCardNumber } from '@/lib/security/card-token';
+import {
+  detokenizeCardCvv,
+  detokenizeCardNumber,
+  tokenizeCardCvv,
+  tokenizeCardNumber,
+} from '@/lib/security/card-token';
 
 function toSafeNumber(value: bigint | number | null | undefined) {
   if (value === null || value === undefined) return null;
@@ -30,7 +35,9 @@ async function resolveOrCreateProvider(
   prisma: ReturnType<typeof getRequiredPrismaClient>,
   rawProvider?: string | null,
 ) {
-  const provider = String(rawProvider ?? '').trim().replace(/\s+/g, ' ');
+  const provider = String(rawProvider ?? '')
+    .trim()
+    .replace(/\s+/g, ' ');
 
   if (!provider) {
     return {
@@ -203,13 +210,16 @@ export async function PUT(request: Request, { params }: Params) {
     tokenizedNumber = tokenizeCardNumber(String(payload.number ?? ''));
     tokenizedCvv = tokenizeCardCvv(String(payload.cvv ?? ''));
   } catch {
-    return NextResponse.json({ error: 'Card tokenization is not configured correctly' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Card tokenization is not configured correctly' },
+      { status: 500 },
+    );
   }
 
-  const {
-    providerId,
-    error: providerError,
-  } = await resolveOrCreateProvider(prisma, payload.provider);
+  const { providerId, error: providerError } = await resolveOrCreateProvider(
+    prisma,
+    payload.provider,
+  );
 
   if (providerError) {
     return NextResponse.json({ error: providerError }, { status: 500 });
@@ -231,15 +241,23 @@ export async function PUT(request: Request, { params }: Params) {
       card_name: payload.card_name?.trim() || null,
       provider_id: providerId,
       credit_limit:
-        Boolean(payload.isCredit) && typeof payload.credit_limit === 'number' && Number.isFinite(payload.credit_limit)
+        Boolean(payload.isCredit) &&
+        typeof payload.credit_limit === 'number' &&
+        Number.isFinite(payload.credit_limit)
           ? payload.credit_limit
           : null,
       billing_date:
-        typeof payload.billing_date === 'number' && Number.isInteger(payload.billing_date) && payload.billing_date >= 1 && payload.billing_date <= 31
+        typeof payload.billing_date === 'number' &&
+        Number.isInteger(payload.billing_date) &&
+        payload.billing_date >= 1 &&
+        payload.billing_date <= 31
           ? payload.billing_date
           : null,
       payment_date:
-        typeof payload.payment_date === 'number' && Number.isInteger(payload.payment_date) && payload.payment_date >= 1 && payload.payment_date <= 31
+        typeof payload.payment_date === 'number' &&
+        Number.isInteger(payload.payment_date) &&
+        payload.payment_date >= 1 &&
+        payload.payment_date <= 31
           ? payload.payment_date
           : null,
       number: tokenizedNumber,
@@ -283,7 +301,9 @@ export async function PATCH(request: Request, { params }: Params) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const normalizedStatus = String(payload.status ?? '').trim().toLowerCase();
+  const normalizedStatus = String(payload.status ?? '')
+    .trim()
+    .toLowerCase();
 
   if (!isCardStatus(normalizedStatus)) {
     return NextResponse.json({ error: 'Invalid card status' }, { status: 400 });

@@ -1,4 +1,4 @@
-import { CredentialTypeCode, type CredentialTypeFieldConfig } from '@/models/credential'
+import { CredentialTypeCode, type CredentialTypeFieldConfig } from '@/models/credential';
 
 export const CREDENTIAL_TYPE_OPTIONS: CredentialTypeFieldConfig[] = [
   {
@@ -73,14 +73,14 @@ export const CREDENTIAL_TYPE_OPTIONS: CredentialTypeFieldConfig[] = [
     placeholder: 'Credential secret',
     hint: 'Use for any other credential type',
   },
-]
+];
 
-const CREDENTIAL_TYPE_SET = new Set(CREDENTIAL_TYPE_OPTIONS.map((item) => item.code))
+const CREDENTIAL_TYPE_SET = new Set(CREDENTIAL_TYPE_OPTIONS.map((item) => item.code));
 
 export function isCredentialTypeCode(value: string): value is CredentialTypeCode {
-  return CREDENTIAL_TYPE_SET.has(value as CredentialTypeCode)
+  return CREDENTIAL_TYPE_SET.has(value as CredentialTypeCode);
 }
 
 export function getCredentialTypeConfig(type: string) {
-  return CREDENTIAL_TYPE_OPTIONS.find((item) => item.code === type) ?? null
+  return CREDENTIAL_TYPE_OPTIONS.find((item) => item.code === type) ?? null;
 }

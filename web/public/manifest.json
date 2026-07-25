@@ -7,10 +7,7 @@
   "start_url": "/",
   "scope": "/",
   "orientation": "portrait",
-  "display_override": [
-    "standalone",
-    "minimal-ui"
-  ],
+  "display_override": ["standalone", "minimal-ui"],
   "description": "A digital wallet for managing cards, credentials, and documents.",
   "icons": [
     {
@@ -26,11 +23,7 @@
       "purpose": "maskable"
     }
   ],
-  "categories": [
-    "finance",
-    "productivity",
-    "security"
-  ],
+  "categories": ["finance", "productivity", "security"],
   "shortcuts": [
     {
       "name": "Add Card",

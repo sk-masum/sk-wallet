@@ -1,8 +1,4 @@
-import type {
-  CardExpiryFilter,
-  CardGroup,
-  CardSort,
-} from '@/lib/stores/card-vault-store';
+import type { CardExpiryFilter, CardGroup, CardSort } from '@/lib/stores/card-vault-store';
 import type { FilterOptions } from '@/models/filter';
 
 export const CARD_GROUP_OPTIONS: FilterOptions<CardGroup> = [

@@ -4,9 +4,7 @@ type UseScrollActivityOptions = {
   idleDelayMs?: number;
 };
 
-export function useScrollActivity(
-  options: UseScrollActivityOptions = {},
-): boolean {
+export function useScrollActivity(options: UseScrollActivityOptions = {}): boolean {
   const { idleDelayMs = 140 } = options;
   const [isActive, setIsActive] = useState(false);
 

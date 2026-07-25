@@ -9,10 +9,7 @@ type UseSuccessQueryToastOptions = {
   onConsumed?: () => void;
 };
 
-export function useSuccessQueryToast({
-  successMessage,
-  onConsumed,
-}: UseSuccessQueryToastOptions) {
+export function useSuccessQueryToast({ successMessage, onConsumed }: UseSuccessQueryToastOptions) {
   useEffect(() => {
     if (!successMessage) return;
 

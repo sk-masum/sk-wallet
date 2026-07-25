@@ -17,11 +17,7 @@ export async function GET() {
   });
 
   const names = Array.from(
-    new Set(
-      (data ?? [])
-        .map((item) => String(item.name ?? '').trim())
-        .filter(Boolean)
-    )
+    new Set((data ?? []).map((item) => String(item.name ?? '').trim()).filter(Boolean)),
   );
 
   return NextResponse.json({ data: names });

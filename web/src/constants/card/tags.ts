@@ -15,4 +15,4 @@ export const CARD_TAG_SUGGESTIONS = [
   'International',
   'Rewards',
   'Emergency',
-] as const
+] as const;

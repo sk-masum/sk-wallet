@@ -1,17 +1,17 @@
-import { redirect } from 'next/navigation'
+import { redirect } from 'next/navigation';
 
-import { CardForm } from '@/components/card/card-form'
-import { withCardFormPage } from '@/hoc/with-card-form-page'
-import { serverApiPost } from '@/lib/api/server'
-import { parseCardFormData } from '@/utils/card/form-data'
-import { validateCardForm } from '@/utils/card/validation'
+import { CardForm } from '@/components/card/card-form';
+import { withCardFormPage } from '@/hoc/with-card-form-page';
+import { serverApiPost } from '@/lib/api/server';
+import { parseCardFormData } from '@/utils/card/form-data';
+import { validateCardForm } from '@/utils/card/validation';
 
 type NewCardPageProps = {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>
-}
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
 
 async function createCard(formData: FormData) {
-  'use server'
+  'use server';
 
   const {
     colorName,
@@ -32,8 +32,7 @@ async function createCard(formData: FormData) {
     expiryMonth,
     expiryYearRaw,
     cvv,
-  } =
-    parseCardFormData(formData)
+  } = parseCardFormData(formData);
 
   const validationError = validateCardForm({
     cardName,
@@ -50,20 +49,18 @@ async function createCard(formData: FormData) {
     expiryMonth,
     expiryYearRaw,
     cvv,
-  })
+  });
 
   if (validationError) {
-    redirect(`/card/new?error=${encodeURIComponent(validationError)}`)
+    redirect(`/card/new?error=${encodeURIComponent(validationError)}`);
   }
 
   const normalizedExpiryMonth =
-    Number.isInteger(expiryMonth) && expiryMonth >= 1 && expiryMonth <= 12
-      ? expiryMonth
-      : null
+    Number.isInteger(expiryMonth) && expiryMonth >= 1 && expiryMonth <= 12 ? expiryMonth : null;
 
-  const normalizedCardNumber = normalizedNumber.replace(/\D/g, '')
-  const normalizedCvv = cvv.replace(/\D/g, '')
-  const isCredit = cardType === 'credit'
+  const normalizedCardNumber = normalizedNumber.replace(/\D/g, '');
+  const normalizedCvv = cvv.replace(/\D/g, '');
+  const isCredit = cardType === 'credit';
 
   const { response, data: result } = await serverApiPost<{ error?: string }>('/api/card', {
     color_name: colorName,
@@ -81,17 +78,17 @@ async function createCard(formData: FormData) {
     cvv: normalizedCvv,
     network,
     isCredit,
-  })
+  });
 
   if (response.status === 401) {
-    redirect('/auth?next=/card/new')
+    redirect('/auth?next=/card/new');
   }
 
   if (!response.ok) {
-    redirect(`/card/new?error=${encodeURIComponent(result?.error || 'Failed to create card')}`)
+    redirect(`/card/new?error=${encodeURIComponent(result?.error || 'Failed to create card')}`);
   }
 
-  redirect(`/card?success=${encodeURIComponent('Card created successfully.')}`)
+  redirect(`/card?success=${encodeURIComponent('Card created successfully.')}`);
 }
 
 export default withCardFormPage<NewCardPageProps>(async function NewCardPage() {
@@ -101,6 +98,6 @@ export default withCardFormPage<NewCardPageProps>(async function NewCardPage() {
     cardDescription: 'Fill the form below to create a new card.',
     backHref: '/card',
     backButtonLabel: 'Back to cards',
-    children: <CardForm action={createCard} submitLabel="Submit" showReset />,
-  }
-})
+    children: <CardForm action={createCard} submitLabel='Submit' showReset />,
+  };
+});

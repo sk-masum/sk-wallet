@@ -1,44 +1,44 @@
-import { redirect } from 'next/navigation'
+import { redirect } from 'next/navigation';
 
-import { BottomTabBar } from '@/components/ui/bottom-tab-bar'
-import { CredentialEditForm } from '@/components/credential/credential-edit-form'
-import { EntityFormPageLayout } from '@/components/shared/entity-form-page-layout'
-import { serverApiGet } from '@/lib/api/server'
-import type { UserCredential } from '@/models/credential'
+import { BottomTabBar } from '@/components/ui/bottom-tab-bar';
+import { CredentialEditForm } from '@/components/credential/credential-edit-form';
+import { EntityFormPageLayout } from '@/components/shared/entity-form-page-layout';
+import { serverApiGet } from '@/lib/api/server';
+import type { UserCredential } from '@/models/credential';
 
 type EditCredentialPageProps = {
-    params: Promise<{
-        id: string
-    }>
-}
+  params: Promise<{
+    id: string;
+  }>;
+};
 
 export default async function EditCredentialPage({ params }: EditCredentialPageProps) {
-    const { id } = await params
+  const { id } = await params;
 
-    const { response, data: result } = await serverApiGet<{ data?: UserCredential; error?: string }>(
-        `/api/credential/${id}`
-    )
+  const { response, data: result } = await serverApiGet<{ data?: UserCredential; error?: string }>(
+    `/api/credential/${id}`,
+  );
 
-    if (response.status === 401) {
-        redirect(`/auth?next=/credential/${id}`)
-    }
+  if (response.status === 401) {
+    redirect(`/auth?next=/credential/${id}`);
+  }
 
-    if (!response.ok || !result?.data) {
-        redirect('/credential?error=' + encodeURIComponent(result?.error || 'Credential not found'))
-    }
+  if (!response.ok || !result?.data) {
+    redirect('/credential?error=' + encodeURIComponent(result?.error || 'Credential not found'));
+  }
 
-    return (
-        <>
-            <EntityFormPageLayout
-                pageTitle="Edit Credential"
-                sectionTitle="Update Credential"
-                sectionDescription="Edit your credential details."
-                backHref="/credential"
-                backButtonLabel="Back to credentials"
-                maxWidthClassName="max-w-4xl"
-            >
-                <CredentialEditForm credential={result.data} />
-            </EntityFormPageLayout>
-        </>
-    )
+  return (
+    <>
+      <EntityFormPageLayout
+        pageTitle='Edit Credential'
+        sectionTitle='Update Credential'
+        sectionDescription='Edit your credential details.'
+        backHref='/credential'
+        backButtonLabel='Back to credentials'
+        maxWidthClassName='max-w-4xl'
+      >
+        <CredentialEditForm credential={result.data} />
+      </EntityFormPageLayout>
+    </>
+  );
 }

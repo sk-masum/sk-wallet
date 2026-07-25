@@ -1,16 +1,16 @@
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 type FormActionsProps = {
-  submitLabel: string
-  submittingLabel?: string
-  isSubmitting?: boolean
-  showReset?: boolean
-  resetLabel?: string
-  className?: string
-  submitClassName?: string
-  resetClassName?: string
-}
+  submitLabel: string;
+  submittingLabel?: string;
+  isSubmitting?: boolean;
+  showReset?: boolean;
+  resetLabel?: string;
+  className?: string;
+  submitClassName?: string;
+  resetClassName?: string;
+};
 
 function FormActions({
   submitLabel,
@@ -25,9 +25,9 @@ function FormActions({
   return (
     <div className={cn('sm:col-span-2 flex flex-col gap-2 sm:flex-row sm:justify-end', className)}>
       <Button
-        type="submit"
-        variant="primary"
-        size="form"
+        type='submit'
+        variant='primary'
+        size='form'
         className={cn('w-full sm:w-auto', submitClassName)}
         disabled={isSubmitting}
       >
@@ -35,9 +35,9 @@ function FormActions({
       </Button>
       {showReset ? (
         <Button
-          type="reset"
-          variant="outline"
-          size="form"
+          type='reset'
+          variant='outline'
+          size='form'
           className={cn('w-full sm:w-auto', resetClassName)}
           disabled={isSubmitting}
         >
@@ -45,7 +45,7 @@ function FormActions({
         </Button>
       ) : null}
     </div>
-  )
+  );
 }
 
-export { FormActions }
+export { FormActions };

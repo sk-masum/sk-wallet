@@ -1,21 +1,21 @@
-import { redirect } from 'next/navigation'
+import { redirect } from 'next/navigation';
 
-import { CardForm } from '@/components/card/card-form'
-import { CardStatusForm } from '@/components/card/card-status-form'
-import { withCardFormPage } from '@/hoc/with-card-form-page'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { isCardStatus } from '@/constants/card/status'
-import { serverApiGet, serverApiPatch, serverApiPut } from '@/lib/api/server'
-import { parseCardFormDataWithId } from '@/utils/card/form-data'
-import { validateCardForm } from '@/utils/card/validation'
+import { CardForm } from '@/components/card/card-form';
+import { CardStatusForm } from '@/components/card/card-status-form';
+import { withCardFormPage } from '@/hoc/with-card-form-page';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { isCardStatus } from '@/constants/card/status';
+import { serverApiGet, serverApiPatch, serverApiPut } from '@/lib/api/server';
+import { parseCardFormDataWithId } from '@/utils/card/form-data';
+import { validateCardForm } from '@/utils/card/validation';
 
 type EditCardPageProps = {
-  params: Promise<{ id: string }>
-  searchParams?: Promise<Record<string, string | string[] | undefined>>
-}
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
 
 async function updateCard(formData: FormData) {
-  'use server'
+  'use server';
 
   const {
     id,
@@ -36,33 +36,33 @@ async function updateCard(formData: FormData) {
     expiryMonth,
     expiryYearRaw,
     cvv,
-  } = parseCardFormDataWithId(formData)
+  } = parseCardFormDataWithId(formData);
 
   if (!id) {
-    redirect('/card?error=Invalid%20request')
+    redirect('/card?error=Invalid%20request');
   }
 
   const { response: existingCardResponse, data: existingCardJson } = await serverApiGet<{
-    data?: { number?: string | number | null }
-  }>(`/api/card/${id}`)
+    data?: { number?: string | number | null };
+  }>(`/api/card/${id}`);
 
   if (existingCardResponse.status === 401) {
-    redirect(`/auth?next=/card/${id}`)
+    redirect(`/auth?next=/card/${id}`);
   }
 
   if (!existingCardResponse.ok) {
-    redirect(`/card/${id}?error=${encodeURIComponent('Card not found.')}`)
+    redirect(`/card/${id}?error=${encodeURIComponent('Card not found.')}`);
   }
 
-  const existingCard = existingCardJson?.data
+  const existingCard = existingCardJson?.data;
 
   if (!existingCard) {
-    redirect(`/card/${id}?error=${encodeURIComponent('Card not found.')}`)
+    redirect(`/card/${id}?error=${encodeURIComponent('Card not found.')}`);
   }
 
-  const submittedDigits = normalizedNumber.replace(/\D/g, '')
-  const existingDigits = String(existingCard.number ?? '').replace(/\D/g, '')
-  const skipCardNumberValidation = submittedDigits === existingDigits
+  const submittedDigits = normalizedNumber.replace(/\D/g, '');
+  const existingDigits = String(existingCard.number ?? '').replace(/\D/g, '');
+  const skipCardNumberValidation = submittedDigits === existingDigits;
 
   const validationError = validateCardForm({
     cardName,
@@ -79,10 +79,10 @@ async function updateCard(formData: FormData) {
     expiryYearRaw,
     cvv,
     skipCardNumberValidation,
-  })
+  });
 
   if (validationError) {
-    redirect(`/card/${id}?error=${encodeURIComponent(validationError)}`)
+    redirect(`/card/${id}?error=${encodeURIComponent(validationError)}`);
   }
 
   const { response, data: result } = await serverApiPut<{ error?: string }>(`/api/card/${id}`, {
@@ -100,66 +100,70 @@ async function updateCard(formData: FormData) {
     cvv: cvv.replace(/\D/g, ''),
     network,
     isCredit: cardType === 'credit',
-  })
+  });
 
   if (response.status === 401) {
-    redirect(`/auth?next=/card/${id}`)
+    redirect(`/auth?next=/card/${id}`);
   }
 
   if (!response.ok) {
-    redirect(`/card/${id}?error=${encodeURIComponent(result?.error || 'Failed to update card')}`)
+    redirect(`/card/${id}?error=${encodeURIComponent(result?.error || 'Failed to update card')}`);
   }
 
-  redirect(`/card?success=${encodeURIComponent('Card updated successfully.')}`)
+  redirect(`/card?success=${encodeURIComponent('Card updated successfully.')}`);
 }
 
 async function updateCardStatus(formData: FormData) {
-  'use server'
+  'use server';
 
-  const id = String(formData.get('id') ?? '').trim()
-  const rawStatus = String(formData.get('status') ?? '').trim().toLowerCase()
+  const id = String(formData.get('id') ?? '').trim();
+  const rawStatus = String(formData.get('status') ?? '')
+    .trim()
+    .toLowerCase();
 
   if (!id || !isCardStatus(rawStatus)) {
-    redirect('/card?error=Invalid%20status%20request')
+    redirect('/card?error=Invalid%20status%20request');
   }
 
   const { response, data: result } = await serverApiPatch<{ error?: string }>(`/api/card/${id}`, {
     status: rawStatus,
-  })
+  });
 
   if (response.status === 401) {
-    redirect(`/auth?next=/card/${id}`)
+    redirect(`/auth?next=/card/${id}`);
   }
 
   if (!response.ok) {
-    redirect(`/card/${id}?error=${encodeURIComponent(result?.error || 'Failed to update status')}`)
+    redirect(`/card/${id}?error=${encodeURIComponent(result?.error || 'Failed to update status')}`);
   }
 
-  redirect(`/card/${id}?success=${encodeURIComponent('Card status updated successfully.')}`)
+  redirect(`/card/${id}?success=${encodeURIComponent('Card status updated successfully.')}`);
 }
 
 export default withCardFormPage<EditCardPageProps>(async function EditCardPage({ params }) {
-  const { id } = await params
+  const { id } = await params;
 
-  const { response, data: result } = await serverApiGet<{ data?: any }>(`/api/card/${id}`)
+  const { response, data: result } = await serverApiGet<{ data?: any }>(`/api/card/${id}`);
 
   if (response.status === 401) {
-    redirect(`/auth?next=/card/${id}`)
+    redirect(`/auth?next=/card/${id}`);
   }
 
   if (!response.ok) {
-    redirect('/card')
+    redirect('/card');
   }
 
-  const card = result?.data
+  const card = result?.data;
 
   if (!card) {
-    redirect('/card')
+    redirect('/card');
   }
 
-  const isCredit = Boolean(card.isCredit)
-  const rawStatus = String(card.status ?? '').trim().toLowerCase()
-  const status = isCardStatus(rawStatus) ? rawStatus : 'active'
+  const isCredit = Boolean(card.isCredit);
+  const rawStatus = String(card.status ?? '')
+    .trim()
+    .toLowerCase();
+  const status = isCardStatus(rawStatus) ? rawStatus : 'active';
 
   return {
     pageTitle: 'Edit Card',
@@ -168,22 +172,26 @@ export default withCardFormPage<EditCardPageProps>(async function EditCardPage({
     backHref: '/card',
     backButtonLabel: 'Back to cards',
     children: (
-      <div className="space-y-4">
-        <Card className="border-border/70 bg-card/90 shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Card Status</CardTitle>
+      <div className='space-y-4'>
+        <Card className='border-border/70 bg-card/90 shadow-sm'>
+          <CardHeader className='pb-3'>
+            <CardTitle className='text-base'>Card Status</CardTitle>
             <CardDescription>
               Change status independently. Use Replaced to archive old cards while keeping history.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <CardStatusForm cardId={String(card.id)} initialStatus={status} action={updateCardStatus} />
+            <CardStatusForm
+              cardId={String(card.id)}
+              initialStatus={status}
+              action={updateCardStatus}
+            />
           </CardContent>
         </Card>
 
         <CardForm
           action={updateCard}
-          submitLabel="Update card"
+          submitLabel='Update card'
           cardId={String(card.id)}
           initialValues={{
             cardType: isCredit ? 'credit' : 'debit',
@@ -204,5 +212,5 @@ export default withCardFormPage<EditCardPageProps>(async function EditCardPage({
         />
       </div>
     ),
-  }
-})
+  };
+});

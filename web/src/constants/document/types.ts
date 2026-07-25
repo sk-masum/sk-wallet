@@ -1,4 +1,4 @@
-import { DocumentTypeCode, type DocumentTypeFieldConfig } from '@/models/document'
+import { DocumentTypeCode, type DocumentTypeFieldConfig } from '@/models/document';
 
 export const DOCUMENT_TYPE_OPTIONS: DocumentTypeFieldConfig[] = [
   {
@@ -81,14 +81,14 @@ export const DOCUMENT_TYPE_OPTIONS: DocumentTypeFieldConfig[] = [
     minLength: 4,
     maxLength: 40,
   },
-]
+];
 
-const DOCUMENT_TYPE_SET = new Set(DOCUMENT_TYPE_OPTIONS.map((item) => item.code))
+const DOCUMENT_TYPE_SET = new Set(DOCUMENT_TYPE_OPTIONS.map((item) => item.code));
 
 export function isDocumentTypeCode(value: string): value is DocumentTypeCode {
-  return DOCUMENT_TYPE_SET.has(value as DocumentTypeCode)
+  return DOCUMENT_TYPE_SET.has(value as DocumentTypeCode);
 }
 
 export function getDocumentTypeConfig(type: string) {
-  return DOCUMENT_TYPE_OPTIONS.find((item) => item.code === type) ?? null
+  return DOCUMENT_TYPE_OPTIONS.find((item) => item.code === type) ?? null;
 }

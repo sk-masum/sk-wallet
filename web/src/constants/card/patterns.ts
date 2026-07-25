@@ -1,11 +1,11 @@
 export type CardPattern = {
-  key: string
-  label: string
-  overlayClassName: string
-  swatchClassName: string
-}
+  key: string;
+  label: string;
+  overlayClassName: string;
+  swatchClassName: string;
+};
 
-export const CARD_PATTERN_NONE = 'none'
+export const CARD_PATTERN_NONE = 'none';
 
 export const CARD_PATTERNS: CardPattern[] = [
   {
@@ -54,15 +54,17 @@ export const CARD_PATTERNS: CardPattern[] = [
     swatchClassName:
       'bg-[linear-gradient(0deg,rgba(255,255,255,0.3),rgba(255,255,255,0.3)),radial-gradient(rgba(255,255,255,0.45)_0.6px,transparent_0.6px)] bg-[size:auto,3px_3px]',
   },
-]
+];
 
 export function getCardPatternByKey(key: string | null | undefined) {
-  const normalized = String(key ?? '').trim().toLowerCase()
-  return CARD_PATTERNS.find((pattern) => pattern.key === normalized) ?? CARD_PATTERNS[0]
+  const normalized = String(key ?? '')
+    .trim()
+    .toLowerCase();
+  return CARD_PATTERNS.find((pattern) => pattern.key === normalized) ?? CARD_PATTERNS[0];
 }
 
 export function getRandomCardPatternKey() {
-  const selectable = CARD_PATTERNS.filter((pattern) => pattern.key !== CARD_PATTERN_NONE)
-  const picked = selectable[Math.floor(Math.random() * selectable.length)]
-  return picked?.key ?? CARD_PATTERN_NONE
+  const selectable = CARD_PATTERNS.filter((pattern) => pattern.key !== CARD_PATTERN_NONE);
+  const picked = selectable[Math.floor(Math.random() * selectable.length)];
+  return picked?.key ?? CARD_PATTERN_NONE;
 }

@@ -1,5 +1,5 @@
-import { CredentialFormLoading } from '@/components/credential/credential-form-loading'
+import { CredentialFormLoading } from '@/components/credential/credential-form-loading';
 
 export default function Loading() {
-    return <CredentialFormLoading />
+  return <CredentialFormLoading />;
 }

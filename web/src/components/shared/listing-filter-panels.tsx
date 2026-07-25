@@ -1,231 +1,231 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import type { ReactNode } from 'react'
+import Link from 'next/link';
+import type { ReactNode } from 'react';
 
-import { DetailDialogContent } from '@/components/shared/detail-dialog-content'
-import { Button, buttonVariants } from '@/components/ui/button'
-import { Dialog, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { cn } from '@/lib/utils'
+import { DetailDialogContent } from '@/components/shared/detail-dialog-content';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Dialog, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
 type ListingFilterDesktopPanelProps = {
-    children: ReactNode
-    className?: string
-}
+  children: ReactNode;
+  className?: string;
+};
 
 export function ListingFilterDesktopPanel({ children, className }: ListingFilterDesktopPanelProps) {
-    return (
-        <div
-            className={cn(
-                'mt-2 space-y-4 rounded-none bg-transparent p-6 shadow-none ring-0',
-                className,
-            )}
-        >
-            {children}
-        </div>
-    )
+  return (
+    <div
+      className={cn('mt-2 space-y-4 rounded-none bg-transparent p-6 shadow-none ring-0', className)}
+    >
+      {children}
+    </div>
+  );
 }
 
 type ListingFilterDesktopSectionProps = {
-    label: string
-    children: ReactNode
-    className?: string
-    labelClassName?: string
-}
+  label: string;
+  children: ReactNode;
+  className?: string;
+  labelClassName?: string;
+};
 
 export function ListingFilterDesktopSection({
-    label,
-    children,
-    className,
-    labelClassName,
+  label,
+  children,
+  className,
+  labelClassName,
 }: ListingFilterDesktopSectionProps) {
-    return (
-        <div
-            className={cn(
-                'listing-filter-surface space-y-1.5 p-4',
-                className,
-            )}
-        >
-            <p className={cn('text-[11px] font-semibold tracking-[0.08em] text-text-subtle uppercase', labelClassName)}>
-                {label}
-            </p>
-            {children}
-        </div>
-    )
+  return (
+    <div className={cn('listing-filter-surface space-y-1.5 p-4', className)}>
+      <p
+        className={cn(
+          'text-[11px] font-semibold tracking-[0.08em] text-text-subtle uppercase',
+          labelClassName,
+        )}
+      >
+        {label}
+      </p>
+      {children}
+    </div>
+  );
 }
 
 type ListingFilterDesktopActionsProps = {
-    hasActiveControls: boolean
-    collapseLabel?: string
-    className?: string
-    resetHref?: string
-    onReset?: () => void
-    onCollapse: () => void
-}
+  hasActiveControls: boolean;
+  collapseLabel?: string;
+  className?: string;
+  resetHref?: string;
+  onReset?: () => void;
+  onCollapse: () => void;
+};
 
 export function ListingFilterDesktopActions({
-    hasActiveControls,
-    collapseLabel = 'Collapse',
-    className,
-    resetHref,
-    onReset,
-    onCollapse,
+  hasActiveControls,
+  collapseLabel = 'Collapse',
+  className,
+  resetHref,
+  onReset,
+  onCollapse,
 }: ListingFilterDesktopActionsProps) {
-    return (
-        <div className={cn('mt-1 flex items-center justify-end gap-2 pt-1', className)}>
-            {resetHref && hasActiveControls ? (
-                <Link
-                    href={resetHref}
-                    className={buttonVariants({ variant: 'toolbar', size: 'md' })}
-                    onClick={onCollapse}
-                >
-                    Reset all
-                </Link>
-            ) : null}
-            {!resetHref ? (
-                <Button
-                    type="button"
-                    variant="toolbar"
-                    size="md"
-                    disabled={!hasActiveControls}
-                    onClick={() => {
-                        if (!hasActiveControls) return
-                        onReset?.()
-                        onCollapse()
-                    }}
-                >
-                    Reset all
-                </Button>
-            ) : null}
-            {resetHref && !hasActiveControls ? (
-                <Button type="button" variant="toolbar" size="md" disabled>
-                    Reset all
-                </Button>
-            ) : null}
-            <Button type="button" variant="primary" size="mdWide" onClick={onCollapse}>
-                {collapseLabel}
-            </Button>
-        </div>
-    )
+  return (
+    <div className={cn('mt-1 flex items-center justify-end gap-2 pt-1', className)}>
+      {resetHref && hasActiveControls ? (
+        <Link
+          href={resetHref}
+          className={buttonVariants({ variant: 'toolbar', size: 'md' })}
+          onClick={onCollapse}
+        >
+          Reset all
+        </Link>
+      ) : null}
+      {!resetHref ? (
+        <Button
+          type='button'
+          variant='toolbar'
+          size='md'
+          disabled={!hasActiveControls}
+          onClick={() => {
+            if (!hasActiveControls) return;
+            onReset?.();
+            onCollapse();
+          }}
+        >
+          Reset all
+        </Button>
+      ) : null}
+      {resetHref && !hasActiveControls ? (
+        <Button type='button' variant='toolbar' size='md' disabled>
+          Reset all
+        </Button>
+      ) : null}
+      <Button type='button' variant='primary' size='mdWide' onClick={onCollapse}>
+        {collapseLabel}
+      </Button>
+    </div>
+  );
 }
 
 type ListingFilterMobileSheetProps = {
-    open: boolean
-    onOpenChange: (open: boolean) => void
-    title: string
-    description: string
-    children: ReactNode
-    className?: string
-}
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description: string;
+  children: ReactNode;
+  className?: string;
+};
 
 export function ListingFilterMobileSheet({
-    open,
-    onOpenChange,
-    title,
-    description,
-    children,
-    className,
+  open,
+  onOpenChange,
+  title,
+  description,
+  children,
+  className,
 }: ListingFilterMobileSheetProps) {
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DetailDialogContent
-                className={cn('sm:hidden max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:w-screen max-sm:max-w-screen max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-0 border-glass-border bg-[linear-gradient(to_bottom,hsl(var(--card)/0.94),hsl(var(--surface-elevated)/0.92))] backdrop-blur-xl dark:bg-[linear-gradient(to_bottom,hsl(var(--card)/0.98),hsl(var(--surface-elevated)/0.96))] ', className)}
-                scrollClassName="max-h-[88dvh] px-0 pb-0"
-            >
-                <div className="flex h-full flex-col bg-transparent pb-4">
-                    <div className="sticky top-0 z-20 border-b border-glass-border-subtle px-3 pb-3 -pt-3 ">
-                        <DialogHeader>
-                            <DialogTitle className="text-left text-2xl">{title}</DialogTitle>
-                        </DialogHeader>
-                    </div>
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DetailDialogContent
+        className={cn(
+          'sm:hidden max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:w-screen max-sm:max-w-screen max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-0 border-glass-border bg-[linear-gradient(to_bottom,hsl(var(--card)/0.94),hsl(var(--surface-elevated)/0.92))] backdrop-blur-xl dark:bg-[linear-gradient(to_bottom,hsl(var(--card)/0.98),hsl(var(--surface-elevated)/0.96))] ',
+          className,
+        )}
+        scrollClassName='max-h-[88dvh] px-0 pb-0'
+      >
+        <div className='flex h-full flex-col bg-transparent pb-4'>
+          <div className='sticky top-0 z-20 border-b border-glass-border-subtle px-3 pb-3 -pt-3 '>
+            <DialogHeader>
+              <DialogTitle className='text-left text-2xl'>{title}</DialogTitle>
+            </DialogHeader>
+          </div>
 
-                    <div className="space-y-4 overflow-y-auto py-8 mt-2 mb-16">{children}</div>
-                </div>
-            </DetailDialogContent>
-        </Dialog>
-    )
+          <div className='space-y-4 overflow-y-auto py-8 mt-2 mb-16'>{children}</div>
+        </div>
+      </DetailDialogContent>
+    </Dialog>
+  );
 }
 
 type ListingFilterMobileSectionProps = {
-    label: string
-    icon?: ReactNode
-    children: ReactNode
-    className?: string
-}
+  label: string;
+  icon?: ReactNode;
+  children: ReactNode;
+  className?: string;
+};
 
-export function ListingFilterMobileSection({ label, icon, children, className }: ListingFilterMobileSectionProps) {
-    return (
-        <div
-            className={cn(
-                'listing-filter-surface space-y-2 p-3.5',
-                className,
-            )}
-        >
-            <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-text-subtle uppercase">
-                {icon}
-                {label}
-            </p>
-            {children}
-        </div>
-    )
+export function ListingFilterMobileSection({
+  label,
+  icon,
+  children,
+  className,
+}: ListingFilterMobileSectionProps) {
+  return (
+    <div className={cn('listing-filter-surface space-y-2 p-3.5', className)}>
+      <p className='inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-text-subtle uppercase'>
+        {icon}
+        {label}
+      </p>
+      {children}
+    </div>
+  );
 }
 
 type ListingFilterMobileActionsProps = {
-    hasActiveControls: boolean
-    doneLabel?: string
-    resetHref?: string
-    onReset?: () => void
-    onDone: () => void
-}
+  hasActiveControls: boolean;
+  doneLabel?: string;
+  resetHref?: string;
+  onReset?: () => void;
+  onDone: () => void;
+};
 
 export function ListingFilterMobileActions({
-    hasActiveControls,
-    doneLabel = 'Done',
-    resetHref,
-    onReset,
-    onDone,
+  hasActiveControls,
+  doneLabel = 'Done',
+  resetHref,
+  onReset,
+  onDone,
 }: ListingFilterMobileActionsProps) {
-    return (
-        <div className="fixed inset-x-0 bottom-0 z-50 flex items-center gap-2 border-t border-glass-border bg-[linear-gradient(to_top,hsl(var(--card)/0.97),hsl(var(--surface)/0.94))] p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-xl dark:bg-[linear-gradient(to_top,hsl(var(--card)/0.99),hsl(var(--surface-elevated)/0.97))] sm:hidden">
-            {resetHref && hasActiveControls ? (
-                <Link
-                    href={resetHref}
-                    className={buttonVariants({ variant: 'toolbar', size: 'md' })}
-                    onClick={onDone}
-                >
-                    Reset all
-                </Link>
-            ) : null}
-            {!resetHref ? (
-                <Button
-                    type="button"
-                    variant="toolbar"
-                    size="md"
-                    className="flex-1 justify-center"
-                    disabled={!hasActiveControls}
-                    onClick={() => {
-                        if (!hasActiveControls) return
-                        onReset?.()
-                        onDone()
-                    }}
-                >
-                    Reset all
-                </Button>
-            ) : null}
-            {resetHref && !hasActiveControls ? (
-                <Button
-                    type="button"
-                    variant="toolbar"
-                    size="md"
-                    className="flex-1 justify-center"
-                    disabled
-                >
-                    Reset all
-                </Button>
-            ) : null}
-            <Button type="button" variant="primaryCta" size="md" className="flex-1" onClick={onDone}>
-                {doneLabel}
-            </Button>
-        </div>
-    )
+  return (
+    <div className='fixed inset-x-0 bottom-0 z-50 flex items-center gap-2 border-t border-glass-border bg-[linear-gradient(to_top,hsl(var(--card)/0.97),hsl(var(--surface)/0.94))] p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-xl dark:bg-[linear-gradient(to_top,hsl(var(--card)/0.99),hsl(var(--surface-elevated)/0.97))] sm:hidden'>
+      {resetHref && hasActiveControls ? (
+        <Link
+          href={resetHref}
+          className={buttonVariants({ variant: 'toolbar', size: 'md' })}
+          onClick={onDone}
+        >
+          Reset all
+        </Link>
+      ) : null}
+      {!resetHref ? (
+        <Button
+          type='button'
+          variant='toolbar'
+          size='md'
+          className='flex-1 justify-center'
+          disabled={!hasActiveControls}
+          onClick={() => {
+            if (!hasActiveControls) return;
+            onReset?.();
+            onDone();
+          }}
+        >
+          Reset all
+        </Button>
+      ) : null}
+      {resetHref && !hasActiveControls ? (
+        <Button
+          type='button'
+          variant='toolbar'
+          size='md'
+          className='flex-1 justify-center'
+          disabled
+        >
+          Reset all
+        </Button>
+      ) : null}
+      <Button type='button' variant='primaryCta' size='md' className='flex-1' onClick={onDone}>
+        {doneLabel}
+      </Button>
+    </div>
+  );
 }

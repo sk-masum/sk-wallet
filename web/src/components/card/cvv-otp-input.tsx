@@ -1,21 +1,21 @@
-'use client'
+'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 type CvvOtpInputProps = {
-  id?: string
-  name?: string
-  defaultValue?: string
-  required?: boolean
-  length: number
-  invalid?: boolean
-  onChange?: (value: string) => void
-}
+  id?: string;
+  name?: string;
+  defaultValue?: string;
+  required?: boolean;
+  length: number;
+  invalid?: boolean;
+  onChange?: (value: string) => void;
+};
 
 function normalizeDigits(value: string, length: number) {
-  return value.replace(/\D/g, '').slice(0, length)
+  return value.replace(/\D/g, '').slice(0, length);
 }
 
 export function CvvOtpInput({
@@ -27,29 +27,32 @@ export function CvvOtpInput({
   invalid = false,
   onChange,
 }: CvvOtpInputProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null)
-  const initialDigits = useMemo(() => normalizeDigits(defaultValue, length), [defaultValue, length])
-  const [digits, setDigits] = useState(initialDigits)
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const initialDigits = useMemo(
+    () => normalizeDigits(defaultValue, length),
+    [defaultValue, length],
+  );
+  const [digits, setDigits] = useState(initialDigits);
 
   useEffect(() => {
-    setDigits(normalizeDigits(defaultValue, length))
-  }, [defaultValue, length])
+    setDigits(normalizeDigits(defaultValue, length));
+  }, [defaultValue, length]);
 
   useEffect(() => {
-    const form = inputRef.current?.form
-    if (!form) return
+    const form = inputRef.current?.form;
+    if (!form) return;
 
     const handleReset = () => {
-      setDigits(normalizeDigits(defaultValue, length))
-      onChange?.(normalizeDigits(defaultValue, length))
-    }
+      setDigits(normalizeDigits(defaultValue, length));
+      onChange?.(normalizeDigits(defaultValue, length));
+    };
 
-    form.addEventListener('reset', handleReset)
-    return () => form.removeEventListener('reset', handleReset)
-  }, [defaultValue, length, onChange])
+    form.addEventListener('reset', handleReset);
+    return () => form.removeEventListener('reset', handleReset);
+  }, [defaultValue, length, onChange]);
 
   return (
-    <div className="relative">
+    <div className='relative'>
       <input
         ref={inputRef}
         id={id}
@@ -59,26 +62,26 @@ export function CvvOtpInput({
         minLength={length}
         maxLength={length}
         pattern={`\\d{${length}}`}
-        inputMode="numeric"
-        autoComplete="cc-csc"
-        className="sr-only"
+        inputMode='numeric'
+        autoComplete='cc-csc'
+        className='sr-only'
         aria-invalid={invalid}
         onChange={(event) => {
-          const nextValue = normalizeDigits(event.target.value, length)
-          setDigits(nextValue)
-          onChange?.(nextValue)
+          const nextValue = normalizeDigits(event.target.value, length);
+          setDigits(nextValue);
+          onChange?.(nextValue);
         }}
       />
 
       <button
-        type="button"
-        className="w-full"
+        type='button'
+        className='w-full'
         onClick={() => inputRef.current?.focus()}
-        aria-label="Enter CVV"
+        aria-label='Enter CVV'
       >
-        <div className="flex items-center gap-2">
+        <div className='flex items-center gap-2'>
           {Array.from({ length }).map((_, index) => {
-            const value = digits[index] ?? ''
+            const value = digits[index] ?? '';
             return (
               <div
                 key={index}
@@ -86,15 +89,15 @@ export function CvvOtpInput({
                   'flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-semibold transition-colors',
                   invalid
                     ? 'border-destructive ring-1 ring-destructive/70'
-                    : 'border-border/70 bg-background/80'
+                    : 'border-border/70 bg-background/80',
                 )}
               >
                 {value}
               </div>
-            )
+            );
           })}
         </div>
       </button>
     </div>
-  )
+  );
 }

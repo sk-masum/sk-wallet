@@ -3,9 +3,9 @@ export function formatCurrency(value: number) {
     style: 'currency',
     currency: 'INR',
     maximumFractionDigits: 0,
-  }).format(value)
+  }).format(value);
 }
 
 export function formatInteger(value: number) {
-  return new Intl.NumberFormat('en-IN').format(value)
+  return new Intl.NumberFormat('en-IN').format(value);
 }

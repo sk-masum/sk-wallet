@@ -1,4 +1,4 @@
-import { BookText, CreditCard, KeyRound, Settings } from 'lucide-react'
+import { BookText, CreditCard, KeyRound, Settings } from 'lucide-react';
 
 export const BOTTOM_TABS = [
   {
@@ -19,4 +19,4 @@ export const BOTTOM_TABS = [
     icon: KeyRound,
     match: (pathname: string) => pathname.startsWith('/credential'),
   },
-]
+];
