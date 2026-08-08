@@ -13,13 +13,13 @@ import {
   entityFormActionsDividerClass,
   entityFormControlClass,
   entityFormDateButtonClass,
-  entityFormFieldCardClass,
   entityFormGridClass,
   entityFormLabelClass,
   entityFormSelectClass,
   entityFormTextareaClass,
 } from '@/components/shared/entity-form-ui';
 import { AppSelectField } from '@/components/shared/app-select-field';
+import { submitEntityForm } from '@/components/shared/entity-form-submit';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
 import { isDocumentCategory } from '@/constants/document/categories';
@@ -163,35 +163,46 @@ export function DocumentForm({
       })),
     };
 
-    const errors = validateDocumentFormFields(payload);
-    if (!validateIdentityFields) {
-      delete errors.type;
-      delete errors.number;
-    }
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      return;
-    }
-
-    setFieldErrors({});
-
-    if (!onSubmit) return;
-
-    setIsSubmitting(true);
-    try {
-      await onSubmit(payload);
-    } finally {
-      setIsSubmitting(false);
-    }
+    await submitEntityForm({
+      payload,
+      validate: validateDocumentFormFields,
+      mutateErrors: (errors) => {
+        if (!validateIdentityFields) {
+          delete errors.type;
+          delete errors.number;
+        }
+      },
+      setFieldErrors,
+      setIsSubmitting,
+      onSubmit,
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit} className={entityFormGridClass}>
+    <form
+      onSubmit={handleSubmit}
+      className={cn(
+        entityFormGridClass,
+        'overflow-hidden rounded-2xl border border-glass-border-strong bg-[radial-gradient(circle_at_8%_6%,hsl(var(--primary)/0.22),transparent_48%),radial-gradient(circle_at_94%_10%,hsl(var(--accent)/0.16),transparent_44%),radial-gradient(circle_at_20%_94%,hsl(var(--info)/0.14),transparent_52%),linear-gradient(160deg,hsl(var(--card)/0.86),hsl(var(--surface-elevated)/0.8))] p-3 shadow-neu-raised-sm backdrop-blur-md sm:p-4',
+      )}
+    >
+      <div
+        aria-hidden='true'
+        className='pointer-events-none absolute -left-10 -top-14 h-56 w-56 rounded-full bg-primary/18 blur-3xl'
+      />
+      <div
+        aria-hidden='true'
+        className='pointer-events-none absolute -right-12 top-1/4 h-52 w-52 rounded-full bg-accent/14 blur-3xl'
+      />
+      <div
+        aria-hidden='true'
+        className='pointer-events-none absolute -bottom-24 left-1/3 h-52 w-52 rounded-full bg-info/12 blur-3xl'
+      />
       <FormField
         id='doc-type'
         label='Document type'
         error={fieldErrors.type}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
       >
         <AppSelectField
@@ -231,7 +242,7 @@ export function DocumentForm({
           label='Custom label'
           hint='This label will be shown instead of Others in your vault.'
           error={fieldErrors.category}
-          className={entityFormFieldCardClass}
+
           labelClassName={entityFormLabelClass}
         >
           <Input
@@ -258,7 +269,7 @@ export function DocumentForm({
           id='doc-category'
           label='Category'
           error={fieldErrors.category}
-          className={entityFormFieldCardClass}
+
           labelClassName={entityFormLabelClass}
         >
           <AppSelectField
@@ -286,7 +297,7 @@ export function DocumentForm({
         label='Document number'
         hint={typeConfig?.hint ?? 'Choose a type to see validation hint'}
         error={fieldErrors.number}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
       >
         <Input
@@ -313,7 +324,7 @@ export function DocumentForm({
         id='doc-name'
         label='Name on document (optional)'
         error={fieldErrors.nameOnDocument}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
       >
         <Input
@@ -337,7 +348,7 @@ export function DocumentForm({
         id='doc-issued-date'
         label='Issued date (optional)'
         error={fieldErrors.issuedDate}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
       >
         <Popover>
@@ -377,7 +388,7 @@ export function DocumentForm({
         id='doc-expiry-date'
         label='Expiry date (optional)'
         error={fieldErrors.expiryDate}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
       >
         <Popover>
@@ -417,7 +428,7 @@ export function DocumentForm({
         id='doc-guardian'
         label='Guardian name (optional)'
         error={fieldErrors.guardianName}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
       >
         <Input
@@ -441,7 +452,7 @@ export function DocumentForm({
         id='doc-address'
         label='Address (optional)'
         error={fieldErrors.address}
-        className={cn(entityFormFieldCardClass, 'sm:col-span-2')}
+        className='sm:col-span-2'
         labelClassName={entityFormLabelClass}
       >
         <Input
@@ -465,7 +476,7 @@ export function DocumentForm({
         id='doc-other-details'
         label='Other details (optional)'
         error={fieldErrors.otherDetails}
-        className={cn(entityFormFieldCardClass, 'sm:col-span-2')}
+        className='sm:col-span-2'
         labelClassName={entityFormLabelClass}
       >
         <Textarea
@@ -490,7 +501,7 @@ export function DocumentForm({
         label='Custom fields (optional)'
         hint='Add your own key/value metadata entries for this document.'
         error={fieldErrors.customFields}
-        className={cn(entityFormFieldCardClass, 'sm:col-span-2')}
+        className='sm:col-span-2'
         labelClassName={entityFormLabelClass}
       >
         <div className='space-y-3'>

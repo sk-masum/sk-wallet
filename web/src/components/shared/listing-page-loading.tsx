@@ -47,12 +47,12 @@ export function ListingPageLoading({
 
       {children}
 
-      <div className='pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4 sm:hidden'>
+      {/* <div className='pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4 sm:hidden'>
         <div className='flex items-center'>
           <Skeleton className='h-15 w-70 rounded-4xl' />
           <Skeleton className='ml-3 h-15 w-15 rounded-4xl' />
         </div>
-      </div>
+      </div> */}
     </ListingPageLayout>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState, type FormEvent } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 
 import { FormActions } from '@/components/ui/form-actions';
 import { FormField } from '@/components/ui/form-field';
@@ -8,13 +9,13 @@ import { Input } from '@/components/ui/input';
 import {
   entityFormActionsDividerClass,
   entityFormControlClass,
-  entityFormFieldCardClass,
   entityFormGridClass,
   entityFormLabelClass,
   entityFormSelectClass,
   entityFormTextareaClass,
 } from '@/components/shared/entity-form-ui';
 import { AppSelectField } from '@/components/shared/app-select-field';
+import { submitEntityForm } from '@/components/shared/entity-form-submit';
 import { Textarea } from '@/components/ui/textarea';
 import { CREDENTIAL_TYPE_OPTIONS, getCredentialTypeConfig } from '@/constants/credential/types';
 import type { CredentialFormFieldErrors, CredentialFormPayload } from '@/models/credential';
@@ -57,6 +58,7 @@ export function CredentialForm({
   });
   const [fieldErrors, setFieldErrors] = useState<CredentialFormFieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSecret, setShowSecret] = useState(false);
 
   const typeConfig = useMemo(() => getCredentialTypeConfig(values.type), [values.type]);
 
@@ -72,22 +74,13 @@ export function CredentialForm({
       notes: values.notes,
     };
 
-    const errors = validateCredentialFormFields(payload, { allowEmptySecret });
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      return;
-    }
-
-    setFieldErrors({});
-
-    if (!onSubmit) return;
-
-    setIsSubmitting(true);
-    try {
-      await onSubmit(payload);
-    } finally {
-      setIsSubmitting(false);
-    }
+    await submitEntityForm({
+      payload,
+      validate: (nextPayload) => validateCredentialFormFields(nextPayload, { allowEmptySecret }),
+      setFieldErrors,
+      setIsSubmitting,
+      onSubmit,
+    });
   };
 
   return (
@@ -96,7 +89,6 @@ export function CredentialForm({
         id='cred-type'
         label='Credential type'
         error={fieldErrors.type}
-        className={entityFormFieldCardClass}
         labelClassName={entityFormLabelClass}
       >
         <AppSelectField
@@ -117,7 +109,7 @@ export function CredentialForm({
         id='cred-service'
         label='Service name'
         error={fieldErrors.serviceName}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
       >
         <Input
@@ -142,7 +134,7 @@ export function CredentialForm({
         id='cred-identifier'
         label='Identifier (optional)'
         error={fieldErrors.identifier}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
       >
         <Input
@@ -167,34 +159,45 @@ export function CredentialForm({
         label={allowEmptySecret ? 'Secret (leave empty to keep existing)' : 'Secret'}
         hint={typeConfig?.hint ?? 'Store only trusted credentials.'}
         error={fieldErrors.secret}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
       >
-        <Input
-          id='cred-secret'
-          type='password'
-          value={values.secret}
-          onChange={(event) => {
-            setValues((prev) => ({ ...prev, secret: event.target.value }));
-            setFieldErrors((prev) => ({ ...prev, secret: undefined }));
-          }}
-          placeholder={typeConfig?.placeholder ?? 'Enter secret'}
-          className={cn(
-            entityFormControlClass,
-            fieldErrors.secret && 'border-destructive focus-visible:ring-destructive',
-          )}
-          aria-invalid={Boolean(fieldErrors.secret)}
-          autoCapitalize='none'
-          autoComplete='off'
-          required={!allowEmptySecret}
-        />
+        <div className='relative'>
+          <Input
+            id='cred-secret'
+            type={showSecret ? 'text' : 'password'}
+            value={values.secret}
+            onChange={(event) => {
+              setValues((prev) => ({ ...prev, secret: event.target.value }));
+              setFieldErrors((prev) => ({ ...prev, secret: undefined }));
+            }}
+            placeholder={typeConfig?.placeholder ?? 'Enter secret'}
+            className={cn(
+              entityFormControlClass,
+              'pr-10',
+              fieldErrors.secret && 'border-destructive focus-visible:ring-destructive',
+            )}
+            aria-invalid={Boolean(fieldErrors.secret)}
+            autoCapitalize='none'
+            autoComplete='off'
+            required={!allowEmptySecret}
+          />
+          <button
+            type='button'
+            aria-label={showSecret ? 'Hide secret' : 'Show secret'}
+            className='absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground'
+            onClick={() => setShowSecret((value) => !value)}
+          >
+            {showSecret ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+          </button>
+        </div>
       </FormField>
 
       <FormField
         id='cred-url'
         label='Website URL (optional)'
         error={fieldErrors.url}
-        className={cn(entityFormFieldCardClass, 'sm:col-span-2')}
+        className='sm:col-span-2'
         labelClassName={entityFormLabelClass}
       >
         <Input
@@ -218,7 +221,7 @@ export function CredentialForm({
         id='cred-notes'
         label='Notes (optional)'
         error={fieldErrors.notes}
-        className={cn(entityFormFieldCardClass, 'sm:col-span-2')}
+        className='sm:col-span-2'
         labelClassName={entityFormLabelClass}
       >
         <Textarea

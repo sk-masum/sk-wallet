@@ -11,7 +11,11 @@ import {
   ListingFilterMobileSection,
   ListingFilterMobileSheet,
 } from '@/components/shared/listing-filter-panels';
-import { ListingFilterSelect } from '@/components/shared/listing-filter-select';
+import {
+  ListingFilterDesktopSelectSections,
+  ListingFilterMobileSelectSections,
+  type ListingFilterSelectSectionConfig,
+} from '@/components/shared/listing-filter-select-sections';
 import { ListingFilterTopBar } from '@/components/shared/listing-filter-topbar';
 import { CardTypeButtonGroup } from '@/components/ui/card-type-button-group';
 import {
@@ -83,6 +87,172 @@ export function CardMobileFilters() {
     );
   };
 
+  const selectSections: ListingFilterSelectSectionConfig[] = [
+    {
+      id: 'network',
+      desktopLabel: 'Network',
+      mobileLabel: 'Network',
+      mobileIcon: <Network className='h-3.5 w-3.5' />,
+      value: toFilterSelectValue(selectedNetwork),
+      onValueChange: (value) => setFilters({ networkFilter: fromFilterSelectValue(value) }),
+      ariaLabel: 'Filter by network',
+      placeholder: 'All networks',
+      allOption: { value: ALL_FILTER_VALUE, label: 'All networks' },
+      options: meta.networkOptions.map((network) => ({
+        value: network,
+        label: network,
+      })),
+    },
+    {
+      id: 'provider',
+      desktopLabel: 'Provider',
+      mobileLabel: 'Provider',
+      mobileIcon: <CreditCard className='h-3.5 w-3.5' />,
+      value: toFilterSelectValue(selectedProvider),
+      onValueChange: (value) => setFilters({ providerFilter: fromFilterSelectValue(value) }),
+      ariaLabel: 'Filter by provider',
+      placeholder: 'All providers',
+      allOption: { value: ALL_FILTER_VALUE, label: 'All providers' },
+      options: meta.providerOptions.map((provider) => ({
+        value: provider,
+        label: provider,
+      })),
+    },
+    {
+      id: 'tag',
+      desktopLabel: 'Tag',
+      mobileLabel: 'Tag',
+      mobileIcon: <CreditCard className='h-3.5 w-3.5' />,
+      value: toFilterSelectValue(selectedTag),
+      onValueChange: (value) => setFilters({ tagFilter: fromFilterSelectValue(value) }),
+      ariaLabel: 'Filter by tag',
+      placeholder: 'All tags',
+      allOption: { value: ALL_FILTER_VALUE, label: 'All tags' },
+      options: meta.tagOptions.map((tag) => ({ value: tag, label: tag })),
+    },
+    {
+      id: 'expiry',
+      desktopLabel: 'Expiry',
+      mobileLabel: 'Expiry',
+      mobileIcon: <CreditCard className='h-3.5 w-3.5' />,
+      value: selectedExpiry,
+      onValueChange: (value) =>
+        setFilters({ expiryFilter: toTypedFilterValue<CardExpiryFilter>(value) }),
+      ariaLabel: 'Filter by expiry',
+      placeholder: 'All cards',
+      options: CARD_EXPIRY_OPTIONS.map((option) => ({
+        value: option.value,
+        label: option.label,
+      })),
+    },
+    {
+      id: 'billingDate',
+      desktopLabel: 'Billing date',
+      mobileLabel: 'Billing date',
+      mobileIcon: <CreditCard className='h-3.5 w-3.5' />,
+      value: toFilterSelectValue(selectedBillingDate),
+      onValueChange: (value) => setFilters({ billingDate: fromFilterSelectValue(value) }),
+      ariaLabel: 'Filter by billing date',
+      placeholder: 'All dates',
+      allOption: { value: ALL_FILTER_VALUE, label: 'All dates' },
+      options: DAY_OF_MONTH_FILTER_OPTIONS.map((option) => ({
+        value: option.value,
+        label: option.label,
+      })),
+    },
+    {
+      id: 'paymentDate',
+      desktopLabel: 'Payment date',
+      mobileLabel: 'Payment date',
+      mobileIcon: <CreditCard className='h-3.5 w-3.5' />,
+      value: toFilterSelectValue(selectedPaymentDate),
+      onValueChange: (value) => setFilters({ paymentDate: fromFilterSelectValue(value) }),
+      ariaLabel: 'Filter by payment date',
+      placeholder: 'All dates',
+      allOption: { value: ALL_FILTER_VALUE, label: 'All dates' },
+      options: DAY_OF_MONTH_FILTER_OPTIONS.map((option) => ({
+        value: option.value,
+        label: option.label,
+      })),
+    },
+    {
+      id: 'sort',
+      desktopLabel: 'Sort',
+      mobileLabel: 'Sort',
+      mobileIcon: <ArrowUpDown className='h-3.5 w-3.5' />,
+      value: selectedSort,
+      onValueChange: (value) => setSortBy(value as CardSort),
+      ariaLabel: 'Sort cards',
+      placeholder: 'Newest first',
+      options: CARD_SORT_OPTIONS.map((option) => ({
+        value: option.value,
+        label: option.label,
+      })),
+    },
+    {
+      id: 'group',
+      desktopLabel: 'Group',
+      mobileLabel: 'Group',
+      mobileIcon: <Layers3 className='h-3.5 w-3.5' />,
+      value: selectedGroup,
+      onValueChange: (value) => setGroupBy(value as CardGroup),
+      ariaLabel: 'Group cards',
+      placeholder: 'No grouping',
+      options: CARD_GROUP_OPTIONS.map((option) => ({
+        value: option.value,
+        label: option.label,
+      })),
+    },
+  ];
+
+  const preCreditLimitSections = selectSections.filter((section) =>
+    ['network', 'provider', 'tag', 'expiry'].includes(section.id),
+  );
+  const postCreditLimitSections = selectSections.filter((section) =>
+    ['billingDate', 'paymentDate', 'sort', 'group'].includes(section.id),
+  );
+
+  const renderCreditLimitControls = () => (
+    <div className='space-y-2'>
+      <div className='flex items-center justify-between text-xs text-text-subtle'>
+        <span>Min: {creditLimitRange[0]}</span>
+        <span>Max: {creditLimitRange[1]}</span>
+      </div>
+      <input
+        type='range'
+        min={meta.creditLimitBounds.min}
+        max={meta.creditLimitBounds.max}
+        step={100}
+        value={creditLimitRange[0]}
+        onChange={(event) => {
+          const nextMin = Number(event.target.value);
+          setCreditLimitRange(([_, currentMax]) => [Math.min(nextMin, currentMax), currentMax]);
+        }}
+        onMouseUp={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
+        onTouchEnd={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
+        className='w-full accent-primary'
+        aria-label='Minimum credit limit'
+        disabled={meta.creditLimitBounds.min >= meta.creditLimitBounds.max}
+      />
+      <input
+        type='range'
+        min={meta.creditLimitBounds.min}
+        max={meta.creditLimitBounds.max}
+        step={100}
+        value={creditLimitRange[1]}
+        onChange={(event) => {
+          const nextMax = Number(event.target.value);
+          setCreditLimitRange(([currentMin]) => [currentMin, Math.max(currentMin, nextMax)]);
+        }}
+        onMouseUp={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
+        onTouchEnd={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
+        className='w-full accent-primary'
+        aria-label='Maximum credit limit'
+        disabled={meta.creditLimitBounds.min >= meta.creditLimitBounds.max}
+      />
+    </div>
+  );
+
   return (
     <>
       <ListingFilterTopBar
@@ -114,176 +284,13 @@ export function CardMobileFilters() {
                 />
               </ListingFilterDesktopSection>
 
-              <ListingFilterDesktopSection label='Network'>
-                <ListingFilterSelect
-                  value={toFilterSelectValue(selectedNetwork)}
-                  onValueChange={(value) =>
-                    setFilters({ networkFilter: fromFilterSelectValue(value) })
-                  }
-                  ariaLabel='Filter by network'
-                  placeholder='All networks'
-                  allOption={{ value: ALL_FILTER_VALUE, label: 'All networks' }}
-                  options={meta.networkOptions.map((network) => ({
-                    value: network,
-                    label: network,
-                  }))}
-                />
-              </ListingFilterDesktopSection>
-
-              <ListingFilterDesktopSection label='Provider'>
-                <ListingFilterSelect
-                  value={toFilterSelectValue(selectedProvider)}
-                  onValueChange={(value) =>
-                    setFilters({ providerFilter: fromFilterSelectValue(value) })
-                  }
-                  ariaLabel='Filter by provider'
-                  placeholder='All providers'
-                  allOption={{ value: ALL_FILTER_VALUE, label: 'All providers' }}
-                  options={meta.providerOptions.map((provider) => ({
-                    value: provider,
-                    label: provider,
-                  }))}
-                />
-              </ListingFilterDesktopSection>
-
-              <ListingFilterDesktopSection label='Tag'>
-                <ListingFilterSelect
-                  value={toFilterSelectValue(selectedTag)}
-                  onValueChange={(value) => setFilters({ tagFilter: fromFilterSelectValue(value) })}
-                  ariaLabel='Filter by tag'
-                  placeholder='All tags'
-                  allOption={{ value: ALL_FILTER_VALUE, label: 'All tags' }}
-                  options={meta.tagOptions.map((tag) => ({ value: tag, label: tag }))}
-                />
-              </ListingFilterDesktopSection>
-
-              <ListingFilterDesktopSection label='Expiry'>
-                <ListingFilterSelect
-                  value={selectedExpiry}
-                  onValueChange={(value) =>
-                    setFilters({ expiryFilter: toTypedFilterValue<CardExpiryFilter>(value) })
-                  }
-                  ariaLabel='Filter by expiry'
-                  placeholder='All cards'
-                  options={CARD_EXPIRY_OPTIONS.map((option) => ({
-                    value: option.value,
-                    label: option.label,
-                  }))}
-                />
-              </ListingFilterDesktopSection>
+              <ListingFilterDesktopSelectSections sections={preCreditLimitSections} />
 
               <ListingFilterDesktopSection label='Credit limit'>
-                <div className='space-y-2'>
-                  <div className='flex items-center justify-between text-xs text-text-subtle'>
-                    <span>Min: {creditLimitRange[0]}</span>
-                    <span>Max: {creditLimitRange[1]}</span>
-                  </div>
-                  <input
-                    type='range'
-                    min={meta.creditLimitBounds.min}
-                    max={meta.creditLimitBounds.max}
-                    step={100}
-                    value={creditLimitRange[0]}
-                    onChange={(event) => {
-                      const nextMin = Number(event.target.value);
-                      setCreditLimitRange(([_, currentMax]) => [
-                        Math.min(nextMin, currentMax),
-                        currentMax,
-                      ]);
-                    }}
-                    onMouseUp={() =>
-                      commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])
-                    }
-                    onTouchEnd={() =>
-                      commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])
-                    }
-                    className='w-full accent-primary'
-                    aria-label='Minimum credit limit'
-                    disabled={meta.creditLimitBounds.min >= meta.creditLimitBounds.max}
-                  />
-                  <input
-                    type='range'
-                    min={meta.creditLimitBounds.min}
-                    max={meta.creditLimitBounds.max}
-                    step={100}
-                    value={creditLimitRange[1]}
-                    onChange={(event) => {
-                      const nextMax = Number(event.target.value);
-                      setCreditLimitRange(([currentMin]) => [
-                        currentMin,
-                        Math.max(currentMin, nextMax),
-                      ]);
-                    }}
-                    onMouseUp={() =>
-                      commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])
-                    }
-                    onTouchEnd={() =>
-                      commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])
-                    }
-                    className='w-full accent-primary'
-                    aria-label='Maximum credit limit'
-                    disabled={meta.creditLimitBounds.min >= meta.creditLimitBounds.max}
-                  />
-                </div>
+                {renderCreditLimitControls()}
               </ListingFilterDesktopSection>
 
-              <ListingFilterDesktopSection label='Billing date'>
-                <ListingFilterSelect
-                  value={toFilterSelectValue(selectedBillingDate)}
-                  onValueChange={(value) =>
-                    setFilters({ billingDate: fromFilterSelectValue(value) })
-                  }
-                  ariaLabel='Filter by billing date'
-                  placeholder='All dates'
-                  allOption={{ value: ALL_FILTER_VALUE, label: 'All dates' }}
-                  options={DAY_OF_MONTH_FILTER_OPTIONS.map((option) => ({
-                    value: option.value,
-                    label: option.label,
-                  }))}
-                />
-              </ListingFilterDesktopSection>
-
-              <ListingFilterDesktopSection label='Payment date'>
-                <ListingFilterSelect
-                  value={toFilterSelectValue(selectedPaymentDate)}
-                  onValueChange={(value) =>
-                    setFilters({ paymentDate: fromFilterSelectValue(value) })
-                  }
-                  ariaLabel='Filter by payment date'
-                  placeholder='All dates'
-                  allOption={{ value: ALL_FILTER_VALUE, label: 'All dates' }}
-                  options={DAY_OF_MONTH_FILTER_OPTIONS.map((option) => ({
-                    value: option.value,
-                    label: option.label,
-                  }))}
-                />
-              </ListingFilterDesktopSection>
-
-              <ListingFilterDesktopSection label='Sort'>
-                <ListingFilterSelect
-                  value={selectedSort}
-                  onValueChange={(value) => setSortBy(value as CardSort)}
-                  ariaLabel='Sort cards'
-                  placeholder='Newest first'
-                  options={CARD_SORT_OPTIONS.map((option) => ({
-                    value: option.value,
-                    label: option.label,
-                  }))}
-                />
-              </ListingFilterDesktopSection>
-
-              <ListingFilterDesktopSection label='Group'>
-                <ListingFilterSelect
-                  value={selectedGroup}
-                  onValueChange={(value) => setGroupBy(value as CardGroup)}
-                  ariaLabel='Group cards'
-                  placeholder='No grouping'
-                  options={CARD_GROUP_OPTIONS.map((option) => ({
-                    value: option.value,
-                    label: option.label,
-                  }))}
-                />
-              </ListingFilterDesktopSection>
+              <ListingFilterDesktopSelectSections sections={postCreditLimitSections} />
             </div>
 
             <ListingFilterDesktopActions
@@ -310,160 +317,16 @@ export function CardMobileFilters() {
           />
         </ListingFilterMobileSection>
 
-        <ListingFilterMobileSection label='Network' icon={<Network className='h-3.5 w-3.5' />}>
-          <ListingFilterSelect
-            value={toFilterSelectValue(selectedNetwork)}
-            onValueChange={(value) => setFilters({ networkFilter: fromFilterSelectValue(value) })}
-            ariaLabel='Filter by network'
-            placeholder='All networks'
-            allOption={{ value: ALL_FILTER_VALUE, label: 'All networks' }}
-            options={meta.networkOptions.map((network) => ({ value: network, label: network }))}
-          />
-        </ListingFilterMobileSection>
-
-        <ListingFilterMobileSection label='Provider' icon={<CreditCard className='h-3.5 w-3.5' />}>
-          <ListingFilterSelect
-            value={toFilterSelectValue(selectedProvider)}
-            onValueChange={(value) => setFilters({ providerFilter: fromFilterSelectValue(value) })}
-            ariaLabel='Filter by provider'
-            placeholder='All providers'
-            allOption={{ value: ALL_FILTER_VALUE, label: 'All providers' }}
-            options={meta.providerOptions.map((provider) => ({ value: provider, label: provider }))}
-          />
-        </ListingFilterMobileSection>
-
-        <ListingFilterMobileSection label='Tag' icon={<CreditCard className='h-3.5 w-3.5' />}>
-          <ListingFilterSelect
-            value={toFilterSelectValue(selectedTag)}
-            onValueChange={(value) => setFilters({ tagFilter: fromFilterSelectValue(value) })}
-            ariaLabel='Filter by tag'
-            placeholder='All tags'
-            allOption={{ value: ALL_FILTER_VALUE, label: 'All tags' }}
-            options={meta.tagOptions.map((tag) => ({ value: tag, label: tag }))}
-          />
-        </ListingFilterMobileSection>
-
-        <ListingFilterMobileSection label='Expiry' icon={<CreditCard className='h-3.5 w-3.5' />}>
-          <ListingFilterSelect
-            value={selectedExpiry}
-            onValueChange={(value) =>
-              setFilters({ expiryFilter: toTypedFilterValue<CardExpiryFilter>(value) })
-            }
-            ariaLabel='Filter by expiry'
-            placeholder='All cards'
-            options={CARD_EXPIRY_OPTIONS.map((option) => ({
-              value: option.value,
-              label: option.label,
-            }))}
-          />
-        </ListingFilterMobileSection>
+        <ListingFilterMobileSelectSections sections={preCreditLimitSections} />
 
         <ListingFilterMobileSection
           label='Credit limit'
           icon={<CreditCard className='h-3.5 w-3.5' />}
         >
-          <div className='space-y-2'>
-            <div className='flex items-center justify-between text-xs text-text-subtle'>
-              <span>Min: {creditLimitRange[0]}</span>
-              <span>Max: {creditLimitRange[1]}</span>
-            </div>
-            <input
-              type='range'
-              min={meta.creditLimitBounds.min}
-              max={meta.creditLimitBounds.max}
-              step={100}
-              value={creditLimitRange[0]}
-              onChange={(event) => {
-                const nextMin = Number(event.target.value);
-                setCreditLimitRange(([_, currentMax]) => [
-                  Math.min(nextMin, currentMax),
-                  currentMax,
-                ]);
-              }}
-              onMouseUp={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
-              onTouchEnd={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
-              className='w-full accent-primary'
-              aria-label='Minimum credit limit'
-              disabled={meta.creditLimitBounds.min >= meta.creditLimitBounds.max}
-            />
-            <input
-              type='range'
-              min={meta.creditLimitBounds.min}
-              max={meta.creditLimitBounds.max}
-              step={100}
-              value={creditLimitRange[1]}
-              onChange={(event) => {
-                const nextMax = Number(event.target.value);
-                setCreditLimitRange(([currentMin]) => [currentMin, Math.max(currentMin, nextMax)]);
-              }}
-              onMouseUp={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
-              onTouchEnd={() => commitCreditLimitRange(creditLimitRange[0], creditLimitRange[1])}
-              className='w-full accent-primary'
-              aria-label='Maximum credit limit'
-              disabled={meta.creditLimitBounds.min >= meta.creditLimitBounds.max}
-            />
-          </div>
+          {renderCreditLimitControls()}
         </ListingFilterMobileSection>
 
-        <ListingFilterMobileSection
-          label='Billing date'
-          icon={<CreditCard className='h-3.5 w-3.5' />}
-        >
-          <ListingFilterSelect
-            value={toFilterSelectValue(selectedBillingDate)}
-            onValueChange={(value) => setFilters({ billingDate: fromFilterSelectValue(value) })}
-            ariaLabel='Filter by billing date'
-            placeholder='All dates'
-            allOption={{ value: ALL_FILTER_VALUE, label: 'All dates' }}
-            options={DAY_OF_MONTH_FILTER_OPTIONS.map((option) => ({
-              value: option.value,
-              label: option.label,
-            }))}
-          />
-        </ListingFilterMobileSection>
-
-        <ListingFilterMobileSection
-          label='Payment date'
-          icon={<CreditCard className='h-3.5 w-3.5' />}
-        >
-          <ListingFilterSelect
-            value={toFilterSelectValue(selectedPaymentDate)}
-            onValueChange={(value) => setFilters({ paymentDate: fromFilterSelectValue(value) })}
-            ariaLabel='Filter by payment date'
-            placeholder='All dates'
-            allOption={{ value: ALL_FILTER_VALUE, label: 'All dates' }}
-            options={DAY_OF_MONTH_FILTER_OPTIONS.map((option) => ({
-              value: option.value,
-              label: option.label,
-            }))}
-          />
-        </ListingFilterMobileSection>
-
-        <ListingFilterMobileSection label='Sort' icon={<ArrowUpDown className='h-3.5 w-3.5' />}>
-          <ListingFilterSelect
-            value={selectedSort}
-            onValueChange={(value) => setSortBy(value as CardSort)}
-            ariaLabel='Sort cards'
-            placeholder='Newest first'
-            options={CARD_SORT_OPTIONS.map((option) => ({
-              value: option.value,
-              label: option.label,
-            }))}
-          />
-        </ListingFilterMobileSection>
-
-        <ListingFilterMobileSection label='Group' icon={<Layers3 className='h-3.5 w-3.5' />}>
-          <ListingFilterSelect
-            value={selectedGroup}
-            onValueChange={(value) => setGroupBy(value as CardGroup)}
-            ariaLabel='Group cards'
-            placeholder='No grouping'
-            options={CARD_GROUP_OPTIONS.map((option) => ({
-              value: option.value,
-              label: option.label,
-            }))}
-          />
-        </ListingFilterMobileSection>
+        <ListingFilterMobileSelectSections sections={postCreditLimitSections} />
 
         <ListingFilterMobileActions
           hasActiveControls={meta.hasActiveControls}

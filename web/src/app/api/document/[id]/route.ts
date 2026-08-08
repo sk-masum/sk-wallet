@@ -1,11 +1,24 @@
 import { NextResponse } from 'next/server';
 import { Prisma } from '@/generated/prisma';
 
+import {
+  apiErrorResponse,
+  badRequestResponse,
+  deleteOwnedEntityById,
+  ownedEntityNotFoundResponse,
+  parseJsonBody,
+  resolveOwnedRouteContext,
+  serverErrorResponse,
+} from '@/app/api/shared/owned-route';
+import {
+  normalizeCustomFields,
+  normalizeTrimmedText,
+  toMutableMetadataRecord,
+} from '@/app/api/shared/payload-utils';
+import { documentDetailSelectWithToken, documentListSelect } from '@/app/api/document/shared';
 import { isDocumentCategory } from '@/constants/document/categories';
 import { isDocumentTypeCode } from '@/constants/document/types';
 import { detokenizeDocumentNumber } from '@/lib/security/doc-token';
-import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
-import { getRequiredPrismaClient } from '@/lib/prisma';
 import { DocumentTypeCode } from '@/models/document';
 
 const RESERVED_METADATA_KEYS = new Set([
@@ -41,42 +54,10 @@ function getDocumentWriteErrorMessage(error: { code?: string; message: string })
   return error.message;
 }
 
-function toMetadataObject(value: unknown) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return {};
-  }
-
-  return { ...(value as Record<string, unknown>) };
-}
-
-function normalizeOptionalText(value: unknown, maxLength: number) {
-  const text = String(value ?? '').trim();
-  if (!text) return '';
-  return text.slice(0, maxLength);
-}
-
 function isValidDateString(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const parsed = new Date(`${value}T00:00:00Z`);
   return !Number.isNaN(parsed.getTime());
-}
-
-function normalizeCustomFields(value: unknown) {
-  if (!Array.isArray(value)) return [];
-
-  return value
-    .map((item) => {
-      const key = String((item as { key?: unknown })?.key ?? '')
-        .trim()
-        .slice(0, 60);
-      const fieldValue = String((item as { value?: unknown })?.value ?? '')
-        .trim()
-        .slice(0, 240);
-      if (!key || !fieldValue) return null;
-      return { key, value: fieldValue };
-    })
-    .filter((item): item is { key: string; value: string } => Boolean(item))
-    .slice(0, 12);
 }
 
 function withMetadataField(metadata: Record<string, unknown>, key: string, value: string) {
@@ -92,43 +73,26 @@ function withMetadataField(metadata: Record<string, unknown>, key: string, value
 }
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params;
-  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
-
-  if (unauthorizedResponse || !user) {
-    return unauthorizedResponse;
+  const routeContext = await resolveOwnedRouteContext(context.params);
+  if (routeContext instanceof NextResponse) {
+    return routeContext;
   }
-
-  const prisma = getRequiredPrismaClient();
+  const { id, userId, prisma } = routeContext;
 
   const data = await prisma.document_record.findFirst({
-    where: { id, user_id: user.id },
-    select: {
-      id: true,
-      user_id: true,
-      document_type: true,
-      document_number_token: true,
-      masked_number: true,
-      document_number_last4: true,
-      name_on_document: true,
-      category: true,
-      metadata: true,
-      verified_at: true,
-      expires_at: true,
-      created_at: true,
-      updated_at: true,
-    },
+    where: { id, user_id: userId },
+    select: documentDetailSelectWithToken,
   });
 
   if (!data) {
-    return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+    return ownedEntityNotFoundResponse('Document');
   }
 
   let documentNumber = '';
   try {
     documentNumber = detokenizeDocumentNumber(data.document_number_token);
   } catch {
-    return NextResponse.json({ error: 'Failed to decode document number' }, { status: 500 });
+    return serverErrorResponse('Failed to decode document number');
   }
 
   return NextResponse.json({
@@ -141,33 +105,28 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
 }
 
 export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params;
-  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
-
-  if (unauthorizedResponse || !user) {
-    return unauthorizedResponse;
+  const routeContext = await resolveOwnedRouteContext(context.params);
+  if (routeContext instanceof NextResponse) {
+    return routeContext;
   }
+  const { id, userId, prisma } = routeContext;
 
-  const prisma = getRequiredPrismaClient();
-
-  let payload: DocumentUpdatePayload;
-
-  try {
-    payload = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  const payloadOrResponse = await parseJsonBody<DocumentUpdatePayload>(request);
+  if (payloadOrResponse instanceof NextResponse) {
+    return payloadOrResponse;
   }
+  const payload = payloadOrResponse;
 
   const existing = await prisma.document_record.findFirst({
-    where: { id, user_id: user.id },
+    where: { id, user_id: userId },
     select: { id: true, document_type: true, metadata: true },
   });
 
   if (!existing) {
-    return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+    return ownedEntityNotFoundResponse('Document');
   }
 
-  const nameOnDocument = normalizeOptionalText(payload.nameOnDocument, 120);
+  const nameOnDocument = normalizeTrimmedText(payload.nameOnDocument, 120);
   const rawCategory = String(payload.category ?? '').trim();
   const normalizedCategory = rawCategory.toLowerCase();
   if (
@@ -175,29 +134,26 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     !isDocumentCategory(normalizedCategory) &&
     !String(payload.type ?? '').trim()
   ) {
-    return NextResponse.json({ error: 'Unsupported document category' }, { status: 400 });
+    return badRequestResponse('Unsupported document category');
   }
-  const issuedDate = normalizeOptionalText(payload.issuedDate, 10);
-  const expiryDate = normalizeOptionalText(payload.expiryDate, 10);
+  const issuedDate = normalizeTrimmedText(payload.issuedDate, 10);
+  const expiryDate = normalizeTrimmedText(payload.expiryDate, 10);
   if (issuedDate && !isValidDateString(issuedDate)) {
-    return NextResponse.json({ error: 'Issued date must be a valid date.' }, { status: 400 });
+    return badRequestResponse('Issued date must be a valid date.');
   }
   if (expiryDate && !isValidDateString(expiryDate)) {
-    return NextResponse.json({ error: 'Expiry date must be a valid date.' }, { status: 400 });
+    return badRequestResponse('Expiry date must be a valid date.');
   }
   if (issuedDate && expiryDate) {
     const issuedTime = new Date(`${issuedDate}T00:00:00Z`).getTime();
     const expiryTime = new Date(`${expiryDate}T00:00:00Z`).getTime();
     if (expiryTime < issuedTime) {
-      return NextResponse.json(
-        { error: 'Expiry date cannot be earlier than issued date.' },
-        { status: 400 },
-      );
+      return badRequestResponse('Expiry date cannot be earlier than issued date.');
     }
   }
-  const address = normalizeOptionalText(payload.address, 240);
-  const guardianName = normalizeOptionalText(payload.guardianName, 120);
-  const otherDetails = normalizeOptionalText(payload.otherDetails, 500);
+  const address = normalizeTrimmedText(payload.address, 240);
+  const guardianName = normalizeTrimmedText(payload.guardianName, 120);
+  const otherDetails = normalizeTrimmedText(payload.otherDetails, 500);
   const selectedType = String(payload.type ?? '')
     .trim()
     .toUpperCase();
@@ -207,22 +163,19 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
   let nextCategory = '';
   if (selectedType) {
     if (!isDocumentTypeCode(selectedType)) {
-      return NextResponse.json({ error: 'Unsupported document type' }, { status: 400 });
+      return badRequestResponse('Unsupported document type');
     }
 
     if (selectedType === DocumentTypeCode.OTHERS) {
-      const customTypeLabel = normalizeOptionalText(rawCategory, 60);
+      const customTypeLabel = normalizeTrimmedText(rawCategory, 60);
       if (customTypeLabel.length < 2) {
-        return NextResponse.json(
-          { error: 'Please provide a custom label for Others.' },
-          { status: 400 },
-        );
+        return badRequestResponse('Please provide a custom label for Others.');
       }
       nextDocumentType = customTypeLabel;
       nextCategory = 'other';
     } else {
       if (normalizedCategory && !isDocumentCategory(normalizedCategory)) {
-        return NextResponse.json({ error: 'Unsupported document category' }, { status: 400 });
+        return badRequestResponse('Unsupported document category');
       }
       nextDocumentType = selectedType;
       nextCategory = normalizedCategory;
@@ -230,12 +183,9 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
   } else if (normalizedCategory && isDocumentCategory(normalizedCategory)) {
     nextCategory = normalizedCategory;
   } else if (rawCategory && !isDocumentTypeCode(existingType)) {
-    const customTypeLabel = normalizeOptionalText(rawCategory, 60);
+    const customTypeLabel = normalizeTrimmedText(rawCategory, 60);
     if (customTypeLabel.length < 2) {
-      return NextResponse.json(
-        { error: 'Please provide a custom label for Others.' },
-        { status: 400 },
-      );
+      return badRequestResponse('Please provide a custom label for Others.');
     }
     nextDocumentType = customTypeLabel;
     nextCategory = 'other';
@@ -244,7 +194,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
   const hasCustomFields = Object.prototype.hasOwnProperty.call(payload, 'customFields');
   const customFields = normalizeCustomFields(payload.customFields);
 
-  const baseMetadata = toMetadataObject(existing.metadata);
+  const baseMetadata = toMutableMetadataRecord(existing.metadata);
   delete baseMetadata.custom_fields;
 
   const mergedMetadata = withMetadataField(
@@ -289,53 +239,38 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
         ...(nextCategory ? { category: nextCategory } : {}),
         metadata: metadata ? (metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
       },
-      select: {
-        id: true,
-        user_id: true,
-        document_type: true,
-        masked_number: true,
-        document_number_last4: true,
-        name_on_document: true,
-        category: true,
-        metadata: true,
-        verified_at: true,
-        expires_at: true,
-        created_at: true,
-        updated_at: true,
-      },
+      select: documentListSelect,
     });
 
-    if (data.user_id !== user.id) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+    if (data.user_id !== userId) {
+      return ownedEntityNotFoundResponse('Document');
     }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
     const message = getDocumentWriteErrorMessage(error as { code?: string; message: string });
     const status = (error as { code?: string }).code === 'P2025' ? 404 : 500;
-    return NextResponse.json({ error: message }, { status });
+    return apiErrorResponse(message, status);
   }
 }
 
 export async function DELETE(_request: Request, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params;
-  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
-
-  if (unauthorizedResponse || !user) {
-    return unauthorizedResponse;
+  const routeContext = await resolveOwnedRouteContext(context.params);
+  if (routeContext instanceof NextResponse) {
+    return routeContext;
   }
+  const { id, userId, prisma } = routeContext;
 
-  const prisma = getRequiredPrismaClient();
-  const existing = await prisma.document_record.findFirst({
-    where: { id, user_id: user.id },
-    select: { id: true },
+  return deleteOwnedEntityById({
+    id,
+    userId,
+    entityLabel: 'Document',
+    findOwnedById: (recordId, ownerId) =>
+      prisma.document_record.findFirst({
+        where: { id: recordId, user_id: ownerId },
+        select: { id: true },
+      }),
+    deleteById: (recordId) =>
+      prisma.document_record.delete({ where: { id: recordId } }).then(() => undefined),
   });
-
-  if (!existing) {
-    return NextResponse.json({ error: 'Document not found' }, { status: 404 });
-  }
-
-  await prisma.document_record.delete({ where: { id } });
-
-  return NextResponse.json({ success: true });
 }

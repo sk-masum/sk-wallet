@@ -3,19 +3,20 @@
 import { useRouter } from 'next/navigation';
 
 import { CredentialForm } from '@/components/credential/credential-form';
-import { clientApiPut } from '@/lib/api/client';
+import { clientApiPatch } from '@/lib/api/client';
 import { showToast } from '@/lib/toast';
 import type { CredentialFormPayload, UserCredential } from '@/models/credential';
 
 type CredentialEditFormProps = {
   credential: UserCredential;
+  initialSecret?: string;
 };
 
-export function CredentialEditForm({ credential }: CredentialEditFormProps) {
+export function CredentialEditForm({ credential, initialSecret = '' }: CredentialEditFormProps) {
   const router = useRouter();
 
   const handleSave = async (payload: CredentialFormPayload) => {
-    const { response, data } = await clientApiPut<{ success?: boolean; error?: string }>(
+    const { response, data } = await clientApiPatch<{ success?: boolean; error?: string }>(
       `/api/credential/${credential.id}`,
       payload,
     );
@@ -47,7 +48,7 @@ export function CredentialEditForm({ credential }: CredentialEditFormProps) {
         type: credential.credential_type,
         serviceName: credential.service_name,
         identifier: String(credential.identifier ?? ''),
-        secret: '',
+        secret: initialSecret,
         url: String(credential.url ?? ''),
         notes: String(credential.notes ?? ''),
       }}

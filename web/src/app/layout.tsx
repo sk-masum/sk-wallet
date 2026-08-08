@@ -164,8 +164,8 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
   colorScheme: 'light dark',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#e5eafe' },
-    { media: '(prefers-color-scheme: dark)', color: '#0d1333' },
+    { media: '(prefers-color-scheme: light)', color: '#eef1f2' },
+    { media: '(prefers-color-scheme: dark)', color: '#111417' },
   ],
 };
 
@@ -215,7 +215,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </Suspense>
           <AppToaster />
           <BiometricGuard>
-            <div className='min-h-screen bg-[radial-gradient(circle_at_8%_0%,hsl(var(--primary)/0.12),transparent_36%),radial-gradient(circle_at_100%_18%,hsl(var(--accent)/0.09),transparent_34%)] dark:bg-[radial-gradient(circle_at_8%_0%,hsl(var(--primary)/0.2),transparent_38%),radial-gradient(circle_at_100%_18%,hsl(var(--accent)/0.14),transparent_36%)]'>
+            <div className='min-h-screen app-aurora-shell'>
               {children}
             </div>
           </BiometricGuard>

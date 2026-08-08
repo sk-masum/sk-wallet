@@ -3,22 +3,7 @@ import { NextResponse } from 'next/server';
 import { getRequiredPrismaClient } from '@/lib/prisma';
 import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
 import type { DashboardAlertsData } from '@/models/dashboard';
-
-function getNextOccurrenceFromDay(day: number, now: Date) {
-  if (!Number.isInteger(day) || day < 1 || day > 31) return null;
-
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const today = now.getDate();
-  const targetDay = Math.min(day, new Date(year, month + 1, 0).getDate());
-
-  if (targetDay >= today) {
-    return new Date(year, month, targetDay);
-  }
-
-  const nextMonthLastDay = new Date(year, month + 2, 0).getDate();
-  return new Date(year, month + 1, Math.min(day, nextMonthLastDay));
-}
+import { buildRecentBillingCards } from '@/app/api/dashboard/shared';
 
 function getCardExpiryDate(expiryYear: number | null, expiryMonth: number | null) {
   if (!expiryYear || !expiryMonth) return null;
@@ -72,22 +57,7 @@ export async function GET() {
     .filter((item): item is NonNullable<typeof item> => Boolean(item))
     .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime());
 
-  const recentBillingCards = cards
-    .map((card) => {
-      const dueDate = getNextOccurrenceFromDay(card.billing_date ?? -1, now);
-      if (!dueDate || card.billing_date == null) return null;
-
-      return {
-        id: String(card.id),
-        name: card.card_name || `Card ${String(card.id)}`,
-        billingDay: Number(card.billing_date),
-        nextBillingDate: dueDate.toISOString(),
-        href: `/card/${String(card.id)}`,
-      };
-    })
-    .filter((item): item is NonNullable<typeof item> => Boolean(item))
-    .sort((a, b) => new Date(a.nextBillingDate).getTime() - new Date(b.nextBillingDate).getTime())
-    .slice(0, 20);
+  const recentBillingCards = buildRecentBillingCards(cards, now, 20);
 
   const blockedOrReplacedCards = cards.filter(
     (card) => card.status === 'replaced' || card.status === 'blocked',

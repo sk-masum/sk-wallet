@@ -6,25 +6,27 @@ import { ArrowUpDown, CreditCard } from 'lucide-react';
 import {
   ListingFilterDesktopActions,
   ListingFilterDesktopPanel,
-  ListingFilterDesktopSection,
   ListingFilterMobileActions,
-  ListingFilterMobileSection,
   ListingFilterMobileSheet,
 } from '@/components/shared/listing-filter-panels';
-import { ListingFilterSelect } from '@/components/shared/listing-filter-select';
+import {
+  ListingFilterDesktopSelectSections,
+  ListingFilterMobileSelectSections,
+  type ListingFilterSelectSectionConfig,
+} from '@/components/shared/listing-filter-select-sections';
 import { ListingFilterTopBar } from '@/components/shared/listing-filter-topbar';
-import { useFilterDialogState } from '@/hooks/use-filter-dialog-state';
-import { CREDENTIAL_TYPE_OPTIONS } from '@/constants/credential/types';
 import { CREDENTIAL_GROUP_OPTIONS, CREDENTIAL_SORT_OPTIONS } from '@/constants/credential/filters';
+import { CREDENTIAL_TYPE_OPTIONS } from '@/constants/credential/types';
 import { ALL_FILTER_VALUE } from '@/constants/ui/filter';
+import { useActiveFilterControls } from '@/hooks/use-active-filter-controls';
+import { useFilterDialogState } from '@/hooks/use-filter-dialog-state';
 import {
   DEFAULT_CREDENTIAL_GROUP,
   DEFAULT_CREDENTIAL_SORT,
-  useCredentialVaultStore,
   type CredentialGroup,
   type CredentialSort,
+  useCredentialVaultStore,
 } from '@/lib/stores/credential-vault-store';
-import { useActiveFilterControls } from '@/hooks/use-active-filter-controls';
 import {
   hasNonDefaultFilterValue,
   hasSpecificFilterValue,
@@ -68,6 +70,52 @@ export function CredentialMobileFilters() {
     setFilters({ typeFilter: value });
   };
 
+  const filterSections: ListingFilterSelectSectionConfig[] = [
+    {
+      id: 'type',
+      desktopLabel: 'Credential type',
+      mobileLabel: 'Type',
+      mobileIcon: <CreditCard className='h-3.5 w-3.5' />,
+      value: selectedType,
+      onValueChange: handleTypeChange,
+      ariaLabel: 'Filter by credential type',
+      placeholder: 'Filter by type',
+      allOption: { value: ALL_FILTER_VALUE, label: 'All types' },
+      options: CREDENTIAL_TYPE_OPTIONS.map((item) => ({
+        value: item.code,
+        label: item.label,
+      })),
+    },
+    {
+      id: 'group',
+      desktopLabel: 'Group',
+      mobileLabel: 'Group',
+      mobileIcon: <CreditCard className='h-3.5 w-3.5' />,
+      value: selectedGroup,
+      onValueChange: (value) => setGroupBy(toTypedFilterValue<CredentialGroup>(value)),
+      ariaLabel: 'Group credentials',
+      placeholder: 'No grouping',
+      options: CREDENTIAL_GROUP_OPTIONS.map((option) => ({
+        value: option.value,
+        label: option.label,
+      })),
+    },
+    {
+      id: 'sort',
+      desktopLabel: 'Sort',
+      mobileLabel: 'Sort',
+      mobileIcon: <ArrowUpDown className='h-3.5 w-3.5' />,
+      value: selectedSort,
+      onValueChange: (value) => setSortBy(toTypedFilterValue<CredentialSort>(value)),
+      ariaLabel: 'Sort credentials',
+      placeholder: 'Sort credentials',
+      options: CREDENTIAL_SORT_OPTIONS.map((option) => ({
+        value: option.value,
+        label: option.label,
+      })),
+    },
+  ];
+
   return (
     <>
       <ListingFilterTopBar
@@ -90,45 +138,7 @@ export function CredentialMobileFilters() {
         desktopExpandedClassName=''
         desktopPanel={
           <ListingFilterDesktopPanel>
-            <ListingFilterDesktopSection label='Credential type'>
-              <ListingFilterSelect
-                value={selectedType}
-                onValueChange={handleTypeChange}
-                ariaLabel='Filter by credential type'
-                placeholder='Filter by type'
-                allOption={{ value: ALL_FILTER_VALUE, label: 'All types' }}
-                options={CREDENTIAL_TYPE_OPTIONS.map((item) => ({
-                  value: item.code,
-                  label: item.label,
-                }))}
-              />
-            </ListingFilterDesktopSection>
-
-            <ListingFilterDesktopSection label='Group'>
-              <ListingFilterSelect
-                value={selectedGroup}
-                onValueChange={(value) => setGroupBy(toTypedFilterValue<CredentialGroup>(value))}
-                ariaLabel='Group credentials'
-                placeholder='No grouping'
-                options={CREDENTIAL_GROUP_OPTIONS.map((option) => ({
-                  value: option.value,
-                  label: option.label,
-                }))}
-              />
-            </ListingFilterDesktopSection>
-
-            <ListingFilterDesktopSection label='Sort'>
-              <ListingFilterSelect
-                value={selectedSort}
-                onValueChange={(value) => setSortBy(toTypedFilterValue<CredentialSort>(value))}
-                ariaLabel='Sort credentials'
-                placeholder='Sort credentials'
-                options={CREDENTIAL_SORT_OPTIONS.map((option) => ({
-                  value: option.value,
-                  label: option.label,
-                }))}
-              />
-            </ListingFilterDesktopSection>
+            <ListingFilterDesktopSelectSections sections={filterSections} />
 
             <ListingFilterDesktopActions
               hasActiveControls={hasActiveControls}
@@ -145,45 +155,7 @@ export function CredentialMobileFilters() {
         title='Refine credentials'
         description='Apply credential filters in one place.'
       >
-        <ListingFilterMobileSection label='Type' icon={<CreditCard className='h-3.5 w-3.5' />}>
-          <ListingFilterSelect
-            value={selectedType}
-            onValueChange={handleTypeChange}
-            ariaLabel='Filter by credential type'
-            placeholder='Filter by type'
-            allOption={{ value: ALL_FILTER_VALUE, label: 'All types' }}
-            options={CREDENTIAL_TYPE_OPTIONS.map((item) => ({
-              value: item.code,
-              label: item.label,
-            }))}
-          />
-        </ListingFilterMobileSection>
-
-        <ListingFilterMobileSection label='Group' icon={<CreditCard className='h-3.5 w-3.5' />}>
-          <ListingFilterSelect
-            value={selectedGroup}
-            onValueChange={(value) => setGroupBy(toTypedFilterValue<CredentialGroup>(value))}
-            ariaLabel='Group credentials'
-            placeholder='No grouping'
-            options={CREDENTIAL_GROUP_OPTIONS.map((option) => ({
-              value: option.value,
-              label: option.label,
-            }))}
-          />
-        </ListingFilterMobileSection>
-
-        <ListingFilterMobileSection label='Sort' icon={<ArrowUpDown className='h-3.5 w-3.5' />}>
-          <ListingFilterSelect
-            value={selectedSort}
-            onValueChange={(value) => setSortBy(toTypedFilterValue<CredentialSort>(value))}
-            ariaLabel='Sort credentials'
-            placeholder='Sort credentials'
-            options={CREDENTIAL_SORT_OPTIONS.map((option) => ({
-              value: option.value,
-              label: option.label,
-            }))}
-          />
-        </ListingFilterMobileSection>
+        <ListingFilterMobileSelectSections sections={filterSections} />
 
         <ListingFilterMobileActions
           hasActiveControls={hasActiveControls}

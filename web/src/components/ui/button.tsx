@@ -45,7 +45,7 @@ const buttonVariants = cva(
         lg: 'h-10 rounded-md px-8',
         icon: 'h-9 w-9',
         iconLg: 'h-11 w-11 rounded-full',
-        headerIcon: 'p-3 sm:p-4',
+        headerIcon: 'p-3',
       },
     },
     defaultVariants: {
@@ -57,7 +57,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {}
+  VariantProps<typeof buttonVariants> { }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, ...props }, ref) => {

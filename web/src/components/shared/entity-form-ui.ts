@@ -1,12 +1,9 @@
 export const entityFormGridClass = 'relative grid gap-x-4 gap-y-5 sm:grid-cols-2';
 
-export const entityFormFieldCardClass =
-  'rounded-2xl border border-border/60 bg-card/55 p-3.5 shadow-[0_10px_22px_-20px_hsl(var(--foreground)/0.45)]';
-
 export const entityFormSectionCardClass = 'rounded-2xl border border-border/60 bg-muted/35 p-3.5';
 
 export const entityFormLabelClass =
-  'text-[11px] font-semibold tracking-[0.08em] text-text-subtle uppercase';
+  'text-[9px] font-semibold tracking-[0.08em] text-text-subtle uppercase';
 
 export const entityFormControlClass =
   'h-11 rounded-2xl border-border/65 bg-background/92 px-3.5 text-sm shadow-sm transition-colors';

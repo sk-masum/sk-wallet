@@ -3,7 +3,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EntityFormPageLayout } from '@/components/shared/entity-form-page-layout';
 import {
   entityFormActionsDividerClass,
-  entityFormFieldCardClass,
   entityFormGridClass,
   entityFormLabelClass,
 } from '@/components/shared/entity-form-ui';
@@ -43,7 +42,7 @@ export function EntityFormPageLoading({
     >
       <div className={entityFormGridClass} aria-live='polite' aria-busy>
         {fields.map((field, index) => (
-          <div key={index} className={cn(entityFormFieldCardClass, field.wrapperClassName)}>
+          <div key={index} className={cn(field.wrapperClassName)}>
             {field.hideLabel ? null : (
               <div className={cn(entityFormLabelClass, 'mb-2')}>
                 <Skeleton className='h-3 w-24' />

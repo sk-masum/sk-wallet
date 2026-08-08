@@ -1,16 +1,4 @@
-type JsonRecord = Record<string, unknown>;
-type JsonBody = JsonRecord | unknown[];
-
-function toHeadersObject(initHeaders?: HeadersInit) {
-  if (!initHeaders) return {} as Record<string, string>;
-  if (initHeaders instanceof Headers) {
-    return Object.fromEntries(initHeaders.entries());
-  }
-  if (Array.isArray(initHeaders)) {
-    return Object.fromEntries(initHeaders);
-  }
-  return { ...initHeaders };
-}
+import { type JsonBody, type JsonRecord, withJsonHeaders } from '@/lib/api/shared';
 
 export async function fetchClientApi<T = JsonRecord>(
   path: string,
@@ -23,17 +11,6 @@ export async function fetchClientApi<T = JsonRecord>(
 
   const data = (await response.json().catch(() => null)) as T | null;
   return { response, data };
-}
-
-function withJsonHeaders(init: RequestInit = {}) {
-  const headersObject = toHeadersObject(init.headers);
-  return {
-    ...init,
-    headers: {
-      'content-type': 'application/json',
-      ...headersObject,
-    },
-  };
 }
 
 export function clientApiGet<T = JsonRecord>(path: string, init: RequestInit = {}) {

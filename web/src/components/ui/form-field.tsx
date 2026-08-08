@@ -25,7 +25,7 @@ function FormField({
     <div className={cn('space-y-2', className)}>
       <label
         htmlFor={id}
-        className={cn('text-[10px] font-medium text-gray-300 uppercase', labelClassName)}
+        className={cn('text-[8px] font-medium text-gray-300 uppercase', labelClassName)}
       >
         {label}
       </label>

@@ -6,6 +6,14 @@ import { EntityFormPageLayout } from '@/components/shared/entity-form-page-layou
 import { serverApiGet } from '@/lib/api/server';
 import type { UserCredential } from '@/models/credential';
 
+type CredentialSecretResponse = {
+  data?: {
+    id: string;
+    secret: string;
+  };
+  error?: string;
+};
+
 type EditCredentialPageProps = {
   params: Promise<{
     id: string;
@@ -27,6 +35,16 @@ export default async function EditCredentialPage({ params }: EditCredentialPageP
     redirect('/credential?error=' + encodeURIComponent(result?.error || 'Credential not found'));
   }
 
+  const { response: secretResponse, data: secretResult } = await serverApiGet<CredentialSecretResponse>(
+    `/api/credential/${id}/secret`,
+  );
+
+  if (secretResponse.status === 401) {
+    redirect(`/auth?next=/credential/${id}`);
+  }
+
+  const initialSecret = secretResponse.ok ? (secretResult?.data?.secret ?? '') : '';
+
   return (
     <>
       <EntityFormPageLayout
@@ -37,7 +55,7 @@ export default async function EditCredentialPage({ params }: EditCredentialPageP
         backButtonLabel='Back to credentials'
         maxWidthClassName='max-w-4xl'
       >
-        <CredentialEditForm credential={result.data} />
+        <CredentialEditForm credential={result.data} initialSecret={initialSecret} />
       </EntityFormPageLayout>
     </>
   );

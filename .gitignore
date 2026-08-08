@@ -48,3 +48,7 @@ out
 # Serwist generated service worker files
 web/public/sw*
 web/public/swe-worker*
+
+.nx/polygraph
+.claude/worktrees
+.claude/settings.local.json

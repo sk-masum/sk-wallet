@@ -6,12 +6,14 @@ import { CreditCard } from 'lucide-react';
 import {
   ListingFilterDesktopActions,
   ListingFilterDesktopPanel,
-  ListingFilterDesktopSection,
   ListingFilterMobileActions,
-  ListingFilterMobileSection,
   ListingFilterMobileSheet,
 } from '@/components/shared/listing-filter-panels';
-import { ListingFilterSelect } from '@/components/shared/listing-filter-select';
+import {
+  ListingFilterDesktopSelectSections,
+  ListingFilterMobileSelectSections,
+  type ListingFilterSelectSectionConfig,
+} from '@/components/shared/listing-filter-select-sections';
 import { ListingFilterTopBar } from '@/components/shared/listing-filter-topbar';
 import { useFilterDialogState } from '@/hooks/use-filter-dialog-state';
 import { DOCUMENT_SORT_OPTIONS } from '@/constants/doc/filters';
@@ -76,6 +78,56 @@ export function DocumentMobileFilters() {
     setSortBy(toTypedFilterValue<DocumentSort>(value));
   };
 
+  const filterSections: ListingFilterSelectSectionConfig[] = [
+    {
+      id: 'type',
+      desktopLabel: 'Type',
+      mobileLabel: 'Type',
+      mobileIcon: <CreditCard className='h-3.5 w-3.5' />,
+      value: selectedType,
+      onValueChange: handleTypeChange,
+      ariaLabel: 'Filter by document type',
+      placeholder: 'Filter by type',
+      allOption: { value: ALL_FILTER_VALUE, label: 'All types' },
+      options: DOCUMENT_TYPE_OPTIONS.map((item) => ({
+        value: item.code,
+        label: item.label,
+      })),
+    },
+    {
+      id: 'category',
+      desktopLabel: 'Category',
+      mobileLabel: 'Category',
+      mobileIcon: <CreditCard className='h-3.5 w-3.5' />,
+      value: selectedCategory,
+      onValueChange: handleCategoryChange,
+      ariaLabel: 'Filter by document category',
+      placeholder: 'Filter by category',
+      allOption: { value: ALL_CATEGORY_FILTER_VALUE, label: 'All categories' },
+      options: DOCUMENT_CATEGORY_OPTIONS.map((item) => ({
+        value: item.value,
+        label: item.label,
+      })),
+    },
+    {
+      id: 'sort',
+      desktopLabel: 'Sort',
+      mobileLabel: 'Sort',
+      mobileIcon: <CreditCard className='h-3.5 w-3.5' />,
+      value: selectedSort,
+      onValueChange: handleSortChange,
+      ariaLabel: 'Sort documents',
+      placeholder: 'Newest first',
+      options: DOCUMENT_SORT_OPTIONS.map((option) => ({
+        value: option.value,
+        label: option.label,
+      })),
+    },
+  ];
+
+  const primaryFilterSections = filterSections.filter((section) => section.id !== 'sort');
+  const sortFilterSection = filterSections.find((section) => section.id === 'sort');
+
   return (
     <>
       <ListingFilterTopBar
@@ -99,47 +151,12 @@ export function DocumentMobileFilters() {
         desktopPanel={
           <ListingFilterDesktopPanel>
             <div className='grid grid-cols-2 gap-4'>
-              <ListingFilterDesktopSection label='Type'>
-                <ListingFilterSelect
-                  value={selectedType}
-                  onValueChange={handleTypeChange}
-                  ariaLabel='Filter by document type'
-                  placeholder='Filter by type'
-                  allOption={{ value: ALL_FILTER_VALUE, label: 'All types' }}
-                  options={DOCUMENT_TYPE_OPTIONS.map((item) => ({
-                    value: item.code,
-                    label: item.label,
-                  }))}
-                />
-              </ListingFilterDesktopSection>
-
-              <ListingFilterDesktopSection label='Category'>
-                <ListingFilterSelect
-                  value={selectedCategory}
-                  onValueChange={handleCategoryChange}
-                  ariaLabel='Filter by document category'
-                  placeholder='Filter by category'
-                  allOption={{ value: ALL_CATEGORY_FILTER_VALUE, label: 'All categories' }}
-                  options={DOCUMENT_CATEGORY_OPTIONS.map((item) => ({
-                    value: item.value,
-                    label: item.label,
-                  }))}
-                />
-              </ListingFilterDesktopSection>
+              <ListingFilterDesktopSelectSections sections={primaryFilterSections} />
             </div>
 
-            <ListingFilterDesktopSection label='Sort'>
-              <ListingFilterSelect
-                value={selectedSort}
-                onValueChange={handleSortChange}
-                ariaLabel='Sort documents'
-                placeholder='Newest first'
-                options={DOCUMENT_SORT_OPTIONS.map((option) => ({
-                  value: option.value,
-                  label: option.label,
-                }))}
-              />
-            </ListingFilterDesktopSection>
+            {sortFilterSection ? (
+              <ListingFilterDesktopSelectSections sections={[sortFilterSection]} />
+            ) : null}
 
             <ListingFilterDesktopActions
               hasActiveControls={hasActiveControls}
@@ -156,43 +173,7 @@ export function DocumentMobileFilters() {
         title='Refine documents'
         description='Apply document filters in one place.'
       >
-        <ListingFilterMobileSection label='Type' icon={<CreditCard className='h-3.5 w-3.5' />}>
-          <ListingFilterSelect
-            value={selectedType}
-            onValueChange={handleTypeChange}
-            ariaLabel='Filter by document type'
-            placeholder='Filter by type'
-            allOption={{ value: ALL_FILTER_VALUE, label: 'All types' }}
-            options={DOCUMENT_TYPE_OPTIONS.map((item) => ({ value: item.code, label: item.label }))}
-          />
-        </ListingFilterMobileSection>
-
-        <ListingFilterMobileSection label='Category' icon={<CreditCard className='h-3.5 w-3.5' />}>
-          <ListingFilterSelect
-            value={selectedCategory}
-            onValueChange={handleCategoryChange}
-            ariaLabel='Filter by document category'
-            placeholder='Filter by category'
-            allOption={{ value: ALL_CATEGORY_FILTER_VALUE, label: 'All categories' }}
-            options={DOCUMENT_CATEGORY_OPTIONS.map((item) => ({
-              value: item.value,
-              label: item.label,
-            }))}
-          />
-        </ListingFilterMobileSection>
-
-        <ListingFilterMobileSection label='Sort' icon={<CreditCard className='h-3.5 w-3.5' />}>
-          <ListingFilterSelect
-            value={selectedSort}
-            onValueChange={handleSortChange}
-            ariaLabel='Sort documents'
-            placeholder='Newest first'
-            options={DOCUMENT_SORT_OPTIONS.map((option) => ({
-              value: option.value,
-              label: option.label,
-            }))}
-          />
-        </ListingFilterMobileSection>
+        <ListingFilterMobileSelectSections sections={filterSections} />
 
         <ListingFilterMobileActions
           hasActiveControls={hasActiveControls}

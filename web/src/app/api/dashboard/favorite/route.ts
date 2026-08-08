@@ -1,31 +1,28 @@
 import { NextResponse } from 'next/server';
 
-import { getRequiredPrismaClient } from '@/lib/prisma';
-import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
+import { parseJsonBody, resolveUserRouteContext } from '@/app/api/shared/owned-route';
+import { normalizeTrimmedText } from '@/app/api/shared/payload-utils';
 
 type FavoriteRow = {
   feature_key: string;
 };
 
 function normalizeFavoriteKey(value: unknown) {
-  const key = String(value ?? '').trim();
-  return key.slice(0, 160);
+  return normalizeTrimmedText(value, 160);
 }
 
 export async function GET() {
-  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
-
-  if (unauthorizedResponse || !user) {
-    return unauthorizedResponse;
+  const routeContext = await resolveUserRouteContext();
+  if (routeContext instanceof NextResponse) {
+    return routeContext;
   }
-
-  const prisma = getRequiredPrismaClient();
+  const { userId, prisma } = routeContext;
 
   try {
     const rows = await prisma.$queryRaw<FavoriteRow[]>`
       select feature_key
       from public.dashboard_favorite
-      where user_id = ${user.id}::uuid
+      where user_id = ${userId}::uuid
       order by updated_at desc
     `;
 
@@ -37,22 +34,20 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
-
-  if (unauthorizedResponse || !user) {
-    return unauthorizedResponse;
+  const routeContext = await resolveUserRouteContext();
+  if (routeContext instanceof NextResponse) {
+    return routeContext;
   }
+  const { userId, prisma } = routeContext;
 
-  let payload: {
+  const payloadOrResponse = await parseJsonBody<{
     key?: string;
     active?: boolean;
-  };
-
-  try {
-    payload = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }>(request);
+  if (payloadOrResponse instanceof NextResponse) {
+    return payloadOrResponse;
   }
+  const payload = payloadOrResponse;
 
   const key = normalizeFavoriteKey(payload.key);
   const active = payload.active === true;
@@ -61,20 +56,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Favorite key is required' }, { status: 400 });
   }
 
-  const prisma = getRequiredPrismaClient();
-
   try {
     if (active) {
       await prisma.$executeRaw`
         insert into public.dashboard_favorite (user_id, feature_key)
-        values (${user.id}::uuid, ${key})
+        values (${userId}::uuid, ${key})
         on conflict (user_id, feature_key)
         do update set updated_at = timezone('utc'::text, now())
       `;
     } else {
       await prisma.$executeRaw`
         delete from public.dashboard_favorite
-        where user_id = ${user.id}::uuid
+        where user_id = ${userId}::uuid
           and feature_key = ${key}
       `;
     }

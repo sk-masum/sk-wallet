@@ -52,7 +52,7 @@ export function BottomTabBar({ addHref, addLabel = 'Add' }: BottomTabBarProps) {
         {addHref ? (
           <Link
             href={addHref}
-            className='group relative ml-3 inline-flex h-15 w-15 items-center justify-center overflow-hidden rounded-4xl bg-linear-to-br from-primary via-primary to-primary/85 text-primary-foreground shadow-fab ring-1 ring-primary/35 transition-all duration-200 hover:-translate-y-0.5 hover:from-primary/95 hover:to-primary hover:shadow-fab-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 dark:shadow-fab-dark dark:ring-primary/55 dark:hover:shadow-fab-dark-hover dark:focus-visible:ring-primary/85'
+            className='group relative ml-3 inline-flex h-15 w-15 border border-glass-border-strong bg-glass p-1.5 shadow-neu-raised-sm backdrop-blur-lg items-center justify-center overflow-hidden rounded-4xl transition-all duration-200 hover:-translate-y-0.5 hover:from-primary/95 hover:to-primary hover:shadow-fab-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70'
             aria-label={addLabel}
             title={addLabel}
           >

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Check, CreditCard, Landmark, Shuffle } from 'lucide-react';
 
@@ -17,7 +17,6 @@ import { CardNetwork } from '@/models/card';
 import {
   entityFormActionsDividerClass,
   entityFormControlClass,
-  entityFormFieldCardClass,
   entityFormGridClass,
   entityFormLabelClass,
   entityFormSectionCardClass,
@@ -139,6 +138,57 @@ function CardFormActions({ submitLabel, showReset }: CardFormActionsProps) {
       showReset={showReset}
       className='mt-1'
     />
+  );
+}
+
+type CardTypeOptionProps = {
+  value: 'credit' | 'debit';
+  title: string;
+  subtitle: string;
+  icon: ReactNode;
+  defaultChecked: boolean;
+  onChange: () => void;
+};
+
+function CardTypeOption({
+  value,
+  title,
+  subtitle,
+  icon,
+  defaultChecked,
+  onChange,
+}: CardTypeOptionProps) {
+  return (
+    <label className='relative cursor-pointer'>
+      <input
+        type='radio'
+        name='card_type'
+        value={value}
+        defaultChecked={defaultChecked}
+        onChange={onChange}
+        required
+        className='peer sr-only'
+      />
+      <span
+        className={cn(
+          buttonVariants({ variant: 'outline', size: 'sm' }),
+          'h-auto min-h-14 w-full justify-start rounded-xl border-border/70 bg-background/88 px-3 py-2 text-left shadow-sm transition-all duration-200',
+          'hover:border-border hover:bg-background',
+          'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2',
+          'peer-checked:border-primary/70 peer-checked:bg-primary/12 peer-checked:text-foreground peer-checked:shadow-[0_8px_18px_-14px_hsl(var(--primary))]',
+        )}
+      >
+        <span className='inline-flex w-full items-center gap-2.5'>
+          <span className='inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/90 text-text-subtle peer-checked:border-primary/45 peer-checked:bg-primary/16 peer-checked:text-primary'>
+            {icon}
+          </span>
+          <span className='leading-tight'>
+            <span className='block text-sm font-semibold'>{title}</span>
+            <span className='block text-[11px] text-text-subtle'>{subtitle}</span>
+          </span>
+        </span>
+      </span>
+    </label>
   );
 }
 
@@ -360,77 +410,29 @@ export function CardForm({
         hint='Choose whether this card charges credit or debits directly from balance.'
       >
         <div className='grid gap-2 sm:grid-cols-2'>
-          <label className='relative cursor-pointer'>
-            <input
-              type='radio'
-              name='card_type'
-              value='credit'
-              defaultChecked={values.cardType === 'credit'}
-              onChange={() => {
-                setSelectedCardType('credit');
-                validateFields(['card_type', 'credit_limit']);
-              }}
-              required
-              className='peer sr-only'
-            />
-            <span
-              className={cn(
-                buttonVariants({ variant: 'outline', size: 'sm' }),
-                'h-auto min-h-14 w-full justify-start rounded-xl border-border/70 bg-background/88 px-3 py-2 text-left shadow-sm transition-all duration-200',
-                'hover:border-border hover:bg-background',
-                'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2',
-                'peer-checked:border-primary/70 peer-checked:bg-primary/12 peer-checked:text-foreground peer-checked:shadow-[0_8px_18px_-14px_hsl(var(--primary))]',
-              )}
-            >
-              <span className='inline-flex w-full items-center gap-2.5'>
-                <span className='inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/90 text-text-subtle peer-checked:border-primary/45 peer-checked:bg-primary/16 peer-checked:text-primary'>
-                  <CreditCard className='h-4 w-4' />
-                </span>
-                <span className='leading-tight'>
-                  <span className='block text-sm font-semibold'>Credit</span>
-                  <span className='block text-[11px] text-text-subtle'>
-                    Pay later billing cycle
-                  </span>
-                </span>
-              </span>
-            </span>
-          </label>
+          <CardTypeOption
+            value='credit'
+            title='Credit'
+            subtitle='Pay later billing cycle'
+            icon={<CreditCard className='h-4 w-4' />}
+            defaultChecked={values.cardType === 'credit'}
+            onChange={() => {
+              setSelectedCardType('credit');
+              validateFields(['card_type', 'credit_limit']);
+            }}
+          />
 
-          <label className='relative cursor-pointer'>
-            <input
-              type='radio'
-              name='card_type'
-              value='debit'
-              defaultChecked={values.cardType === 'debit'}
-              onChange={() => {
-                setSelectedCardType('debit');
-                validateFields(['card_type', 'credit_limit']);
-              }}
-              required
-              className='peer sr-only'
-            />
-            <span
-              className={cn(
-                buttonVariants({ variant: 'outline', size: 'sm' }),
-                'h-auto min-h-14 w-full justify-start rounded-xl border-border/70 bg-background/88 px-3 py-2 text-left shadow-sm transition-all duration-200',
-                'hover:border-border hover:bg-background',
-                'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2',
-                'peer-checked:border-primary/70 peer-checked:bg-primary/12 peer-checked:text-foreground peer-checked:shadow-[0_8px_18px_-14px_hsl(var(--primary))]',
-              )}
-            >
-              <span className='inline-flex w-full items-center gap-2.5'>
-                <span className='inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/90 text-text-subtle peer-checked:border-primary/45 peer-checked:bg-primary/16 peer-checked:text-primary'>
-                  <Landmark className='h-4 w-4' />
-                </span>
-                <span className='leading-tight'>
-                  <span className='block text-sm font-semibold'>Debit</span>
-                  <span className='block text-[11px] text-text-subtle'>
-                    Instant balance deduction
-                  </span>
-                </span>
-              </span>
-            </span>
-          </label>
+          <CardTypeOption
+            value='debit'
+            title='Debit'
+            subtitle='Instant balance deduction'
+            icon={<Landmark className='h-4 w-4' />}
+            defaultChecked={values.cardType === 'debit'}
+            onChange={() => {
+              setSelectedCardType('debit');
+              validateFields(['card_type', 'credit_limit']);
+            }}
+          />
         </div>
       </FormField>
 
@@ -439,7 +441,7 @@ export function CardForm({
           id='credit_limit'
           label='CREDIT LIMIT'
           error={fieldErrors.credit_limit}
-          className={entityFormFieldCardClass}
+
           labelClassName={entityFormLabelClass}
           hint='Required for credit cards. Enter total approved limit.'
         >
@@ -464,7 +466,7 @@ export function CardForm({
         id='card_name'
         label='CARD NAME'
         error={fieldErrors.card_name}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
       >
         <Input
@@ -488,7 +490,7 @@ export function CardForm({
         id='tags'
         label='TAGS'
         error={fieldErrors.tags}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
         hint='Optional: type comma-separated tags, use autocomplete, or pick from dropdown.'
       >
@@ -531,7 +533,7 @@ export function CardForm({
         id='number'
         label='CARD NUMBER'
         error={fieldErrors.number}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
       >
         <div className='space-y-1.5'>
@@ -654,7 +656,7 @@ export function CardForm({
         id='provider'
         label='PROVIDER'
         error={fieldErrors.provider}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
         hint='Optional: type to search or add a new issuer.'
       >
@@ -709,7 +711,7 @@ export function CardForm({
                   className={cn(
                     'flex w-full items-center rounded-sm px-2 py-1.5 text-left text-sm transition-colors hover:bg-accent',
                     providerValue.trim().toLowerCase() === providerOption.toLowerCase() &&
-                      'bg-accent',
+                    'bg-accent',
                   )}
                 >
                   {providerOption}
@@ -727,7 +729,7 @@ export function CardForm({
         id='holder_name'
         label='HOLDER NAME'
         error={fieldErrors.holder_name}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
       >
         <Input
@@ -752,7 +754,7 @@ export function CardForm({
         id='expiry_month'
         label='EXPIRY MONTH'
         error={fieldErrors.expiry_month}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
       >
         <>
@@ -779,7 +781,7 @@ export function CardForm({
         id='expiry_year'
         label='EXPIRY YEAR'
         error={fieldErrors.expiry_year}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
       >
         <Input
@@ -805,7 +807,7 @@ export function CardForm({
         id='billing_date'
         label='BILLING DATE'
         error={fieldErrors.billing_date}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
         hint='Optional day of month (1-31) when statement is generated.'
       >
@@ -831,7 +833,7 @@ export function CardForm({
         id='payment_date'
         label='PAYMENT DATE'
         error={fieldErrors.payment_date}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
         hint='Optional day of month (1-31) when payment is due.'
       >
@@ -857,7 +859,7 @@ export function CardForm({
         id='network'
         label='NETWORK'
         error={fieldErrors.network}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
         hint='Selecting network improves card number and CVV validation accuracy.'
       >
@@ -888,7 +890,7 @@ export function CardForm({
         id='cvv'
         label='CVV'
         error={fieldErrors.cvv}
-        className={entityFormFieldCardClass}
+
         labelClassName={entityFormLabelClass}
         hint={`Enter the ${cvvLength}-digit security code.`}
       >

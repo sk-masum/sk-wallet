@@ -31,10 +31,8 @@ export function SharedCarouselSection<T>({
   return (
     <section className={cn('relative overflow-hidden sm:px-4 sm:py-5', className)}>
       <div className='pointer-events-none absolute inset-0 ' />
-      <div className='relative mb-4 flex items-end justify-between gap-3'>
-        <div>
-          <h3 className='text-lg font-semibold text-foreground sm:text-2xl'>{title}</h3>
-        </div>
+      <div className='relative mb-4 flex items-end justify-between gap-3 py-2'>
+        <h3 className='text-lg font-semibold text-foreground sm:text-2xl'>{title}</h3>
         <Link
           href={actionHref}
           className='interactive-lift interactive-ring inline-flex items-center rounded-full border border-glass-border-strong bg-glass px-3 py-1 text-xs font-semibold text-text-subtle shadow-neu-raised-sm backdrop-blur-sm transition-colors hover:bg-glass-strong hover:text-foreground'
@@ -49,7 +47,7 @@ export function SharedCarouselSection<T>({
         ) : (
           <div
             className={cn(
-              '-mx-1 flex snap-x snap-mandatory gap-1 sm:gap-3 overflow-x-auto px-1 pb-4 scrollbar-none [&::-webkit-scrollbar]:hidden',
+              '-mx-1 flex snap-x snap-mandatory gap-1 sm:gap-3 overflow-x-auto px-1 pt-1 pb-4 scrollbar-none [&::-webkit-scrollbar]:hidden',
               trackClassName,
             )}
           >

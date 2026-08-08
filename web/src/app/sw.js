@@ -10,9 +10,35 @@ import {
 const CACHE_NAMES = {
   APP_SHELL: 'sk-wallet-app-shell-v1',
   STATIC_ASSETS: 'sk-wallet-static-assets-v1',
+  APP_ROUTE_DATA: 'sk-wallet-app-route-data-v1',
   API_DYNAMIC: 'sk-wallet-api-dynamic-v1',
+  API_READONLY: 'sk-wallet-api-readonly-v1',
   API_VAULT: 'sk-wallet-api-vault-v1',
 };
+
+const OFFLINE_READ_API_PATTERNS = [
+  /^\/api\/dashboard(?:\/(?:alerts|favorite))?$/,
+  /^\/api\/card(?:\/[^/]+)?$/,
+  /^\/api\/credential(?:\/[^/]+)?$/,
+  /^\/api\/document(?:\/[^/]+)?$/,
+];
+
+function isSensitiveApiBypass(pathname) {
+  return /^\/api\/credential\/[^/]+\/secret$/.test(pathname);
+}
+
+function isOfflineReadApi(pathname) {
+  return OFFLINE_READ_API_PATTERNS.some((pattern) => pattern.test(pathname));
+}
+
+function isNextRouteDataRequest(request, url) {
+  const acceptHeader = request.headers.get('accept') || '';
+  return (
+    url.searchParams.has('_rsc') ||
+    request.headers.has('rsc') ||
+    acceptHeader.includes('text/x-component')
+  );
+}
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
@@ -49,9 +75,30 @@ const serwist = new Serwist({
       }),
     },
     {
+      // Next.js app-router flight data keeps route transitions usable while offline.
+      matcher: ({ request, url }) =>
+        request.method === 'GET' &&
+        url.origin === self.location.origin &&
+        isNextRouteDataRequest(request, url),
+      handler: new NetworkFirst({
+        cacheName: CACHE_NAMES.APP_ROUTE_DATA,
+        networkTimeoutSeconds: 4,
+        plugins: [
+          new CacheableResponsePlugin({ statuses: [200] }),
+          new ExpirationPlugin({
+            maxEntries: 120,
+            maxAgeSeconds: 60 * 60 * 24 * 3,
+          }),
+        ],
+      }),
+    },
+    {
       // Sensitive vault endpoints stay dynamic and only keep a tiny fallback cache.
-      matcher: ({ url }) =>
-        url.origin === self.location.origin && url.pathname.startsWith('/api/vault'),
+      matcher: ({ request, url }) =>
+        request.method === 'GET' &&
+        url.origin === self.location.origin &&
+        url.pathname.startsWith('/api/vault') &&
+        !isSensitiveApiBypass(url.pathname),
       handler: new NetworkFirst({
         cacheName: CACHE_NAMES.API_VAULT,
         networkTimeoutSeconds: 4,
@@ -65,8 +112,32 @@ const serwist = new Serwist({
       }),
     },
     {
+      // Core wallet reads get a durable cache for reliable offline access.
+      matcher: ({ request, url }) =>
+        request.method === 'GET' &&
+        url.origin === self.location.origin &&
+        url.pathname.startsWith('/api/') &&
+        isOfflineReadApi(url.pathname) &&
+        !isSensitiveApiBypass(url.pathname),
+      handler: new StaleWhileRevalidate({
+        cacheName: CACHE_NAMES.API_READONLY,
+        plugins: [
+          new CacheableResponsePlugin({ statuses: [200] }),
+          new ExpirationPlugin({
+            maxEntries: 200,
+            maxAgeSeconds: 60 * 60 * 24 * 7,
+          }),
+        ],
+      }),
+    },
+    {
       // All other API reads are network-first to keep user data fresh.
-      matcher: ({ url }) => url.origin === self.location.origin && url.pathname.startsWith('/api/'),
+      matcher: ({ request, url }) =>
+        request.method === 'GET' &&
+        url.origin === self.location.origin &&
+        url.pathname.startsWith('/api/') &&
+        !isOfflineReadApi(url.pathname) &&
+        !isSensitiveApiBypass(url.pathname),
       handler: new NetworkFirst({
         cacheName: CACHE_NAMES.API_DYNAMIC,
         networkTimeoutSeconds: 4,
@@ -74,7 +145,7 @@ const serwist = new Serwist({
           new CacheableResponsePlugin({ statuses: [200] }),
           new ExpirationPlugin({
             maxEntries: 50,
-            maxAgeSeconds: 60,
+            maxAgeSeconds: 60 * 5,
           }),
         ],
       }),

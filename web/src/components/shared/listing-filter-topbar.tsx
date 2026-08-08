@@ -123,7 +123,7 @@ export function ListingFilterTopBar({
                 }
                 placeholder={mobileSearchPlaceholder}
                 aria-label={mobileSearchAriaLabel}
-                className='h-10 rounded-xl border-glass-border-soft bg-glass pr-10 shadow-neu-inset-sm '
+                className='h-11.5 rounded-xl border-glass-border-soft bg-glass pr-10 shadow-neu-inset-sm '
               />
               {hasTextQuery ? renderClearSearchAction(false) : null}
               {searchHiddenFields}

@@ -21,6 +21,30 @@ type BillingReminderCard = {
 const BILLING_PERMISSION_DISMISS_KEY = 'sk-wallet:billing-reminder:permission-dismissed';
 const BILLING_LAST_CHECK_KEY = 'sk-wallet:billing-reminder:last-check-date';
 const BILLING_NOTIFIED_PREFIX = 'sk-wallet:billing-reminder:notified:';
+const OFFLINE_WARMUP_ENDPOINTS = [
+  '/api/dashboard',
+  '/api/dashboard/alerts',
+  '/api/dashboard/favorite',
+  '/api/card',
+  '/api/credential',
+  '/api/document',
+];
+
+async function warmOfflineDataCache() {
+  if (typeof window === 'undefined' || !navigator.onLine) {
+    return;
+  }
+
+  await Promise.allSettled(
+    OFFLINE_WARMUP_ENDPOINTS.map((endpoint) =>
+      fetch(endpoint, {
+        method: 'GET',
+        cache: 'no-store',
+        credentials: 'same-origin',
+      }),
+    ),
+  );
+}
 
 function getTodayKey(now = new Date()) {
   const year = now.getFullYear();
@@ -161,6 +185,7 @@ export function ServiceWorkerRegister() {
       .register('/sw.js')
       .then((registration) => {
         activateWaitingWorker(registration);
+        void warmOfflineDataCache();
 
         registration.addEventListener('updatefound', () => {
           const installing = registration.installing;
@@ -198,12 +223,18 @@ export function ServiceWorkerRegister() {
       }
     };
 
+    const onOnline = () => {
+      void warmOfflineDataCache();
+    };
+
     window.addEventListener('focus', onVisibilityChange);
     document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('online', onOnline);
 
     return () => {
       window.removeEventListener('focus', onVisibilityChange);
       document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('online', onOnline);
     };
   }, []);
 

@@ -1,8 +1,20 @@
 import { NextResponse } from 'next/server';
 import { Prisma } from '@/generated/prisma';
 
-import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
-import { getRequiredPrismaClient } from '@/lib/prisma';
+import {
+  apiErrorResponse,
+  badRequestResponse,
+  parseJsonBody,
+  resolveUserRouteContext,
+  serverErrorResponse,
+  validationFailedResponse,
+} from '@/app/api/shared/owned-route';
+import {
+  normalizeCustomFields,
+  normalizeTrimmedText,
+  toMutableMetadataRecord,
+} from '@/app/api/shared/payload-utils';
+import { documentListSelect } from '@/app/api/document/shared';
 import { DocumentTypeCode, type DocumentFormPayload } from '@/models/document';
 import { hashDocumentIdentity } from '@/lib/security/doc-hash';
 import { tokenizeDocumentNumber } from '@/lib/security/doc-token';
@@ -14,32 +26,6 @@ import {
   validateDocumentFormFields,
 } from '@/utils/document/validation';
 
-function toMetadata(value: unknown) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return null;
-  }
-
-  return value as Record<string, unknown>;
-}
-
-function normalizeCustomFields(value: unknown) {
-  if (!Array.isArray(value)) return [];
-
-  return value
-    .map((item) => {
-      const key = String((item as { key?: unknown })?.key ?? '')
-        .trim()
-        .slice(0, 60);
-      const fieldValue = String((item as { value?: unknown })?.value ?? '')
-        .trim()
-        .slice(0, 240);
-      if (!key || !fieldValue) return null;
-      return { key, value: fieldValue };
-    })
-    .filter((item): item is { key: string; value: string } => Boolean(item))
-    .slice(0, 12);
-}
-
 function getDocumentWriteErrorMessage(error: { code?: string; message: string }) {
   if (error.code === 'P2002') {
     return 'This document number is already registered.';
@@ -49,68 +35,49 @@ function getDocumentWriteErrorMessage(error: { code?: string; message: string })
 }
 
 export async function GET() {
-  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
-
-  if (unauthorizedResponse || !user) {
-    return unauthorizedResponse;
+  const routeContext = await resolveUserRouteContext();
+  if (routeContext instanceof NextResponse) {
+    return routeContext;
   }
-
-  const prisma = getRequiredPrismaClient();
+  const { userId, prisma } = routeContext;
 
   const data = await prisma.document_record.findMany({
     where: {
-      user_id: user.id,
+      user_id: userId,
     },
-    select: {
-      id: true,
-      user_id: true,
-      document_type: true,
-      masked_number: true,
-      document_number_last4: true,
-      name_on_document: true,
-      category: true,
-      metadata: true,
-      verified_at: true,
-      expires_at: true,
-      created_at: true,
-      updated_at: true,
-    },
+    select: documentListSelect,
   });
 
   return NextResponse.json({ data: data ?? [] });
 }
 
 export async function POST(request: Request) {
-  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
-
-  if (unauthorizedResponse || !user) {
-    return unauthorizedResponse;
+  const routeContext = await resolveUserRouteContext();
+  if (routeContext instanceof NextResponse) {
+    return routeContext;
   }
+  const { userId, prisma } = routeContext;
 
-  const prisma = getRequiredPrismaClient();
-
-  let payload: DocumentFormPayload;
-
-  try {
-    payload = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  const payloadOrResponse = await parseJsonBody<DocumentFormPayload>(request);
+  if (payloadOrResponse instanceof NextResponse) {
+    return payloadOrResponse;
   }
+  const payload = payloadOrResponse;
 
   const errors = validateDocumentFormFields(payload);
   if (Object.keys(errors).length > 0) {
-    return NextResponse.json({ error: 'Validation failed', fieldErrors: errors }, { status: 400 });
+    return validationFailedResponse(errors);
   }
 
   const type = String(payload.type ?? '')
     .trim()
     .toUpperCase();
-  const rawCategory = String(payload.category ?? '').trim();
+  const rawCategory = normalizeTrimmedText(payload.category, 120);
   if (!isDocumentTypeCode(type)) {
-    return NextResponse.json({ error: 'Unsupported document type' }, { status: 400 });
+    return badRequestResponse('Unsupported document type');
   }
   if (type !== DocumentTypeCode.OTHERS && !isDocumentCategory(rawCategory.toLowerCase())) {
-    return NextResponse.json({ error: 'Unsupported document category' }, { status: 400 });
+    return badRequestResponse('Unsupported document category');
   }
 
   const normalizedNumber = normalizeDocumentNumber(type, payload.number);
@@ -120,10 +87,7 @@ export async function POST(request: Request) {
   try {
     tokenizedNumber = tokenizeDocumentNumber(normalizedNumber);
   } catch {
-    return NextResponse.json(
-      { error: 'Document tokenization is not configured correctly' },
-      { status: 500 },
-    );
+    return serverErrorResponse('Document tokenization is not configured correctly');
   }
 
   const customTypeLabel = rawCategory.slice(0, 60);
@@ -131,22 +95,19 @@ export async function POST(request: Request) {
   const storedCategory = type === DocumentTypeCode.OTHERS ? 'other' : rawCategory.toLowerCase();
 
   if (type === DocumentTypeCode.OTHERS && storedType.length < 2) {
-    return NextResponse.json(
-      { error: 'Please provide a custom label for Others.' },
-      { status: 400 },
-    );
+    return badRequestResponse('Please provide a custom label for Others.');
   }
 
   const documentHash = hashDocumentIdentity(storedType, normalizedNumber);
   const maskedNumber = maskDocumentNumber(type, normalizedNumber);
-  const nameOnDocument = String(payload.nameOnDocument ?? '').trim();
-  const issuedDate = String(payload.issuedDate ?? '').trim();
-  const expiryDate = String(payload.expiryDate ?? '').trim();
-  const address = String(payload.address ?? '').trim();
-  const guardianName = String(payload.guardianName ?? '').trim();
-  const otherDetails = String(payload.otherDetails ?? '').trim();
+  const nameOnDocument = normalizeTrimmedText(payload.nameOnDocument, 120);
+  const issuedDate = normalizeTrimmedText(payload.issuedDate, 10);
+  const expiryDate = normalizeTrimmedText(payload.expiryDate, 10);
+  const address = normalizeTrimmedText(payload.address, 240);
+  const guardianName = normalizeTrimmedText(payload.guardianName, 120);
+  const otherDetails = normalizeTrimmedText(payload.otherDetails, 500);
   const customFields = normalizeCustomFields(payload.customFields);
-  const baseMetadata = { ...(toMetadata(payload.metadata) ?? {}) };
+  const baseMetadata = toMutableMetadataRecord(payload.metadata);
   delete baseMetadata.custom_fields;
   const customFieldMetadata = Object.fromEntries(
     customFields.map((item) => [item.key, item.value]),
@@ -164,7 +125,7 @@ export async function POST(request: Request) {
   try {
     const data = await prisma.document_record.create({
       data: {
-        user_id: user.id,
+        user_id: userId,
         document_type: storedType,
         document_number_token: tokenizedNumber,
         document_number_last4: last4,
@@ -187,6 +148,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, data });
   } catch (error) {
     const message = getDocumentWriteErrorMessage(error as { code?: string; message: string });
-    return NextResponse.json({ error: message }, { status: 500 });
+    return apiErrorResponse(message, 500);
   }
 }

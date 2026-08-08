@@ -1,8 +1,18 @@
 import { NextResponse } from 'next/server';
 
 import { isCredentialTypeCode } from '@/constants/credential/types';
-import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
-import { getRequiredPrismaClient } from '@/lib/prisma';
+import {
+  apiErrorResponse,
+  badRequestResponse,
+  deleteOwnedEntityById,
+  ownedEntityNotFoundResponse,
+  parseJsonBody,
+  resolveOwnedRouteContext,
+  serverErrorResponse,
+  validationFailedResponse,
+} from '@/app/api/shared/owned-route';
+import { credentialPublicSelect } from '@/app/api/credential/shared';
+import { normalizeTrimmedText } from '@/app/api/shared/payload-utils';
 import { hashCredentialSecret } from '@/lib/security/credential-hash';
 import { tokenizeCredentialSecret } from '@/lib/security/credential-token';
 import type { CredentialFormPayload, CredentialTypeCode } from '@/models/credential';
@@ -24,79 +34,52 @@ function getCredentialWriteErrorMessage(error: { code?: string; message: string 
   return error.message;
 }
 
-function normalizeText(value: unknown, maxLength: number) {
-  const text = String(value ?? '').trim();
-  if (!text) return '';
-  return text.slice(0, maxLength);
-}
-
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params;
-  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
-
-  if (unauthorizedResponse || !user) {
-    return unauthorizedResponse;
+  const routeContext = await resolveOwnedRouteContext(context.params);
+  if (routeContext instanceof NextResponse) {
+    return routeContext;
   }
-
-  const prisma = getRequiredPrismaClient();
+  const { id, userId, prisma } = routeContext;
 
   const data = await prisma.credential_record.findFirst({
-    where: { id, user_id: user.id },
-    select: {
-      id: true,
-      user_id: true,
-      credential_type: true,
-      service_name: true,
-      identifier: true,
-      masked_secret: true,
-      secret_last4: true,
-      url: true,
-      notes: true,
-      metadata: true,
-      created_at: true,
-      updated_at: true,
-    },
+    where: { id, user_id: userId },
+    select: credentialPublicSelect,
   });
 
   if (!data) {
-    return NextResponse.json({ error: 'Credential not found' }, { status: 404 });
+    return ownedEntityNotFoundResponse('Credential');
   }
 
   return NextResponse.json({ data });
 }
 
-export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params;
-  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
-
-  if (unauthorizedResponse || !user) {
-    return unauthorizedResponse;
+async function updateCredential(request: Request, context: { params: Promise<{ id: string }> }) {
+  const routeContext = await resolveOwnedRouteContext(context.params);
+  if (routeContext instanceof NextResponse) {
+    return routeContext;
   }
+  const { id, userId, prisma } = routeContext;
 
-  const prisma = getRequiredPrismaClient();
-
-  let payload: CredentialFormPayload;
-
-  try {
-    payload = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  const payloadOrResponse = await parseJsonBody<CredentialFormPayload>(request);
+  if (payloadOrResponse instanceof NextResponse) {
+    return payloadOrResponse;
   }
+  const payload = payloadOrResponse;
 
   const errors = validateCredentialFormFields(payload, { allowEmptySecret: true });
   if (Object.keys(errors).length > 0) {
-    return NextResponse.json({ error: 'Validation failed', fieldErrors: errors }, { status: 400 });
+    return validationFailedResponse(errors);
   }
 
   const type = String(payload.type ?? '')
     .trim()
     .toUpperCase();
   if (!isCredentialTypeCode(type)) {
-    return NextResponse.json({ error: 'Unsupported credential type' }, { status: 400 });
+    return badRequestResponse('Unsupported credential type');
   }
 
   const existing = await prisma.credential_record.findFirst({
-    where: { id, user_id: user.id },
+    where: { id, user_id: userId },
     select: {
       id: true,
       secret_token: true,
@@ -107,13 +90,13 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
   });
 
   if (!existing) {
-    return NextResponse.json({ error: 'Credential not found' }, { status: 404 });
+    return ownedEntityNotFoundResponse('Credential');
   }
 
-  const serviceName = normalizeText(payload.serviceName, 120);
-  const identifier = normalizeText(payload.identifier, 120);
-  const url = normalizeText(payload.url, 400);
-  const notes = normalizeText(payload.notes, 1000);
+  const serviceName = normalizeTrimmedText(payload.serviceName, 120);
+  const identifier = normalizeTrimmedText(payload.identifier, 120);
+  const url = normalizeTrimmedText(payload.url, 400);
+  const notes = normalizeTrimmedText(payload.notes, 1000);
   const normalizedSecret = normalizeCredentialSecret(payload.secret ?? '');
 
   let secretToken = existing.secret_token;
@@ -125,10 +108,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     try {
       secretToken = tokenizeCredentialSecret(normalizedSecret);
     } catch {
-      return NextResponse.json(
-        { error: 'Credential tokenization is not configured correctly' },
-        { status: 500 },
-      );
+      return serverErrorResponse('Credential tokenization is not configured correctly');
     }
 
     secretHash = hashCredentialSecret(
@@ -155,53 +135,46 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
         url: url || null,
         notes: notes || null,
       },
-      select: {
-        id: true,
-        user_id: true,
-        credential_type: true,
-        service_name: true,
-        identifier: true,
-        masked_secret: true,
-        secret_last4: true,
-        url: true,
-        notes: true,
-        metadata: true,
-        created_at: true,
-        updated_at: true,
-      },
+      select: credentialPublicSelect,
     });
 
-    if (data.user_id !== user.id) {
-      return NextResponse.json({ error: 'Credential not found' }, { status: 404 });
+    if (data.user_id !== userId) {
+      return ownedEntityNotFoundResponse('Credential');
     }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
     const message = getCredentialWriteErrorMessage(error as { code?: string; message: string });
     const status = (error as { code?: string }).code === 'P2025' ? 404 : 500;
-    return NextResponse.json({ error: message }, { status });
+    return apiErrorResponse(message, status);
   }
 }
 
+export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
+  return updateCredential(request, context);
+}
+
+export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
+  return updateCredential(request, context);
+}
+
 export async function DELETE(_request: Request, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params;
-  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
-
-  if (unauthorizedResponse || !user) {
-    return unauthorizedResponse;
+  const routeContext = await resolveOwnedRouteContext(context.params);
+  if (routeContext instanceof NextResponse) {
+    return routeContext;
   }
+  const { id, userId, prisma } = routeContext;
 
-  const prisma = getRequiredPrismaClient();
-  const existing = await prisma.credential_record.findFirst({
-    where: { id, user_id: user.id },
-    select: { id: true },
+  return deleteOwnedEntityById({
+    id,
+    userId,
+    entityLabel: 'Credential',
+    findOwnedById: (recordId, ownerId) =>
+      prisma.credential_record.findFirst({
+        where: { id: recordId, user_id: ownerId },
+        select: { id: true },
+      }),
+    deleteById: (recordId) =>
+      prisma.credential_record.delete({ where: { id: recordId } }).then(() => undefined),
   });
-
-  if (!existing) {
-    return NextResponse.json({ error: 'Credential not found' }, { status: 404 });
-  }
-
-  await prisma.credential_record.delete({ where: { id } });
-
-  return NextResponse.json({ success: true });
 }

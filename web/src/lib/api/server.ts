@@ -1,18 +1,5 @@
 import { headers } from 'next/headers';
-
-type JsonRecord = Record<string, unknown>;
-type JsonBody = JsonRecord | unknown[];
-
-function toHeadersObject(initHeaders?: HeadersInit) {
-  if (!initHeaders) return {} as Record<string, string>;
-  if (initHeaders instanceof Headers) {
-    return Object.fromEntries(initHeaders.entries());
-  }
-  if (Array.isArray(initHeaders)) {
-    return Object.fromEntries(initHeaders);
-  }
-  return { ...initHeaders };
-}
+import { type JsonBody, type JsonRecord, toHeadersObject, withJsonHeaders } from '@/lib/api/shared';
 
 export async function getServerApiContext() {
   const requestHeaders = await headers();
@@ -48,17 +35,6 @@ export async function fetchServerApi<T = JsonRecord>(
 
   const data = (await response.json().catch(() => null)) as T | null;
   return { response, data };
-}
-
-function withJsonHeaders(init: RequestInit = {}) {
-  const headersObject = toHeadersObject(init.headers);
-  return {
-    ...init,
-    headers: {
-      'content-type': 'application/json',
-      ...headersObject,
-    },
-  };
 }
 
 export function serverApiGet<T = JsonRecord>(path: string, init: RequestInit = {}) {

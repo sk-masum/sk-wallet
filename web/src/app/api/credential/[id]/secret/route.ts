@@ -1,26 +1,26 @@
 import { NextResponse } from 'next/server';
 
+import {
+  ownedEntityNotFoundResponse,
+  resolveOwnedRouteContext,
+} from '@/app/api/shared/owned-route';
+import { credentialSecretTokenSelect } from '@/app/api/credential/shared';
 import { detokenizeCredentialSecret } from '@/lib/security/credential-token';
-import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
-import { getRequiredPrismaClient } from '@/lib/prisma';
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params;
-  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
-
-  if (unauthorizedResponse || !user) {
-    return unauthorizedResponse;
+  const routeContext = await resolveOwnedRouteContext(context.params);
+  if (routeContext instanceof NextResponse) {
+    return routeContext;
   }
-
-  const prisma = getRequiredPrismaClient();
+  const { id, userId, prisma } = routeContext;
 
   const data = await prisma.credential_record.findFirst({
-    where: { id, user_id: user.id },
-    select: { id: true, secret_token: true },
+    where: { id, user_id: userId },
+    select: credentialSecretTokenSelect,
   });
 
   if (!data) {
-    return NextResponse.json({ error: 'Credential not found' }, { status: 404 });
+    return ownedEntityNotFoundResponse('Credential');
   }
 
   try {
