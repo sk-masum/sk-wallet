@@ -7,6 +7,8 @@ import {
   StaleWhileRevalidate,
 } from 'serwist';
 
+const DAY_IN_SECONDS = 60 * 60 * 24;
+
 const CACHE_NAMES = {
   APP_SHELL: 'sk-wallet-app-shell-v1',
   STATIC_ASSETS: 'sk-wallet-static-assets-v1',
@@ -16,12 +18,26 @@ const CACHE_NAMES = {
   API_VAULT: 'sk-wallet-api-vault-v1',
 };
 
+const ORIGIN = self.location.origin;
+
 const OFFLINE_READ_API_PATTERNS = [
   /^\/api\/dashboard(?:\/(?:alerts|favorite))?$/,
   /^\/api\/card(?:\/[^/]+)?$/,
   /^\/api\/credential(?:\/[^/]+)?$/,
   /^\/api\/document(?:\/[^/]+)?$/,
 ];
+
+function isSameOrigin(url) {
+  return url.origin === ORIGIN;
+}
+
+function isGetRequest(request) {
+  return request.method === 'GET';
+}
+
+function isApiPath(pathname) {
+  return pathname.startsWith('/api/');
+}
 
 function isSensitiveApiBypass(pathname) {
   return /^\/api\/credential\/[^/]+\/secret$/.test(pathname);
@@ -40,154 +56,177 @@ function isNextRouteDataRequest(request, url) {
   );
 }
 
+const runtimeMatchers = {
+  appShell: ({ request, url }) => request.mode === 'navigate' && isSameOrigin(url),
+  staticAssets: ({ request, url }) =>
+    isSameOrigin(url) && ['script', 'style', 'font', 'worker'].includes(request.destination),
+  appRouteData: ({ request, url }) =>
+    isGetRequest(request) && isSameOrigin(url) && isNextRouteDataRequest(request, url),
+  apiVault: ({ request, url }) =>
+    isGetRequest(request) &&
+    isSameOrigin(url) &&
+    url.pathname.startsWith('/api/vault') &&
+    !isSensitiveApiBypass(url.pathname),
+  apiReadonly: ({ request, url }) =>
+    isGetRequest(request) &&
+    isSameOrigin(url) &&
+    isApiPath(url.pathname) &&
+    isOfflineReadApi(url.pathname) &&
+    !isSensitiveApiBypass(url.pathname),
+  apiDynamic: ({ request, url }) =>
+    isGetRequest(request) &&
+    isSameOrigin(url) &&
+    isApiPath(url.pathname) &&
+    !isOfflineReadApi(url.pathname) &&
+    !isSensitiveApiBypass(url.pathname),
+};
+
+const runtimeHandlers = {
+  appShell: new StaleWhileRevalidate({
+    cacheName: CACHE_NAMES.APP_SHELL,
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({ maxEntries: 30 }),
+    ],
+  }),
+  staticAssets: new CacheFirst({
+    cacheName: CACHE_NAMES.STATIC_ASSETS,
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({
+        maxEntries: 120,
+        maxAgeSeconds: DAY_IN_SECONDS * 30,
+      }),
+    ],
+  }),
+  appRouteData: new NetworkFirst({
+    cacheName: CACHE_NAMES.APP_ROUTE_DATA,
+    networkTimeoutSeconds: 4,
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [200] }),
+      new ExpirationPlugin({
+        maxEntries: 120,
+        maxAgeSeconds: DAY_IN_SECONDS * 3,
+      }),
+    ],
+  }),
+  apiVault: new NetworkFirst({
+    cacheName: CACHE_NAMES.API_VAULT,
+    networkTimeoutSeconds: 4,
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [200] }),
+      new ExpirationPlugin({
+        maxEntries: 3,
+        maxAgeSeconds: 30,
+      }),
+    ],
+  }),
+  apiReadonly: new StaleWhileRevalidate({
+    cacheName: CACHE_NAMES.API_READONLY,
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [200] }),
+      new ExpirationPlugin({
+        maxEntries: 200,
+        maxAgeSeconds: DAY_IN_SECONDS * 7,
+      }),
+    ],
+  }),
+  apiDynamic: new NetworkFirst({
+    cacheName: CACHE_NAMES.API_DYNAMIC,
+    networkTimeoutSeconds: 4,
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [200] }),
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 60 * 5,
+      }),
+    ],
+  }),
+};
+
+const runtimeCaching = [
+  {
+    // App shell: instant cached response, then update quietly in background.
+    matcher: runtimeMatchers.appShell,
+    handler: runtimeHandlers.appShell,
+  },
+  {
+    // Static chunks and fonts: cache-first for fastest startup in installed PWA mode.
+    matcher: runtimeMatchers.staticAssets,
+    handler: runtimeHandlers.staticAssets,
+  },
+  {
+    // Next.js app-router flight data keeps route transitions usable while offline.
+    matcher: runtimeMatchers.appRouteData,
+    handler: runtimeHandlers.appRouteData,
+  },
+  {
+    // Sensitive vault endpoints stay dynamic and only keep a tiny fallback cache.
+    matcher: runtimeMatchers.apiVault,
+    handler: runtimeHandlers.apiVault,
+  },
+  {
+    // Core wallet reads get a durable cache for reliable offline access.
+    matcher: runtimeMatchers.apiReadonly,
+    handler: runtimeHandlers.apiReadonly,
+  },
+  {
+    // All other API reads are network-first to keep user data fresh.
+    matcher: runtimeMatchers.apiDynamic,
+    handler: runtimeHandlers.apiDynamic,
+  },
+];
+
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
-  runtimeCaching: [
-    {
-      // App shell: instant cached response, then update quietly in background.
-      matcher: ({ request, url }) =>
-        request.mode === 'navigate' && url.origin === self.location.origin,
-      handler: new StaleWhileRevalidate({
-        cacheName: CACHE_NAMES.APP_SHELL,
-        plugins: [
-          new CacheableResponsePlugin({ statuses: [0, 200] }),
-          new ExpirationPlugin({ maxEntries: 30 }),
-        ],
-      }),
-    },
-    {
-      // Static chunks and fonts: cache-first for fastest startup in installed PWA mode.
-      matcher: ({ request, url }) =>
-        url.origin === self.location.origin &&
-        ['script', 'style', 'font', 'worker'].includes(request.destination),
-      handler: new CacheFirst({
-        cacheName: CACHE_NAMES.STATIC_ASSETS,
-        plugins: [
-          new CacheableResponsePlugin({ statuses: [0, 200] }),
-          new ExpirationPlugin({
-            maxEntries: 120,
-            maxAgeSeconds: 60 * 60 * 24 * 30,
-          }),
-        ],
-      }),
-    },
-    {
-      // Next.js app-router flight data keeps route transitions usable while offline.
-      matcher: ({ request, url }) =>
-        request.method === 'GET' &&
-        url.origin === self.location.origin &&
-        isNextRouteDataRequest(request, url),
-      handler: new NetworkFirst({
-        cacheName: CACHE_NAMES.APP_ROUTE_DATA,
-        networkTimeoutSeconds: 4,
-        plugins: [
-          new CacheableResponsePlugin({ statuses: [200] }),
-          new ExpirationPlugin({
-            maxEntries: 120,
-            maxAgeSeconds: 60 * 60 * 24 * 3,
-          }),
-        ],
-      }),
-    },
-    {
-      // Sensitive vault endpoints stay dynamic and only keep a tiny fallback cache.
-      matcher: ({ request, url }) =>
-        request.method === 'GET' &&
-        url.origin === self.location.origin &&
-        url.pathname.startsWith('/api/vault') &&
-        !isSensitiveApiBypass(url.pathname),
-      handler: new NetworkFirst({
-        cacheName: CACHE_NAMES.API_VAULT,
-        networkTimeoutSeconds: 4,
-        plugins: [
-          new CacheableResponsePlugin({ statuses: [200] }),
-          new ExpirationPlugin({
-            maxEntries: 3,
-            maxAgeSeconds: 30,
-          }),
-        ],
-      }),
-    },
-    {
-      // Core wallet reads get a durable cache for reliable offline access.
-      matcher: ({ request, url }) =>
-        request.method === 'GET' &&
-        url.origin === self.location.origin &&
-        url.pathname.startsWith('/api/') &&
-        isOfflineReadApi(url.pathname) &&
-        !isSensitiveApiBypass(url.pathname),
-      handler: new StaleWhileRevalidate({
-        cacheName: CACHE_NAMES.API_READONLY,
-        plugins: [
-          new CacheableResponsePlugin({ statuses: [200] }),
-          new ExpirationPlugin({
-            maxEntries: 200,
-            maxAgeSeconds: 60 * 60 * 24 * 7,
-          }),
-        ],
-      }),
-    },
-    {
-      // All other API reads are network-first to keep user data fresh.
-      matcher: ({ request, url }) =>
-        request.method === 'GET' &&
-        url.origin === self.location.origin &&
-        url.pathname.startsWith('/api/') &&
-        !isOfflineReadApi(url.pathname) &&
-        !isSensitiveApiBypass(url.pathname),
-      handler: new NetworkFirst({
-        cacheName: CACHE_NAMES.API_DYNAMIC,
-        networkTimeoutSeconds: 4,
-        plugins: [
-          new CacheableResponsePlugin({ statuses: [200] }),
-          new ExpirationPlugin({
-            maxEntries: 50,
-            maxAgeSeconds: 60 * 5,
-          }),
-        ],
-      }),
-    },
-  ],
+  runtimeCaching,
 });
 
 serwist.addEventListeners();
 
-self.addEventListener('message', (event) => {
+function handleMessage(event) {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-});
+}
 
-self.addEventListener('notificationclick', (event) => {
+async function focusOrOpenWindow(targetUrl) {
+  const clientList = await self.clients.matchAll({
+    type: 'window',
+    includeUncontrolled: true,
+  });
+
+  for (const client of clientList) {
+    if (!('focus' in client)) continue;
+
+    const currentUrl = new URL(client.url);
+    if (currentUrl.origin === ORIGIN) {
+      if ('navigate' in client) {
+        await client.navigate(targetUrl);
+      }
+      await client.focus();
+      return;
+    }
+  }
+
+  await self.clients.openWindow(targetUrl);
+}
+
+function handleNotificationClick(event) {
   event.notification.close();
 
   const relativeUrl = event.notification?.data?.url || '/card';
-  const targetUrl = new URL(relativeUrl, self.location.origin).href;
+  const targetUrl = new URL(relativeUrl, ORIGIN).href;
 
   event.waitUntil(
     (async () => {
-      const clientList = await self.clients.matchAll({
-        type: 'window',
-        includeUncontrolled: true,
-      });
-
-      for (const client of clientList) {
-        if (!('focus' in client)) continue;
-
-        const currentUrl = new URL(client.url);
-        if (currentUrl.origin === self.location.origin) {
-          if ('navigate' in client) {
-            await client.navigate(targetUrl);
-          }
-          await client.focus();
-          return;
-        }
-      }
-
-      await self.clients.openWindow(targetUrl);
+      await focusOrOpenWindow(targetUrl);
     })(),
   );
-});
+}
+
+self.addEventListener('message', handleMessage);
+self.addEventListener('notificationclick', handleNotificationClick);

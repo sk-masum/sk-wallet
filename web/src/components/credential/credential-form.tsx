@@ -4,6 +4,11 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
 import { FormActions } from '@/components/ui/form-actions';
+import {
+  EntityInputField,
+  EntityTextareaField,
+  EntityTypeSelectField,
+} from '@/components/shared/entity-form-kit';
 import { FormField } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
 import {
@@ -11,12 +16,9 @@ import {
   entityFormControlClass,
   entityFormGridClass,
   entityFormLabelClass,
-  entityFormSelectClass,
-  entityFormTextareaClass,
 } from '@/components/shared/entity-form-ui';
-import { AppSelectField } from '@/components/shared/app-select-field';
+import { useEntityFormFieldMetadata } from '@/hooks/use-entity-form-field-metadata';
 import { submitEntityForm } from '@/components/shared/entity-form-submit';
-import { Textarea } from '@/components/ui/textarea';
 import { CREDENTIAL_TYPE_OPTIONS, getCredentialTypeConfig } from '@/constants/credential/types';
 import type { CredentialFormFieldErrors, CredentialFormPayload } from '@/models/credential';
 import { cn } from '@/lib/utils';
@@ -48,6 +50,7 @@ export function CredentialForm({
   lockTypeField = false,
   onSubmit,
 }: CredentialFormProps) {
+  const fieldMeta = useEntityFormFieldMetadata('credential');
   const [values, setValues] = useState<CredentialFormValues>({
     type: initialValues?.type ?? '',
     serviceName: initialValues?.serviceName ?? '',
@@ -85,81 +88,59 @@ export function CredentialForm({
 
   return (
     <form onSubmit={handleSubmit} className={entityFormGridClass}>
-      <FormField
+      <EntityTypeSelectField
         id='cred-type'
-        label='Credential type'
+        label={fieldMeta.type.label}
         error={fieldErrors.type}
         labelClassName={entityFormLabelClass}
-      >
-        <AppSelectField
-          id='cred-type'
-          disabled={lockTypeField}
-          value={values.type}
-          onValueChange={(value) => {
-            setValues((prev) => ({ ...prev, type: value }));
-            setFieldErrors((prev) => ({ ...prev, type: undefined }));
-          }}
-          placeholder='Select credential type'
-          triggerClassName={cn(entityFormSelectClass, fieldErrors.type && 'border-destructive')}
-          options={CREDENTIAL_TYPE_OPTIONS.map((item) => ({ value: item.code, label: item.label }))}
-        />
-      </FormField>
+        disabled={lockTypeField}
+        value={values.type}
+        onValueChange={(value) => {
+          setValues((prev) => ({ ...prev, type: value }));
+          setFieldErrors((prev) => ({ ...prev, type: undefined }));
+        }}
+        placeholder={fieldMeta.type.placeholder ?? 'Select credential type'}
+        options={CREDENTIAL_TYPE_OPTIONS.map((item) => ({ value: item.code, label: item.label }))}
+      />
 
-      <FormField
+      <EntityInputField
         id='cred-service'
-        label='Service name'
+        label={fieldMeta.serviceName.label}
         error={fieldErrors.serviceName}
-
         labelClassName={entityFormLabelClass}
-      >
-        <Input
-          id='cred-service'
-          value={values.serviceName}
-          onChange={(event) => {
+        inputProps={{
+          value: values.serviceName,
+          onChange: (event) => {
             setValues((prev) => ({ ...prev, serviceName: event.target.value }));
             setFieldErrors((prev) => ({ ...prev, serviceName: undefined }));
-          }}
-          placeholder='e.g. Gmail, GitHub, HBL'
-          className={cn(
-            entityFormControlClass,
-            fieldErrors.serviceName && 'border-destructive focus-visible:ring-destructive',
-          )}
-          aria-invalid={Boolean(fieldErrors.serviceName)}
-          maxLength={120}
-          required
-        />
-      </FormField>
+          },
+          placeholder: fieldMeta.serviceName.placeholder,
+          maxLength: fieldMeta.serviceName.maxLength,
+          required: fieldMeta.serviceName.required,
+        }}
+      />
 
-      <FormField
+      <EntityInputField
         id='cred-identifier'
-        label='Identifier (optional)'
+        label={fieldMeta.identifier.label}
         error={fieldErrors.identifier}
-
         labelClassName={entityFormLabelClass}
-      >
-        <Input
-          id='cred-identifier'
-          value={values.identifier}
-          onChange={(event) => {
+        inputProps={{
+          value: values.identifier,
+          onChange: (event) => {
             setValues((prev) => ({ ...prev, identifier: event.target.value }));
             setFieldErrors((prev) => ({ ...prev, identifier: undefined }));
-          }}
-          placeholder='email / username / phone'
-          className={cn(
-            entityFormControlClass,
-            fieldErrors.identifier && 'border-destructive focus-visible:ring-destructive',
-          )}
-          aria-invalid={Boolean(fieldErrors.identifier)}
-          maxLength={120}
-        />
-      </FormField>
+          },
+          placeholder: fieldMeta.identifier.placeholder,
+          maxLength: fieldMeta.identifier.maxLength,
+        }}
+      />
 
       <FormField
         id='cred-secret'
-        label={allowEmptySecret ? 'Secret (leave empty to keep existing)' : 'Secret'}
-        hint={typeConfig?.hint ?? 'Store only trusted credentials.'}
+        label={allowEmptySecret ? 'Secret (leave empty to keep existing)' : fieldMeta.secret.label}
+        hint={typeConfig?.hint ?? fieldMeta.secret.hint}
         error={fieldErrors.secret}
-
         labelClassName={entityFormLabelClass}
       >
         <div className='relative'>
@@ -171,7 +152,7 @@ export function CredentialForm({
               setValues((prev) => ({ ...prev, secret: event.target.value }));
               setFieldErrors((prev) => ({ ...prev, secret: undefined }));
             }}
-            placeholder={typeConfig?.placeholder ?? 'Enter secret'}
+            placeholder={typeConfig?.placeholder ?? fieldMeta.secret.placeholder}
             className={cn(
               entityFormControlClass,
               'pr-10',
@@ -193,53 +174,39 @@ export function CredentialForm({
         </div>
       </FormField>
 
-      <FormField
+      <EntityInputField
         id='cred-url'
-        label='Website URL (optional)'
+        label={fieldMeta.url.label}
         error={fieldErrors.url}
         className='sm:col-span-2'
         labelClassName={entityFormLabelClass}
-      >
-        <Input
-          id='cred-url'
-          value={values.url}
-          onChange={(event) => {
+        inputProps={{
+          value: values.url,
+          onChange: (event) => {
             setValues((prev) => ({ ...prev, url: event.target.value }));
             setFieldErrors((prev) => ({ ...prev, url: undefined }));
-          }}
-          placeholder='https://example.com'
-          className={cn(
-            entityFormControlClass,
-            fieldErrors.url && 'border-destructive focus-visible:ring-destructive',
-          )}
-          aria-invalid={Boolean(fieldErrors.url)}
-          maxLength={400}
-        />
-      </FormField>
+          },
+          placeholder: fieldMeta.url.placeholder,
+          maxLength: fieldMeta.url.maxLength,
+        }}
+      />
 
-      <FormField
+      <EntityTextareaField
         id='cred-notes'
-        label='Notes (optional)'
+        label={fieldMeta.notes.label}
         error={fieldErrors.notes}
         className='sm:col-span-2'
         labelClassName={entityFormLabelClass}
-      >
-        <Textarea
-          id='cred-notes'
-          value={values.notes}
-          onChange={(event) => {
+        textareaProps={{
+          value: values.notes,
+          onChange: (event) => {
             setValues((prev) => ({ ...prev, notes: event.target.value }));
             setFieldErrors((prev) => ({ ...prev, notes: undefined }));
-          }}
-          placeholder='Any extra details'
-          className={cn(
-            entityFormTextareaClass,
-            fieldErrors.notes && 'border-destructive focus-visible:ring-destructive',
-          )}
-          aria-invalid={Boolean(fieldErrors.notes)}
-          maxLength={1000}
-        />
-      </FormField>
+          },
+          placeholder: fieldMeta.notes.placeholder,
+          maxLength: fieldMeta.notes.maxLength,
+        }}
+      />
 
       <div className={entityFormActionsDividerClass}>
         <FormActions submitLabel={submitLabel} isSubmitting={isSubmitting} showReset={showReset} />

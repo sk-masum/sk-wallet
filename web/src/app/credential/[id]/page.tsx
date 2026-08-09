@@ -35,9 +35,8 @@ export default async function EditCredentialPage({ params }: EditCredentialPageP
     redirect('/credential?error=' + encodeURIComponent(result?.error || 'Credential not found'));
   }
 
-  const { response: secretResponse, data: secretResult } = await serverApiGet<CredentialSecretResponse>(
-    `/api/credential/${id}/secret`,
-  );
+  const { response: secretResponse, data: secretResult } =
+    await serverApiGet<CredentialSecretResponse>(`/api/credential/${id}/secret`);
 
   if (secretResponse.status === 401) {
     redirect(`/auth?next=/credential/${id}`);

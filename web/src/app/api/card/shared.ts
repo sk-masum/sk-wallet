@@ -1,6 +1,11 @@
+import type { UserRouteContext } from '@/app/api/shared/owned-route';
 import { isCardStatus } from '@/constants/card/status';
-import { getRequiredPrismaClient } from '@/lib/prisma';
-import { detokenizeCardCvv, detokenizeCardNumber } from '@/lib/security/card-token';
+import {
+  detokenizeCardCvv,
+  detokenizeCardNumber,
+  tokenizeCardCvv,
+  tokenizeCardNumber,
+} from '@/lib/security/card-token';
 
 export type CardWritePayload = {
   color_name?: string;
@@ -38,6 +43,17 @@ export type CardWriteData = {
   status?: string;
 };
 
+export type CardWritePreparationResult =
+  | {
+      ok: true;
+      writeData: CardWriteData;
+    }
+  | {
+      ok: false;
+      errorCode: 'TOKENIZATION' | 'PROVIDER';
+      message: string;
+    };
+
 export function toSafeNumber(value: bigint | number | null | undefined) {
   if (value === null || value === undefined) return null;
   return typeof value === 'bigint' ? Number(value) : value;
@@ -59,7 +75,7 @@ export function decodeCvvFieldOrEmpty(value: string) {
   }
 }
 
-type CardWithProvider = {
+type CardResponseSource = {
   id: bigint | number;
   provider_id: bigint | number | null;
   credit_limit: { toNumber: () => number } | null;
@@ -69,7 +85,7 @@ type CardWithProvider = {
   [key: string]: unknown;
 };
 
-export function mapCardForResponse(card: CardWithProvider) {
+export function mapCardForResponse(card: CardResponseSource) {
   return {
     ...card,
     id: toSafeNumber(card.id),
@@ -83,7 +99,7 @@ export function mapCardForResponse(card: CardWithProvider) {
 }
 
 export async function resolveOrCreateProvider(
-  prisma: ReturnType<typeof getRequiredPrismaClient>,
+  prisma: UserRouteContext['prisma'],
   rawProvider?: string | null,
 ) {
   const provider = String(rawProvider ?? '')
@@ -211,4 +227,42 @@ export function buildCardWriteData(
   }
 
   return data;
+}
+
+export async function prepareCardWriteData(
+  prisma: UserRouteContext['prisma'],
+  payload: CardWritePayload,
+  mode: 'create' | 'update',
+): Promise<CardWritePreparationResult> {
+  let tokenizedNumber = '';
+  let tokenizedCvv = '';
+
+  try {
+    tokenizedNumber = tokenizeCardNumber(String(payload.number ?? ''));
+    tokenizedCvv = tokenizeCardCvv(String(payload.cvv ?? ''));
+  } catch {
+    return {
+      ok: false,
+      errorCode: 'TOKENIZATION',
+      message: 'Card tokenization is not configured correctly',
+    };
+  }
+
+  const { providerId, error: providerError } = await resolveOrCreateProvider(
+    prisma,
+    payload.provider,
+  );
+
+  if (providerError) {
+    return {
+      ok: false,
+      errorCode: 'PROVIDER',
+      message: providerError,
+    };
+  }
+
+  return {
+    ok: true,
+    writeData: buildCardWriteData(payload, providerId, tokenizedNumber, tokenizedCvv, mode),
+  };
 }

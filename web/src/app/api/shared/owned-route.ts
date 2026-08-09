@@ -14,6 +14,12 @@ export type UserRouteContext = {
   prisma: ReturnType<typeof getRequiredPrismaClient>;
 };
 
+type RouteResult = NextResponse | Response;
+
+export function isNextResponse(value: unknown): value is NextResponse {
+  return value instanceof NextResponse;
+}
+
 export function ownedEntityNotFoundResponse(entityLabel: string) {
   return NextResponse.json({ error: `${entityLabel} not found` }, { status: 404 });
 }
@@ -115,4 +121,27 @@ export async function resolveOwnedRouteContext(
     userId: user.id,
     prisma: getRequiredPrismaClient(),
   };
+}
+
+export async function withUserRouteContext(
+  handler: (context: UserRouteContext) => Promise<RouteResult> | RouteResult,
+) {
+  const routeContext = await resolveUserRouteContext();
+  if (isNextResponse(routeContext)) {
+    return routeContext;
+  }
+
+  return handler(routeContext);
+}
+
+export async function withOwnedRouteContext(
+  paramsPromise: Promise<{ id: string }>,
+  handler: (context: OwnedRouteContext) => Promise<RouteResult> | RouteResult,
+) {
+  const routeContext = await resolveOwnedRouteContext(paramsPromise);
+  if (isNextResponse(routeContext)) {
+    return routeContext;
+  }
+
+  return handler(routeContext);
 }

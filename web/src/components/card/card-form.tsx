@@ -1,11 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Check, CreditCard, Landmark, Shuffle } from 'lucide-react';
 
-import { Button, buttonVariants } from '@/components/ui/button';
 import { FormActions } from '@/components/ui/form-actions';
+import {
+  EntityAutocompleteField,
+  EntityInputField,
+  EntityModeToggleCardGroup,
+} from '@/components/shared/entity-form-kit';
 import { FormField } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
 import { AppSelectField } from '@/components/shared/app-select-field';
@@ -27,11 +31,13 @@ import { MONTH_OPTIONS } from '@/constants/card/month-options';
 import { CARD_NETWORK_FORM_OPTIONS } from '@/utils/card/network';
 import { buildCardAppearance, getCardThemes, parseCardAppearance } from '@/utils/card/theme';
 import { parseCardTags } from '@/utils/card/form-data';
+import { useEntityFormFieldMetadata } from '@/hooks/use-entity-form-field-metadata';
 import {
   getExpectedCvvLength,
   validateCardFormFields,
   type CardFormFieldErrors,
 } from '@/utils/card/validation';
+import { CardFormPendingOverlay } from './card-form-overlay';
 
 type CardProviderApiResponse = {
   data?: string[];
@@ -101,28 +107,6 @@ type CardFormProps = {
 
 const TAG_PICKER_PLACEHOLDER = '__pick_tag__';
 
-function FormPendingOverlay() {
-  const { pending } = useFormStatus();
-
-  if (!pending) return null;
-
-  return (
-    <div className='absolute inset-0 z-20 flex items-center justify-center rounded-lg bg-background/70 backdrop-blur-[1px]'>
-      <div className='flex flex-col items-center gap-3'>
-        <div className='relative h-24 w-40'>
-          <div className='absolute left-2 top-3 h-20 w-32 rounded-xl border border-border/50 bg-muted/50' />
-          <div className='absolute left-4 top-1 h-20 w-32 rounded-xl border border-cyan-300/70 bg-linear-to-br from-cyan-600 via-blue-700 to-indigo-800 shadow-lg animate-bounce' />
-          <div className='absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground'>
-            <span className='absolute inline-flex h-full w-full rounded-full bg-primary opacity-40 animate-ping' />
-            <span className='relative text-sm font-bold'>+</span>
-          </div>
-        </div>
-        <p className='text-sm font-medium text-foreground'>Saving card...</p>
-      </div>
-    </div>
-  );
-}
-
 type CardFormActionsProps = {
   submitLabel: string;
   showReset: boolean;
@@ -141,57 +125,6 @@ function CardFormActions({ submitLabel, showReset }: CardFormActionsProps) {
   );
 }
 
-type CardTypeOptionProps = {
-  value: 'credit' | 'debit';
-  title: string;
-  subtitle: string;
-  icon: ReactNode;
-  defaultChecked: boolean;
-  onChange: () => void;
-};
-
-function CardTypeOption({
-  value,
-  title,
-  subtitle,
-  icon,
-  defaultChecked,
-  onChange,
-}: CardTypeOptionProps) {
-  return (
-    <label className='relative cursor-pointer'>
-      <input
-        type='radio'
-        name='card_type'
-        value={value}
-        defaultChecked={defaultChecked}
-        onChange={onChange}
-        required
-        className='peer sr-only'
-      />
-      <span
-        className={cn(
-          buttonVariants({ variant: 'outline', size: 'sm' }),
-          'h-auto min-h-14 w-full justify-start rounded-xl border-border/70 bg-background/88 px-3 py-2 text-left shadow-sm transition-all duration-200',
-          'hover:border-border hover:bg-background',
-          'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2',
-          'peer-checked:border-primary/70 peer-checked:bg-primary/12 peer-checked:text-foreground peer-checked:shadow-[0_8px_18px_-14px_hsl(var(--primary))]',
-        )}
-      >
-        <span className='inline-flex w-full items-center gap-2.5'>
-          <span className='inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/90 text-text-subtle peer-checked:border-primary/45 peer-checked:bg-primary/16 peer-checked:text-primary'>
-            {icon}
-          </span>
-          <span className='leading-tight'>
-            <span className='block text-sm font-semibold'>{title}</span>
-            <span className='block text-[11px] text-text-subtle'>{subtitle}</span>
-          </span>
-        </span>
-      </span>
-    </label>
-  );
-}
-
 export function CardForm({
   action,
   submitLabel,
@@ -199,6 +132,7 @@ export function CardForm({
   cardId,
   initialValues,
 }: CardFormProps) {
+  const fieldMeta = useEntityFormFieldMetadata('card');
   const values: CardFormValues = {
     cardType: initialValues?.cardType ?? 'credit',
     colorName: initialValues?.colorName ?? '',
@@ -231,7 +165,6 @@ export function CardForm({
   const [tagsValue, setTagsValue] = useState(values.tags);
   const [tagPickerValue, setTagPickerValue] = useState(TAG_PICKER_PLACEHOLDER);
   const [providerValue, setProviderValue] = useState(values.provider);
-  const [showProviderSuggestions, setShowProviderSuggestions] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<CardFormFieldErrors>({});
   const formRef = useRef<HTMLFormElement | null>(null);
   const cvvLength = getExpectedCvvLength(Number(selectedNetwork)) ?? 3;
@@ -246,23 +179,6 @@ export function CardForm({
     return normalizedCurrentProvider ? [normalizedCurrentProvider] : [];
   }, [values.provider]);
   const [providerOptions, setProviderOptions] = useState(initialProviderOptions);
-  const filteredProviderOptions = useMemo(() => {
-    const normalizedQuery = providerValue.trim().toLowerCase();
-
-    if (!normalizedQuery) return providerOptions;
-
-    return providerOptions.filter((providerOption) =>
-      providerOption.toLowerCase().includes(normalizedQuery),
-    );
-  }, [providerOptions, providerValue]);
-  const canAddProviderOption = useMemo(() => {
-    const normalizedValue = normalizeProvider(providerValue);
-    if (!normalizedValue) return false;
-
-    return !providerOptions.some(
-      (providerOption) => providerOption.toLowerCase() === normalizedValue.toLowerCase(),
-    );
-  }, [providerOptions, providerValue]);
   const cardNumberDigitsCount = useMemo(() => numberValue.replace(/\D/g, '').length, [numberValue]);
   const expectedCardNumberLengths = useMemo(
     () => getExpectedCardNumberLengths(selectedNetwork),
@@ -332,7 +248,6 @@ export function CardForm({
       setProviderOptions((previous) => mergeProviderOptions(previous, [normalizedProvider]));
     }
 
-    setShowProviderSuggestions(false);
     window.requestAnimationFrame(() => validateFields(['provider']));
   };
 
@@ -399,107 +314,89 @@ export function CardForm({
         name='color_name'
         value={buildCardAppearance(selectedColorName, selectedPatternKey)}
       />
-      <FormPendingOverlay />
+      <CardFormPendingOverlay />
 
       <FormField
         id='color_name'
-        label='Card Type'
+        label={fieldMeta.card_type.label}
         error={fieldErrors.card_type}
         className={cn(entityFormSectionCardClass, 'sm:col-span-2')}
         labelClassName={entityFormLabelClass}
-        hint='Choose whether this card charges credit or debits directly from balance.'
+        hint={fieldMeta.card_type.hint}
       >
-        <div className='grid gap-2 sm:grid-cols-2'>
-          <CardTypeOption
-            value='credit'
-            title='Credit'
-            subtitle='Pay later billing cycle'
-            icon={<CreditCard className='h-4 w-4' />}
-            defaultChecked={values.cardType === 'credit'}
-            onChange={() => {
-              setSelectedCardType('credit');
-              validateFields(['card_type', 'credit_limit']);
-            }}
-          />
-
-          <CardTypeOption
-            value='debit'
-            title='Debit'
-            subtitle='Instant balance deduction'
-            icon={<Landmark className='h-4 w-4' />}
-            defaultChecked={values.cardType === 'debit'}
-            onChange={() => {
-              setSelectedCardType('debit');
-              validateFields(['card_type', 'credit_limit']);
-            }}
-          />
-        </div>
-      </FormField>
-
-      {selectedCardType === 'credit' ? (
-        <FormField
-          id='credit_limit'
-          label='CREDIT LIMIT'
-          error={fieldErrors.credit_limit}
-
-          labelClassName={entityFormLabelClass}
-          hint='Required for credit cards. Enter total approved limit.'
-        >
-          <Input
-            id='credit_limit'
-            name='credit_limit'
-            placeholder='e.g. 250000'
-            onChange={() => validateFields(['credit_limit'])}
-            className={cn(
-              entityFormControlClass,
-              fieldErrors.credit_limit && 'border-destructive focus-visible:ring-destructive',
-            )}
-            aria-invalid={Boolean(fieldErrors.credit_limit)}
-            inputMode='decimal'
-            defaultValue={values.creditLimit}
-            required
-          />
-        </FormField>
-      ) : null}
-
-      <FormField
-        id='card_name'
-        label='CARD NAME'
-        error={fieldErrors.card_name}
-
-        labelClassName={entityFormLabelClass}
-      >
-        <Input
-          id='card_name'
-          name='card_name'
-          placeholder='e.g. Personal Visa'
-          onChange={() => validateFields(['card_name'])}
-          className={cn(
-            entityFormControlClass,
-            fieldErrors.card_name && 'border-destructive focus-visible:ring-destructive',
-          )}
-          aria-invalid={Boolean(fieldErrors.card_name)}
-          minLength={2}
-          maxLength={80}
-          defaultValue={values.cardName}
+        <EntityModeToggleCardGroup
+          name='card_type'
+          value={selectedCardType}
           required
+          onValueChange={(value) => {
+            setSelectedCardType(value === 'debit' ? 'debit' : 'credit');
+            validateFields(['card_type', 'credit_limit']);
+          }}
+          options={[
+            {
+              value: 'credit',
+              title: fieldMeta.card_type.options?.[0]?.title ?? 'Credit',
+              subtitle: fieldMeta.card_type.options?.[0]?.subtitle ?? 'Pay later billing cycle',
+              icon: <CreditCard className='h-4 w-4' />,
+            },
+            {
+              value: 'debit',
+              title: fieldMeta.card_type.options?.[1]?.title ?? 'Debit',
+              subtitle:
+                fieldMeta.card_type.options?.[1]?.subtitle ?? 'Instant balance deduction',
+              icon: <Landmark className='h-4 w-4' />,
+            },
+          ]}
         />
       </FormField>
 
+      {selectedCardType === 'credit' ? (
+        <EntityInputField
+          id='credit_limit'
+          label={fieldMeta.credit_limit.label}
+          error={fieldErrors.credit_limit}
+          labelClassName={entityFormLabelClass}
+          hint={fieldMeta.credit_limit.hint}
+          inputProps={{
+            name: 'credit_limit',
+            placeholder: fieldMeta.credit_limit.placeholder,
+            onChange: () => validateFields(['credit_limit']),
+            inputMode: fieldMeta.credit_limit.inputMode,
+            defaultValue: values.creditLimit,
+            required: fieldMeta.credit_limit.required,
+          }}
+        />
+      ) : null}
+
+      <EntityInputField
+        id='card_name'
+        label={fieldMeta.card_name.label}
+        error={fieldErrors.card_name}
+        labelClassName={entityFormLabelClass}
+        inputProps={{
+          name: 'card_name',
+          placeholder: fieldMeta.card_name.placeholder,
+          onChange: () => validateFields(['card_name']),
+          minLength: 2,
+          maxLength: fieldMeta.card_name.maxLength,
+          defaultValue: values.cardName,
+          required: fieldMeta.card_name.required,
+        }}
+      />
+
       <FormField
         id='tags'
-        label='TAGS'
+        label={fieldMeta.tags.label}
         error={fieldErrors.tags}
-
         labelClassName={entityFormLabelClass}
-        hint='Optional: type comma-separated tags, use autocomplete, or pick from dropdown.'
+        hint={fieldMeta.tags.hint}
       >
         <div className='space-y-2'>
           <Input
             id='tags'
             name='tags'
             list='card-tag-suggestions'
-            placeholder='e.g. travel, family, recurring'
+            placeholder={fieldMeta.tags.placeholder}
             value={tagsValue}
             onChange={(event) => {
               setTagsValue(event.target.value);
@@ -510,7 +407,7 @@ export function CardForm({
               fieldErrors.tags && 'border-destructive focus-visible:ring-destructive',
             )}
             aria-invalid={Boolean(fieldErrors.tags)}
-            maxLength={220}
+            maxLength={fieldMeta.tags.maxLength}
             autoComplete='off'
           />
           <datalist id='card-tag-suggestions'>
@@ -531,9 +428,8 @@ export function CardForm({
       </FormField>
       <FormField
         id='number'
-        label='CARD NUMBER'
+        label={fieldMeta.number.label}
         error={fieldErrors.number}
-
         labelClassName={entityFormLabelClass}
       >
         <div className='space-y-1.5'>
@@ -568,10 +464,10 @@ export function CardForm({
 
       <FormField
         id='color'
-        label='Color'
+        label={fieldMeta.color.label}
         className={cn('min-w-0', entityFormSectionCardClass, 'sm:col-span-2')}
         labelClassName={entityFormLabelClass}
-        hint='Pick a color theme for quick visual identification.'
+        hint={fieldMeta.color.hint}
       >
         <div className='w-full max-w-full overflow-x-auto overscroll-x-contain py-1 pl-1'>
           <div className='flex min-w-max flex-nowrap items-center gap-2 pr-1'>
@@ -606,10 +502,10 @@ export function CardForm({
 
       <FormField
         id='pattern'
-        label='Pattern'
+        label={fieldMeta.pattern.label}
         className={cn(entityFormSectionCardClass, 'sm:col-span-2')}
         labelClassName={entityFormLabelClass}
-        hint='Choose a texture overlay or randomize for variety.'
+        hint={fieldMeta.pattern.hint}
       >
         <div className='space-y-2'>
           <div className='grid grid-cols-3 gap-2 sm:grid-cols-6'>
@@ -652,109 +548,46 @@ export function CardForm({
         </div>
       </FormField>
 
-      <FormField
+      <EntityAutocompleteField
         id='provider'
-        label='PROVIDER'
+        label={fieldMeta.provider.label}
         error={fieldErrors.provider}
-
         labelClassName={entityFormLabelClass}
-        hint='Optional: type to search or add a new issuer.'
-      >
-        <div className='relative space-y-2'>
-          <Input
-            id='provider'
-            name='provider'
-            placeholder='e.g. HBL'
-            value={providerValue}
-            onFocus={() => setShowProviderSuggestions(true)}
-            onBlur={() => {
-              window.setTimeout(() => setShowProviderSuggestions(false), 120);
-            }}
-            onChange={(event) => {
-              setProviderValue(event.target.value);
-              setShowProviderSuggestions(true);
-              validateFields(['provider']);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' && canAddProviderOption) {
-                event.preventDefault();
-                handleProviderOptionSelect(providerValue, true);
-              }
-            }}
-            className={cn(
-              entityFormControlClass,
-              fieldErrors.provider && 'border-destructive focus-visible:ring-destructive',
-            )}
-            aria-invalid={Boolean(fieldErrors.provider)}
-            maxLength={50}
-            autoComplete='off'
-          />
-          {showProviderSuggestions ? (
-            <div className='absolute z-40 mt-1 max-h-56 w-full overflow-y-auto rounded-md border border-border/70 bg-popover p-1 shadow-md'>
-              {canAddProviderOption ? (
-                <button
-                  type='button'
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => handleProviderOptionSelect(providerValue, true)}
-                  className='flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-left text-sm transition-colors hover:bg-accent'
-                >
-                  <span>Add "{providerValue.trim()}"</span>
-                  <span className='text-xs text-text-subtle'>new</span>
-                </button>
-              ) : null}
-              {filteredProviderOptions.map((providerOption) => (
-                <button
-                  key={providerOption}
-                  type='button'
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => handleProviderOptionSelect(providerOption)}
-                  className={cn(
-                    'flex w-full items-center rounded-sm px-2 py-1.5 text-left text-sm transition-colors hover:bg-accent',
-                    providerValue.trim().toLowerCase() === providerOption.toLowerCase() &&
-                    'bg-accent',
-                  )}
-                >
-                  {providerOption}
-                </button>
-              ))}
-              {filteredProviderOptions.length === 0 && !canAddProviderOption ? (
-                <p className='px-2 py-1.5 text-sm text-text-subtle'>No matching providers</p>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-      </FormField>
+        hint={fieldMeta.provider.hint}
+        name='provider'
+        value={providerValue}
+        onValueChange={(nextValue) => {
+          setProviderValue(nextValue);
+          validateFields(['provider']);
+        }}
+        options={providerOptions}
+        placeholder={fieldMeta.provider.placeholder}
+        maxLength={fieldMeta.provider.maxLength}
+        normalizeInput={normalizeProvider}
+        onSelectOption={(option, details) => handleProviderOptionSelect(option, details.isNew)}
+      />
 
-      <FormField
+      <EntityInputField
         id='holder_name'
-        label='HOLDER NAME'
+        label={fieldMeta.holder_name.label}
         error={fieldErrors.holder_name}
-
         labelClassName={entityFormLabelClass}
-      >
-        <Input
-          id='holder_name'
-          name='holder_name'
-          placeholder='As printed on card'
-          onChange={() => validateFields(['holder_name'])}
-          className={cn(
-            entityFormControlClass,
-            fieldErrors.holder_name && 'border-destructive focus-visible:ring-destructive',
-          )}
-          aria-invalid={Boolean(fieldErrors.holder_name)}
-          autoComplete='cc-name'
-          minLength={2}
-          maxLength={80}
-          defaultValue={values.holderName}
-          required
-        />
-      </FormField>
+        inputProps={{
+          name: 'holder_name',
+          placeholder: fieldMeta.holder_name.placeholder,
+          onChange: () => validateFields(['holder_name']),
+          autoComplete: 'cc-name',
+          minLength: 2,
+          maxLength: fieldMeta.holder_name.maxLength,
+          defaultValue: values.holderName,
+          required: fieldMeta.holder_name.required,
+        }}
+      />
 
       <FormField
         id='expiry_month'
-        label='EXPIRY MONTH'
+        label={fieldMeta.expiry_month.label}
         error={fieldErrors.expiry_month}
-
         labelClassName={entityFormLabelClass}
       >
         <>
@@ -767,7 +600,7 @@ export function CardForm({
             }}
             required
             ariaInvalid={Boolean(fieldErrors.expiry_month)}
-            placeholder='Select month'
+            placeholder={fieldMeta.expiry_month.placeholder ?? 'Select month'}
             triggerClassName={cn(
               entityFormSelectClass,
               fieldErrors.expiry_month && 'border-destructive focus-visible:ring-destructive',
@@ -777,91 +610,66 @@ export function CardForm({
         </>
       </FormField>
 
-      <FormField
+      <EntityInputField
         id='expiry_year'
-        label='EXPIRY YEAR'
+        label={fieldMeta.expiry_year.label}
         error={fieldErrors.expiry_year}
-
         labelClassName={entityFormLabelClass}
-      >
-        <Input
-          id='expiry_year'
-          name='expiry_year'
-          placeholder='YYYY'
-          onChange={() => validateFields(['expiry_year'])}
-          className={cn(
-            entityFormControlClass,
-            fieldErrors.expiry_year && 'border-destructive focus-visible:ring-destructive',
-          )}
-          aria-invalid={Boolean(fieldErrors.expiry_year)}
-          inputMode='numeric'
-          pattern='[0-9]{4}'
-          minLength={4}
-          maxLength={4}
-          defaultValue={values.expiryYear}
-          required
-        />
-      </FormField>
+        inputProps={{
+          name: 'expiry_year',
+          placeholder: fieldMeta.expiry_year.placeholder,
+          onChange: () => validateFields(['expiry_year']),
+          inputMode: fieldMeta.expiry_year.inputMode,
+          pattern: '[0-9]{4}',
+          minLength: 4,
+          maxLength: fieldMeta.expiry_year.maxLength,
+          defaultValue: values.expiryYear,
+          required: fieldMeta.expiry_year.required,
+        }}
+      />
 
-      <FormField
+      <EntityInputField
         id='billing_date'
-        label='BILLING DATE'
+        label={fieldMeta.billing_date.label}
         error={fieldErrors.billing_date}
-
         labelClassName={entityFormLabelClass}
-        hint='Optional day of month (1-31) when statement is generated.'
-      >
-        <Input
-          id='billing_date'
-          name='billing_date'
-          placeholder='e.g. 5'
-          onChange={() => validateFields(['billing_date'])}
-          className={cn(
-            entityFormControlClass,
-            fieldErrors.billing_date && 'border-destructive focus-visible:ring-destructive',
-          )}
-          aria-invalid={Boolean(fieldErrors.billing_date)}
-          inputMode='numeric'
-          pattern='[0-9]{1,2}'
-          min={1}
-          max={31}
-          defaultValue={values.billingDate}
-        />
-      </FormField>
+        hint={fieldMeta.billing_date.hint}
+        inputProps={{
+          name: 'billing_date',
+          placeholder: fieldMeta.billing_date.placeholder,
+          onChange: () => validateFields(['billing_date']),
+          inputMode: fieldMeta.billing_date.inputMode,
+          pattern: '[0-9]{1,2}',
+          min: 1,
+          max: 31,
+          defaultValue: values.billingDate,
+        }}
+      />
 
-      <FormField
+      <EntityInputField
         id='payment_date'
-        label='PAYMENT DATE'
+        label={fieldMeta.payment_date.label}
         error={fieldErrors.payment_date}
-
         labelClassName={entityFormLabelClass}
-        hint='Optional day of month (1-31) when payment is due.'
-      >
-        <Input
-          id='payment_date'
-          name='payment_date'
-          placeholder='e.g. 20'
-          onChange={() => validateFields(['payment_date'])}
-          className={cn(
-            entityFormControlClass,
-            fieldErrors.payment_date && 'border-destructive focus-visible:ring-destructive',
-          )}
-          aria-invalid={Boolean(fieldErrors.payment_date)}
-          inputMode='numeric'
-          pattern='[0-9]{1,2}'
-          min={1}
-          max={31}
-          defaultValue={values.paymentDate}
-        />
-      </FormField>
+        hint={fieldMeta.payment_date.hint}
+        inputProps={{
+          name: 'payment_date',
+          placeholder: fieldMeta.payment_date.placeholder,
+          onChange: () => validateFields(['payment_date']),
+          inputMode: fieldMeta.payment_date.inputMode,
+          pattern: '[0-9]{1,2}',
+          min: 1,
+          max: 31,
+          defaultValue: values.paymentDate,
+        }}
+      />
 
       <FormField
         id='network'
-        label='NETWORK'
+        label={fieldMeta.network.label}
         error={fieldErrors.network}
-
         labelClassName={entityFormLabelClass}
-        hint='Selecting network improves card number and CVV validation accuracy.'
+        hint={fieldMeta.network.hint}
       >
         <>
           <input type='hidden' id='network' name='network' value={selectedNetwork} />
@@ -873,7 +681,7 @@ export function CardForm({
             }}
             required
             ariaInvalid={Boolean(fieldErrors.network)}
-            placeholder='Select network'
+            placeholder={fieldMeta.network.placeholder ?? 'Select network'}
             triggerClassName={cn(
               entityFormSelectClass,
               fieldErrors.network && 'border-destructive focus-visible:ring-destructive',
@@ -888,9 +696,8 @@ export function CardForm({
 
       <FormField
         id='cvv'
-        label='CVV'
+        label={fieldMeta.cvv.label}
         error={fieldErrors.cvv}
-
         labelClassName={entityFormLabelClass}
         hint={`Enter the ${cvvLength}-digit security code.`}
       >

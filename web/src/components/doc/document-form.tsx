@@ -1,27 +1,24 @@
 'use client';
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { CalendarIcon, Plus, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
+import {
+  EntityDatePickerField,
+  EntityInputField,
+  EntityTextareaField,
+  EntityCustomFieldsEditor,
+  EntityTypeSelectField,
+  type EntityCustomFieldItem,
+} from '@/components/shared/entity-form-kit';
 import { FormActions } from '@/components/ui/form-actions';
 import { FormField } from '@/components/ui/form-field';
-import { Input } from '@/components/ui/input';
 import {
   entityFormActionsDividerClass,
-  entityFormControlClass,
-  entityFormDateButtonClass,
   entityFormGridClass,
   entityFormLabelClass,
-  entityFormSelectClass,
-  entityFormTextareaClass,
 } from '@/components/shared/entity-form-ui';
-import { AppSelectField } from '@/components/shared/app-select-field';
 import { submitEntityForm } from '@/components/shared/entity-form-submit';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Textarea } from '@/components/ui/textarea';
 import { isDocumentCategory } from '@/constants/document/categories';
 import { DOCUMENT_CATEGORY_OPTIONS } from '@/constants/document/categories';
 import { DOCUMENT_TYPE_OPTIONS, getDocumentTypeConfig } from '@/constants/document/types';
@@ -30,6 +27,7 @@ import {
   type DocumentFormFieldErrors,
   type DocumentFormPayload,
 } from '@/models/document';
+import { useEntityFormFieldMetadata } from '@/hooks/use-entity-form-field-metadata';
 import { cn } from '@/lib/utils';
 import { validateDocumentFormFields } from '@/utils/document/validation';
 
@@ -45,11 +43,7 @@ type DocumentFormValues = {
   otherDetails: string;
 };
 
-type DocumentCustomFieldInput = {
-  id: string;
-  key: string;
-  value: string;
-};
+type DocumentCustomFieldInput = EntityCustomFieldItem;
 
 type DocumentFormInitialValues = Partial<DocumentFormValues> & {
   customFields?: Array<{
@@ -107,6 +101,7 @@ export function DocumentForm({
   validateIdentityFields = true,
   onSubmit,
 }: DocumentFormProps) {
+  const fieldMeta = useEntityFormFieldMetadata('document');
   const [values, setValues] = useState<DocumentFormValues>({
     type: initialValues?.type ?? '',
     category: initialValues?.category ?? 'other',
@@ -198,386 +193,209 @@ export function DocumentForm({
         aria-hidden='true'
         className='pointer-events-none absolute -bottom-24 left-1/3 h-52 w-52 rounded-full bg-info/12 blur-3xl'
       />
-      <FormField
+      <EntityTypeSelectField
         id='doc-type'
-        label='Document type'
+        label={fieldMeta.type.label}
         error={fieldErrors.type}
-
         labelClassName={entityFormLabelClass}
-      >
-        <AppSelectField
-          id='doc-type'
-          disabled={lockTypeField}
-          value={values.type}
-          onValueChange={(value) => {
-            setValues((prev) => ({
-              ...prev,
-              type: value,
-              number: '',
-              category:
-                value === DocumentTypeCode.OTHERS
-                  ? isDocumentCategory(prev.category)
-                    ? ''
-                    : prev.category
-                  : isDocumentCategory(prev.category)
-                    ? prev.category
-                    : 'other',
-            }));
-            setFieldErrors((prev) => ({
-              ...prev,
-              type: undefined,
-              number: undefined,
-              category: undefined,
-            }));
-          }}
-          placeholder='Select document type'
-          triggerClassName={cn(entityFormSelectClass, fieldErrors.type && 'border-destructive')}
-          options={DOCUMENT_TYPE_OPTIONS.map((item) => ({ value: item.code, label: item.label }))}
-        />
-      </FormField>
+        disabled={lockTypeField}
+        value={values.type}
+        onValueChange={(value) => {
+          setValues((prev) => ({
+            ...prev,
+            type: value,
+            number: '',
+            category:
+              value === DocumentTypeCode.OTHERS
+                ? isDocumentCategory(prev.category)
+                  ? ''
+                  : prev.category
+                : isDocumentCategory(prev.category)
+                  ? prev.category
+                  : 'other',
+          }));
+          setFieldErrors((prev) => ({
+            ...prev,
+            type: undefined,
+            number: undefined,
+            category: undefined,
+          }));
+        }}
+        placeholder={fieldMeta.type.placeholder ?? 'Select document type'}
+        options={DOCUMENT_TYPE_OPTIONS.map((item) => ({ value: item.code, label: item.label }))}
+      />
 
       {values.type === DocumentTypeCode.OTHERS ? (
-        <FormField
+        <EntityInputField
           id='doc-custom-label'
-          label='Custom label'
-          hint='This label will be shown instead of Others in your vault.'
+          label={fieldMeta.customLabel.label}
+          hint={fieldMeta.customLabel.hint}
           error={fieldErrors.category}
-
           labelClassName={entityFormLabelClass}
-        >
-          <Input
-            id='doc-custom-label'
-            value={values.category}
-            onChange={(event) => {
+          inputProps={{
+            value: values.category,
+            onChange: (event) => {
               setValues((prev) => ({ ...prev, category: event.target.value }));
               setFieldErrors((prev) => ({ ...prev, category: undefined }));
-            }}
-            placeholder='e.g. Employee ID'
-            className={cn(
-              entityFormControlClass,
-              fieldErrors.category && 'border-destructive focus-visible:ring-destructive',
-            )}
-            aria-invalid={Boolean(fieldErrors.category)}
-            maxLength={60}
-            required
-          />
-        </FormField>
+            },
+            placeholder: fieldMeta.customLabel.placeholder,
+            maxLength: fieldMeta.customLabel.maxLength,
+            required: fieldMeta.customLabel.required,
+          }}
+        />
       ) : null}
 
       {values.type !== DocumentTypeCode.OTHERS ? (
-        <FormField
+        <EntityTypeSelectField
           id='doc-category'
-          label='Category'
+          label={fieldMeta.category.label}
           error={fieldErrors.category}
-
           labelClassName={entityFormLabelClass}
-        >
-          <AppSelectField
-            id='doc-category'
-            value={values.category}
-            onValueChange={(value) => {
-              setValues((prev) => ({ ...prev, category: value }));
-              setFieldErrors((prev) => ({ ...prev, category: undefined }));
-            }}
-            placeholder='Select category'
-            triggerClassName={cn(
-              entityFormSelectClass,
-              fieldErrors.category && 'border-destructive',
-            )}
-            options={DOCUMENT_CATEGORY_OPTIONS.map((item) => ({
-              value: item.value,
-              label: item.label,
-            }))}
-          />
-        </FormField>
+          value={values.category}
+          onValueChange={(value) => {
+            setValues((prev) => ({ ...prev, category: value }));
+            setFieldErrors((prev) => ({ ...prev, category: undefined }));
+          }}
+          placeholder={fieldMeta.category.placeholder ?? 'Select category'}
+          options={DOCUMENT_CATEGORY_OPTIONS.map((item) => ({
+            value: item.value,
+            label: item.label,
+          }))}
+        />
       ) : null}
 
-      <FormField
+      <EntityInputField
         id='doc-number'
-        label='Document number'
+        label={fieldMeta.number.label}
         hint={typeConfig?.hint ?? 'Choose a type to see validation hint'}
         error={fieldErrors.number}
-
         labelClassName={entityFormLabelClass}
-      >
-        <Input
-          id='doc-number'
-          value={values.number}
-          onChange={(event) => {
+        inputProps={{
+          value: values.number,
+          onChange: (event) => {
             const nextValue = event.target.value;
             setValues((prev) => ({ ...prev, number: nextValue }));
             setFieldErrors((prev) => ({ ...prev, number: undefined }));
-          }}
-          placeholder={typeConfig?.placeholder ?? 'Enter document number'}
-          className={cn(
-            entityFormControlClass,
-            fieldErrors.number && 'border-destructive focus-visible:ring-destructive',
-          )}
-          aria-invalid={Boolean(fieldErrors.number)}
-          autoCapitalize='characters'
-          disabled={lockNumberField}
-          required={validateIdentityFields && !lockNumberField}
-        />
-      </FormField>
+          },
+          placeholder: typeConfig?.placeholder ?? fieldMeta.number.placeholder,
+          autoCapitalize: 'characters',
+          disabled: lockNumberField,
+          required: validateIdentityFields && !lockNumberField,
+        }}
+      />
 
-      <FormField
+      <EntityInputField
         id='doc-name'
-        label='Name on document (optional)'
+        label={fieldMeta.nameOnDocument.label}
         error={fieldErrors.nameOnDocument}
-
         labelClassName={entityFormLabelClass}
-      >
-        <Input
-          id='doc-name'
-          value={values.nameOnDocument}
-          onChange={(event) => {
+        inputProps={{
+          value: values.nameOnDocument,
+          onChange: (event) => {
             setValues((prev) => ({ ...prev, nameOnDocument: event.target.value }));
             setFieldErrors((prev) => ({ ...prev, nameOnDocument: undefined }));
-          }}
-          placeholder='As printed on document'
-          className={cn(
-            entityFormControlClass,
-            fieldErrors.nameOnDocument && 'border-destructive focus-visible:ring-destructive',
-          )}
-          aria-invalid={Boolean(fieldErrors.nameOnDocument)}
-          maxLength={120}
-        />
-      </FormField>
+          },
+          placeholder: fieldMeta.nameOnDocument.placeholder,
+          maxLength: fieldMeta.nameOnDocument.maxLength,
+        }}
+      />
 
-      <FormField
+      <EntityDatePickerField
         id='doc-issued-date'
-        label='Issued date (optional)'
+        label={fieldMeta.issuedDate.label}
         error={fieldErrors.issuedDate}
-
         labelClassName={entityFormLabelClass}
-      >
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              id='doc-issued-date'
-              type='button'
-              variant='outline'
-              className={cn(
-                entityFormDateButtonClass,
-                !issuedDateValue && 'text-text-subtle',
-                fieldErrors.issuedDate && 'border-destructive',
-              )}
-              aria-invalid={Boolean(fieldErrors.issuedDate)}
-            >
-              <CalendarIcon className='mr-2 h-4 w-4' />
-              {issuedDateValue ? format(issuedDateValue, 'PPP') : 'Select issued date'}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className='w-auto p-0' align='start'>
-            <Calendar
-              mode='single'
-              selected={issuedDateValue}
-              onSelect={(date) => {
-                setValues((prev) => ({
-                  ...prev,
-                  issuedDate: date ? format(date, 'yyyy-MM-dd') : '',
-                }));
-                setFieldErrors((prev) => ({ ...prev, issuedDate: undefined }));
-              }}
-            />
-          </PopoverContent>
-        </Popover>
-      </FormField>
+        value={issuedDateValue}
+        placeholder={fieldMeta.issuedDate.placeholder ?? 'Select issued date'}
+        onSelect={(date) => {
+          setValues((prev) => ({
+            ...prev,
+            issuedDate: date ? format(date, 'yyyy-MM-dd') : '',
+          }));
+          setFieldErrors((prev) => ({ ...prev, issuedDate: undefined }));
+        }}
+      />
 
-      <FormField
+      <EntityDatePickerField
         id='doc-expiry-date'
-        label='Expiry date (optional)'
+        label={fieldMeta.expiryDate.label}
         error={fieldErrors.expiryDate}
-
         labelClassName={entityFormLabelClass}
-      >
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              id='doc-expiry-date'
-              type='button'
-              variant='outline'
-              className={cn(
-                entityFormDateButtonClass,
-                !expiryDateValue && 'text-text-subtle',
-                fieldErrors.expiryDate && 'border-destructive',
-              )}
-              aria-invalid={Boolean(fieldErrors.expiryDate)}
-            >
-              <CalendarIcon className='mr-2 h-4 w-4' />
-              {expiryDateValue ? format(expiryDateValue, 'PPP') : 'Select expiry date'}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className='w-auto p-0' align='start'>
-            <Calendar
-              mode='single'
-              selected={expiryDateValue}
-              onSelect={(date) => {
-                setValues((prev) => ({
-                  ...prev,
-                  expiryDate: date ? format(date, 'yyyy-MM-dd') : '',
-                }));
-                setFieldErrors((prev) => ({ ...prev, expiryDate: undefined }));
-              }}
-            />
-          </PopoverContent>
-        </Popover>
-      </FormField>
+        value={expiryDateValue}
+        placeholder={fieldMeta.expiryDate.placeholder ?? 'Select expiry date'}
+        onSelect={(date) => {
+          setValues((prev) => ({
+            ...prev,
+            expiryDate: date ? format(date, 'yyyy-MM-dd') : '',
+          }));
+          setFieldErrors((prev) => ({ ...prev, expiryDate: undefined }));
+        }}
+      />
 
-      <FormField
+      <EntityInputField
         id='doc-guardian'
-        label='Guardian name (optional)'
+        label={fieldMeta.guardianName.label}
         error={fieldErrors.guardianName}
-
         labelClassName={entityFormLabelClass}
-      >
-        <Input
-          id='doc-guardian'
-          value={values.guardianName}
-          onChange={(event) => {
+        inputProps={{
+          value: values.guardianName,
+          onChange: (event) => {
             setValues((prev) => ({ ...prev, guardianName: event.target.value }));
             setFieldErrors((prev) => ({ ...prev, guardianName: undefined }));
-          }}
-          placeholder='Father / Mother / Guardian'
-          className={cn(
-            entityFormControlClass,
-            fieldErrors.guardianName && 'border-destructive focus-visible:ring-destructive',
-          )}
-          aria-invalid={Boolean(fieldErrors.guardianName)}
-          maxLength={120}
-        />
-      </FormField>
+          },
+          placeholder: fieldMeta.guardianName.placeholder,
+          maxLength: fieldMeta.guardianName.maxLength,
+        }}
+      />
 
-      <FormField
+      <EntityInputField
         id='doc-address'
-        label='Address (optional)'
+        label={fieldMeta.address.label}
         error={fieldErrors.address}
         className='sm:col-span-2'
         labelClassName={entityFormLabelClass}
-      >
-        <Input
-          id='doc-address'
-          value={values.address}
-          onChange={(event) => {
+        inputProps={{
+          value: values.address,
+          onChange: (event) => {
             setValues((prev) => ({ ...prev, address: event.target.value }));
             setFieldErrors((prev) => ({ ...prev, address: undefined }));
-          }}
-          placeholder='Current address'
-          className={cn(
-            entityFormControlClass,
-            fieldErrors.address && 'border-destructive focus-visible:ring-destructive',
-          )}
-          aria-invalid={Boolean(fieldErrors.address)}
-          maxLength={240}
-        />
-      </FormField>
+          },
+          placeholder: fieldMeta.address.placeholder,
+          maxLength: fieldMeta.address.maxLength,
+        }}
+      />
 
-      <FormField
+      <EntityTextareaField
         id='doc-other-details'
-        label='Other details (optional)'
+        label={fieldMeta.otherDetails.label}
         error={fieldErrors.otherDetails}
         className='sm:col-span-2'
         labelClassName={entityFormLabelClass}
-      >
-        <Textarea
-          id='doc-other-details'
-          value={values.otherDetails}
-          onChange={(event) => {
+        textareaProps={{
+          value: values.otherDetails,
+          onChange: (event) => {
             setValues((prev) => ({ ...prev, otherDetails: event.target.value }));
             setFieldErrors((prev) => ({ ...prev, otherDetails: undefined }));
-          }}
-          placeholder='Any additional notes'
-          className={cn(
-            entityFormTextareaClass,
-            fieldErrors.otherDetails && 'border-destructive focus-visible:ring-destructive',
-          )}
-          aria-invalid={Boolean(fieldErrors.otherDetails)}
-          maxLength={500}
-        />
-      </FormField>
+          },
+          placeholder: fieldMeta.otherDetails.placeholder,
+          maxLength: fieldMeta.otherDetails.maxLength,
+        }}
+      />
 
       <FormField
         id='doc-custom-fields'
-        label='Custom fields (optional)'
-        hint='Add your own key/value metadata entries for this document.'
+        label={fieldMeta.customFields.label}
+        hint={fieldMeta.customFields.hint}
         error={fieldErrors.customFields}
         className='sm:col-span-2'
         labelClassName={entityFormLabelClass}
       >
-        <div className='space-y-3'>
-          {customFields.length === 0 ? (
-            <p className='text-xs text-text-subtle'>No custom fields added yet.</p>
-          ) : (
-            customFields.map((item, index) => (
-              <div
-                key={item.id}
-                className='grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_40px]'
-              >
-                <Input
-                  id={`doc-custom-key-${item.id}`}
-                  value={item.key}
-                  onChange={(event) => {
-                    const nextValue = event.target.value;
-                    setCustomFields((prev) =>
-                      prev.map((field) =>
-                        field.id === item.id ? { ...field, key: nextValue } : field,
-                      ),
-                    );
-                    setFieldErrors((prev) => ({ ...prev, customFields: undefined }));
-                  }}
-                  placeholder={`Field name ${index + 1}`}
-                  className={entityFormControlClass}
-                  maxLength={60}
-                />
-                <Input
-                  id={`doc-custom-value-${item.id}`}
-                  value={item.value}
-                  onChange={(event) => {
-                    const nextValue = event.target.value;
-                    setCustomFields((prev) =>
-                      prev.map((field) =>
-                        field.id === item.id ? { ...field, value: nextValue } : field,
-                      ),
-                    );
-                    setFieldErrors((prev) => ({ ...prev, customFields: undefined }));
-                  }}
-                  placeholder={`Field value ${index + 1}`}
-                  className={entityFormControlClass}
-                  maxLength={240}
-                />
-                <Button
-                  type='button'
-                  variant='ghost'
-                  size='icon'
-                  className='h-10 w-10 rounded-xl text-text-subtle hover:text-destructive'
-                  onClick={() => {
-                    setCustomFields((prev) => prev.filter((field) => field.id !== item.id));
-                    setFieldErrors((prev) => ({ ...prev, customFields: undefined }));
-                  }}
-                  aria-label={`Remove custom field ${index + 1}`}
-                >
-                  <Trash2 className='h-4 w-4' />
-                </Button>
-              </div>
-            ))
-          )}
-
-          <Button
-            type='button'
-            variant='outline'
-            className='h-10 rounded-xl'
-            onClick={() => {
-              setCustomFields((prev) => [
-                ...prev,
-                { id: createCustomFieldId(), key: '', value: '' },
-              ]);
-              setFieldErrors((prev) => ({ ...prev, customFields: undefined }));
-            }}
-          >
-            <Plus className='mr-2 h-4 w-4' />
-            Add custom field
-          </Button>
-        </div>
+        <EntityCustomFieldsEditor
+          fields={customFields}
+          createId={createCustomFieldId}
+          onChange={setCustomFields}
+          onTouched={() => setFieldErrors((prev) => ({ ...prev, customFields: undefined }))}
+        />
       </FormField>
 
       <div className={entityFormActionsDividerClass}>

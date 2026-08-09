@@ -1,3 +1,5 @@
+import { normalizeTrimmedText } from '@/app/api/shared/payload-utils';
+
 export function getNextOccurrenceFromDay(day: number, now: Date) {
   if (!Number.isInteger(day) || day < 1 || day > 31) return null;
 
@@ -27,6 +29,64 @@ type BillingCardItem = {
   nextBillingDate: string;
   href: string;
 };
+
+type ExpiringCardSource = {
+  id: bigint | number | string;
+  card_name: string | null;
+  status: string | null;
+  expiry_month: number | null;
+  expiry_year: number | null;
+};
+
+type ExpiringCardItem = {
+  id: string;
+  name: string;
+  status: string;
+  expiryDate: string;
+  daysLeft: number;
+  href: string;
+};
+
+export type FavoriteRow = {
+  feature_key: string;
+};
+
+export function normalizeFavoriteKey(value: unknown) {
+  return normalizeTrimmedText(value, 160);
+}
+
+export function createFavoriteKeySet(rows: FavoriteRow[]) {
+  return new Set(rows.map((row) => String(row.feature_key)));
+}
+
+export function getCardExpiryDate(expiryYear: number | null, expiryMonth: number | null) {
+  if (!expiryYear || !expiryMonth) return null;
+  return new Date(Number(expiryYear), Number(expiryMonth), 0);
+}
+
+export function getDaysLeft(targetDate: Date, now: Date) {
+  const msPerDay = 1000 * 60 * 60 * 24;
+  return Math.max(0, Math.ceil((targetDate.getTime() - now.getTime()) / msPerDay));
+}
+
+export function buildExpiringCards(cards: ExpiringCardSource[], now: Date, soonCutoff: Date) {
+  return cards
+    .map((card) => {
+      const expiryDate = getCardExpiryDate(card.expiry_year, card.expiry_month);
+      if (!expiryDate || expiryDate < now || expiryDate > soonCutoff) return null;
+
+      return {
+        id: String(card.id),
+        name: card.card_name || `Card ${String(card.id)}`,
+        status: String(card.status ?? 'active').toLowerCase(),
+        expiryDate: expiryDate.toISOString(),
+        daysLeft: getDaysLeft(expiryDate, now),
+        href: `/card/${String(card.id)}`,
+      };
+    })
+    .filter((item): item is ExpiringCardItem => Boolean(item))
+    .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime());
+}
 
 export function buildRecentBillingCards(cards: BillingCardSource[], now: Date, limit: number) {
   return cards

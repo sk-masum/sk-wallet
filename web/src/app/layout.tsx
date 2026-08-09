@@ -215,9 +215,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </Suspense>
           <AppToaster />
           <BiometricGuard>
-            <div className='min-h-screen app-aurora-shell'>
-              {children}
-            </div>
+            <div className='min-h-screen app-aurora-shell'>{children}</div>
           </BiometricGuard>
         </ThemeProvider>
       </body>

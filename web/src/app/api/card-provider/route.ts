@@ -1,24 +1,18 @@
 import { NextResponse } from 'next/server';
 
-import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
-import { getRequiredPrismaClient } from '@/lib/prisma';
+import { withUserRouteContext } from '@/app/api/shared/owned-route';
 
 export async function GET() {
-  const { user, unauthorizedResponse } = await getRouteSupabaseContext();
+  return withUserRouteContext(async ({ prisma }) => {
+    const data = await prisma.card_provider.findMany({
+      select: { name: true },
+      orderBy: { name: 'asc' },
+    });
 
-  if (unauthorizedResponse || !user) {
-    return unauthorizedResponse;
-  }
+    const names = Array.from(
+      new Set((data ?? []).map((item) => String(item.name ?? '').trim()).filter(Boolean)),
+    );
 
-  const prisma = getRequiredPrismaClient();
-  const data = await prisma.card_provider.findMany({
-    select: { name: true },
-    orderBy: { name: 'asc' },
+    return NextResponse.json({ data: names });
   });
-
-  const names = Array.from(
-    new Set((data ?? []).map((item) => String(item.name ?? '').trim()).filter(Boolean)),
-  );
-
-  return NextResponse.json({ data: names });
 }

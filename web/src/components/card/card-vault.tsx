@@ -118,7 +118,9 @@ export function CardVault({ initialCards, initialError }: CardVaultProps) {
 
   const activeFilterChips = [
     meta.hasTextQuery ? { key: 'query', label: 'Query', value: query } : null,
-    meta.hasTypeFilter ? { key: 'type', label: 'Type', value: selectedType, capitalize: true } : null,
+    meta.hasTypeFilter
+      ? { key: 'type', label: 'Type', value: selectedType, capitalize: true }
+      : null,
     meta.hasNetworkFilter ? { key: 'network', label: 'Network', value: selectedNetwork } : null,
     meta.hasProviderFilter ? { key: 'provider', label: 'Provider', value: selectedProvider } : null,
     meta.hasTagFilter ? { key: 'tag', label: 'Tag', value: selectedTag } : null,
@@ -127,10 +129,10 @@ export function CardVault({ initialCards, initialError }: CardVaultProps) {
       : null,
     meta.creditLimitFilterActive
       ? {
-        key: 'credit-limit',
-        label: 'Credit limit',
-        value: `${meta.selectedCreditLimitMin} - ${meta.selectedCreditLimitMax}`,
-      }
+          key: 'credit-limit',
+          label: 'Credit limit',
+          value: `${meta.selectedCreditLimitMin} - ${meta.selectedCreditLimitMax}`,
+        }
       : null,
     meta.hasBillingDateFilter
       ? { key: 'billing-date', label: 'Billing date', value: `Day ${selectedBillingDate}` }
@@ -143,15 +145,15 @@ export function CardVault({ initialCards, initialError }: CardVaultProps) {
       : null,
     meta.hasGrouping
       ? {
-        key: 'group',
-        label: 'Group',
-        value:
-          selectedGroup === 'provider'
-            ? 'Provider'
-            : selectedGroup === 'network'
-              ? 'Network'
-              : 'Tags',
-      }
+          key: 'group',
+          label: 'Group',
+          value:
+            selectedGroup === 'provider'
+              ? 'Provider'
+              : selectedGroup === 'network'
+                ? 'Network'
+                : 'Tags',
+        }
       : null,
   ].filter((chip): chip is NonNullable<typeof chip> => Boolean(chip));
 
