@@ -7,6 +7,9 @@ const baseConfig = {
   turbopack: {
     root: path.resolve(__dirname, '..'),
   },
+  async redirects() {
+    return [{ source: '/docs', destination: '/doc', permanent: true }];
+  },
   async headers() {
     return [
       {

@@ -276,10 +276,10 @@
 
 **Solutions:**
 
-1. Verify `NEXTAUTH_SECRET` is set
-2. Ensure `NEXTAUTH_URL` matches your domain
+1. Verify `NEXTAUTH_SECRET` is set for the Production environment and stays the same across redeployments.
+2. Ensure `NEXTAUTH_URL` matches the public HTTPS origin used to sign in. If `AUTH_URL` or `AUTH_SECRET` is set, it takes precedence over the corresponding `NEXTAUTH_` variable.
 3. Check browser cookie settings (not in private/incognito)
-4. Verify HTTPS is enabled
+4. After changing environment variables, redeploy and sign in again. On HTTPS, the sign-in response should set a `__Secure-authjs.session-token` cookie.
 
 ---
 
