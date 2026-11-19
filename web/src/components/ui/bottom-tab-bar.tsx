@@ -21,8 +21,8 @@ export function BottomTabBar({ addHref, addLabel = 'Add' }: BottomTabBarProps) {
       className='pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4'
     >
       <div className='pointer-events-auto flex items-center'>
-        <div className='relative flex w-fit max-w-full items-center justify-center gap-1.5 rounded-4xl border border-glass-border-strong bg-glass p-1.5 shadow-neu-raised-sm backdrop-blur-lg '>
-          <div className='pointer-events-none absolute inset-0 rounded-4xl bg-linear-to-b from-glass-overlay-strong via-transparent to-transparent dark:from-glass-overlay-soft' />
+        <div className='relative flex w-fit max-w-full items-center justify-center gap-1.5  p-1.5  '>
+          <div className='pointer-events-none absolute inset-0 rounded-4xl' />
 
           {BOTTOM_TABS.map((tab) => {
             const active = tab.match(pathname);
@@ -33,7 +33,7 @@ export function BottomTabBar({ addHref, addLabel = 'Add' }: BottomTabBarProps) {
                 key={tab.href}
                 href={tab.href}
                 className={cn(
-                  'relative inline-flex h-12 items-center justify-center rounded-full text-sm transition-colors',
+                  'relative inline-flex h-12 items-center justify-center rounded-full text-md transition-colors',
                   active
                     ? 'gap-2 px-4 border border-primary/45 bg-primary text-primary-foreground font-medium shadow-primary-card dark:border-primary/60 dark:bg-primary dark:text-primary-foreground dark:shadow-primary-card-dark'
                     : 'w-12 border border-glass-border-soft bg-glass text-text-subtle shadow-neu-raised-sm hover:bg-glass-strong ',
@@ -42,7 +42,7 @@ export function BottomTabBar({ addHref, addLabel = 'Add' }: BottomTabBarProps) {
                 aria-label={tab.label}
                 title={tab.label}
               >
-                <Icon className={cn('h-4 w-4', active && '-mr-0.5')} />
+                <Icon className={cn('h-7 w-7', active && '-mr-0.5')} />
                 {active ? tab.label : null}
               </Link>
             );
@@ -52,7 +52,7 @@ export function BottomTabBar({ addHref, addLabel = 'Add' }: BottomTabBarProps) {
         {addHref ? (
           <Link
             href={addHref}
-            className='group relative ml-3 inline-flex h-15 w-15 border border-glass-border-strong bg-glass p-1.5 shadow-neu-raised-sm backdrop-blur-lg items-center justify-center overflow-hidden rounded-4xl transition-all duration-200 hover:-translate-y-0.5 hover:from-primary/95 hover:to-primary hover:shadow-fab-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70'
+            className='group relative ml-3 inline-flex h-12 w-12 border border-glass-border-strong bg-glass p-0.5 shadow-neu-raised-sm backdrop-blur-lg items-center justify-center overflow-hidden rounded-4xl transition-all duration-200 hover:-translate-y-0.5 hover:from-primary/95 hover:to-primary hover:shadow-fab-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70'
             aria-label={addLabel}
             title={addLabel}
           >
