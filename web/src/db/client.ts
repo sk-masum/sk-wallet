@@ -1,5 +1,6 @@
-import { drizzle } from 'drizzle-orm/libsql';
-import { createClient } from '@libsql/client';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import Database from 'better-sqlite3';
+import path from 'path';
 import * as schema from './schema';
 
 declare global {
@@ -12,11 +13,16 @@ function createDrizzleClient() {
     throw new Error('DATABASE_URL is not configured');
   }
 
-  const client = createClient({
-    url: process.env.DATABASE_URL,
-  });
+  // Parse file:// URLs for SQLite
+  const dbPath = process.env.DATABASE_URL.replace('file:', '');
+  
+  // Resolve relative paths from the workspace root
+  const resolvedPath = dbPath.startsWith('/') 
+    ? dbPath 
+    : path.resolve(process.cwd(), dbPath);
 
-  return drizzle(client, { schema });
+  const sqlite = new Database(resolvedPath);
+  return drizzle(sqlite, { schema });
 }
 
 export function getDb() {

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { requestPersistentStorageOnFirstLogin } from '@/lib/biometric';
-import { signInWithEmailPassword } from '@/lib/supabase/browser-auth';
+import { signInWithEmailPassword } from '@/lib/auth-utils/browser-auth';
 
 export default function AuthPage() {
   const [nextPath, setNextPath] = useState('/');

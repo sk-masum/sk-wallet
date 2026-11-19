@@ -31,7 +31,7 @@ import {
   registerBiometricCredential,
   unlockBiometricVault,
 } from '@/lib/biometric';
-import { useBrowserUser, signOutBrowserSession } from '@/lib/supabase/browser-auth';
+import { useBrowserUser, signOutBrowserSession } from '@/lib/auth-utils/browser-auth';
 
 export default function SettingsPage() {
   const router = useRouter();

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { updateSession } from '@/lib/supabase/middleware';
+import { updateSession } from '@/lib/auth-utils/middleware';
 
 const PROTECTED_PREFIXES = ['/card', '/doc', '/credential', '/settings'];
 

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { getRequiredDb } from '@/db/client';
 import type { Db } from '@/db/client';
-import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
+import { getRouteSupabaseContext } from '@/lib/auth-utils/route-auth';
 
 export type OwnedRouteContext = {
   id: string;

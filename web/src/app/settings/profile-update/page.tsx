@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/ui/page-header';
-import { useBrowserUser, updateBrowserUser } from '@/lib/supabase/browser-auth';
+import { useBrowserUser, updateBrowserUser } from '@/lib/auth-utils/browser-auth';
 
 export default function ProfileUpdatePage() {
   const router = useRouter();
