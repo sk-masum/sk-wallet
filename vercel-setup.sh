@@ -21,7 +21,8 @@ NC='\033[0m' # No Color
 echo "Checking prerequisites..."
 
 if ! command -v vercel &> /dev/null; then
-    echo -e "${YELLOW}Warning: Vercel CLI not found. Install with: npm install -g vercel${NC}"
+    echo "Installing Vercel CLI globally..."
+    npm install -g vercel
 fi
 
 if ! command -v openssl &> /dev/null; then
@@ -97,7 +98,7 @@ echo ""
 # Check if already linked to Vercel
 if [ ! -d ".vercel" ]; then
     echo "Linking to Vercel..."
-    vercel link --yes
+    npx vercel link --yes 2>/dev/null || vercel link --yes
 else
     echo -e "${GREEN}✓ Already linked to Vercel${NC}"
 fi
@@ -108,16 +109,16 @@ echo ""
 
 # Set environment variables for all environments
 echo "Setting DATABASE_URL..."
-vercel env add DATABASE_URL < <(echo "$DATABASE_URL") --yes
+echo "$DATABASE_URL" | npx vercel env add DATABASE_URL --yes 2>/dev/null || echo "$DATABASE_URL" | vercel env add DATABASE_URL --yes
 
 echo "Setting NEXTAUTH_SECRET..."
-vercel env add NEXTAUTH_SECRET < <(echo "$NEXTAUTH_SECRET") --yes
+echo "$NEXTAUTH_SECRET" | npx vercel env add NEXTAUTH_SECRET --yes 2>/dev/null || echo "$NEXTAUTH_SECRET" | vercel env add NEXTAUTH_SECRET --yes
 
 echo "Setting NEXTAUTH_URL..."
-vercel env add NEXTAUTH_URL < <(echo "$NEXTAUTH_URL") --yes
+echo "$NEXTAUTH_URL" | npx vercel env add NEXTAUTH_URL --yes 2>/dev/null || echo "$NEXTAUTH_URL" | vercel env add NEXTAUTH_URL --yes
 
 echo "Setting CARD_TOKEN_SECRET..."
-vercel env add CARD_TOKEN_SECRET < <(echo "$CARD_TOKEN_SECRET") --yes
+echo "$CARD_TOKEN_SECRET" | npx vercel env add CARD_TOKEN_SECRET --yes 2>/dev/null || echo "$CARD_TOKEN_SECRET" | vercel env add CARD_TOKEN_SECRET --yes
 
 echo ""
 echo -e "${GREEN}✓ Environment variables set!${NC}"

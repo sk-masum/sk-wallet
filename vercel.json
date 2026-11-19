@@ -4,7 +4,6 @@
   "installCommand": "npm install",
   "buildCommand": "npm run vercel-build",
   "devCommand": "npm run vercel-dev",
-  "public": false,
   "env": [
     "DATABASE_URL",
     "NEXTAUTH_SECRET",

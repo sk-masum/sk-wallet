@@ -52,3 +52,4 @@ web/public/swe-worker*
 .nx/polygraph
 .claude/worktrees
 .claude/settings.local.json.env.local
+.env*
