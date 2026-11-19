@@ -4,20 +4,6 @@
   "installCommand": "npm install",
   "buildCommand": "npm run vercel-build",
   "devCommand": "npm run vercel-dev",
-  "env": {
-    "DATABASE_URL": {
-      "description": "Turso database connection string with auth token"
-    },
-    "NEXTAUTH_SECRET": {
-      "description": "NextAuth session encryption secret (32+ characters)"
-    },
-    "NEXTAUTH_URL": {
-      "description": "NextAuth URL - must match deployment domain"
-    },
-    "CARD_TOKEN_SECRET": {
-      "description": "Card tokenization secret (32+ characters)"
-    }
-  },
   "regions": ["sfo1"],
   "git": {
     "deploymentEnabled": {
