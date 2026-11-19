@@ -5,6 +5,7 @@ If the automated scripts don't work (e.g., Vercel CLI not available), follow the
 ## 🚀 Manual Deployment in 10 Steps
 
 ### Step 1: Create Vercel Account
+
 - Go to https://vercel.com
 - Sign up with GitHub
 - Authorize GitHub access
@@ -19,6 +20,7 @@ If the automated scripts don't work (e.g., Vercel CLI not available), follow the
 ### Step 3: Configure Build Settings
 
 Leave these as auto-detected:
+
 - **Framework Preset**: Next.js
 - **Build Command**: `npm run vercel-build`
 - **Output Directory**: `.next`
@@ -33,7 +35,7 @@ Open your terminal and run:
 openssl rand -base64 32
 # Save the output
 
-# Generate CARD_TOKEN_SECRET
+# Generate NEXT_PUBLIC_CARD_TOKEN_SECRET
 openssl rand -base64 32
 # Save the output
 ```
@@ -48,34 +50,42 @@ Save both outputs - you'll need them in Step 5.
 
 2. Add each variable and select which environments to apply:
 
-#### Variable 1: DATABASE_URL
+#### Variable 1: NEXT_PUBLIC_DATABASE_URL
+
 ```
-DATABASE_URL=libsql://your-db-name-username.aws-ap-northeast-1.turso.io?authToken=YOUR_AUTH_TOKEN
+NEXT_PUBLIC_DATABASE_URL=libsql://your-db-name-username.aws-ap-northeast-1.turso.io?authToken=YOUR_AUTH_TOKEN
 ```
+
 - Get this from https://app.turso.io
 - **IMPORTANT**: Include the `?authToken=` parameter
 - Apply to: **Production**, **Preview**, **Development**
 
 #### Variable 2: NEXTAUTH_SECRET
+
 ```
 NEXTAUTH_SECRET=<paste-your-generated-secret-here>
 ```
+
 - Use the value from Step 4
 - Must be 32+ characters
 - Apply to: **Production**, **Preview**, **Development**
 
 #### Variable 3: NEXTAUTH_URL
+
 ```
 NEXTAUTH_URL=https://your-project-name.vercel.app
 ```
+
 - Replace `your-project-name` with your actual Vercel project name
 - **For Production only**: Use your custom domain if you have one
 - Apply to: **Production**, **Preview**, **Development**
 
-#### Variable 4: CARD_TOKEN_SECRET
+#### Variable 4: NEXT_PUBLIC_CARD_TOKEN_SECRET
+
 ```
-CARD_TOKEN_SECRET=<paste-your-generated-secret-here>
+NEXT_PUBLIC_CARD_TOKEN_SECRET=<paste-your-generated-secret-here>
 ```
+
 - Use the value from Step 4
 - Must be 32+ characters
 - Apply to: **Production**, **Preview**, **Development**
@@ -101,14 +111,17 @@ This creates all necessary tables in Turso.
 ### Step 8: Deploy to Vercel
 
 **Option A: Automatic (Recommended)**
+
 ```bash
 git add .
 git commit -m "feat: ready for production deployment"
 git push origin main
 ```
+
 Vercel will automatically build and deploy.
 
 **Option B: Manual Redeploy**
+
 1. In Vercel dashboard, go to **Deployments**
 2. Find the latest failed deployment
 3. Click three dots → **Redeploy**
@@ -159,18 +172,22 @@ After deployment, verify:
 ### Common Build Errors
 
 **Error: "Cannot find module..."**
+
 - Solution: Run `npm install` locally and push
 - Or: Clear Vercel cache (Settings → Redeploy)
 
-**Error: "DATABASE_URL is not configured"**
-- Solution: Verify DATABASE_URL is set in Environment Variables
+**Error: "NEXT_PUBLIC_DATABASE_URL is not configured"**
+
+- Solution: Verify NEXT_PUBLIC_DATABASE_URL is set in Environment Variables
 - Redeploy after adding variable
 
 **Error: "NextAuth errors"**
+
 - Solution: Check NEXTAUTH_SECRET and NEXTAUTH_URL are set
 - NEXTAUTH_URL must match deployment domain
 
 **Error: "npm ERR! 404"**
+
 - Solution: Check if all dependencies are installed locally
 - Run `npm install` and `npm run build` locally
 
@@ -194,14 +211,17 @@ After deployment, verify:
 After successful deployment:
 
 ### View Logs
+
 1. In Vercel dashboard: **Deployments** → Latest → **View Function Logs**
 2. Or via CLI: `vercel logs --prod`
 
 ### Check Analytics
+
 1. In Vercel dashboard: **Analytics** tab
 2. See response times, edge locations, errors
 
 ### Database Status
+
 1. Go to https://app.turso.io
 2. Select your database
 3. Check query performance and usage
@@ -222,6 +242,7 @@ git push origin main
 ```
 
 Or manually redeploy in Vercel dashboard:
+
 1. Go to **Deployments**
 2. Click three dots on latest deployment
 3. Select **Redeploy**
@@ -241,7 +262,7 @@ Or manually redeploy in Vercel dashboard:
 ## 💡 Tips
 
 1. **Keep NEXTAUTH_SECRET secret** - Never share it
-2. **Keep DATABASE_URL secret** - Never commit it to git
+2. **Keep NEXT_PUBLIC_DATABASE_URL secret** - Never commit it to git
 3. **Test locally first** - Run `npm run dev` before deploying
 4. **Monitor logs daily** - Check for errors after deployment
 5. **Keep dependencies updated** - Run `npm update` monthly
@@ -251,6 +272,7 @@ Or manually redeploy in Vercel dashboard:
 ## ✅ Success Indicators
 
 Your deployment is successful when:
+
 - ✅ App loads at https://your-domain.vercel.app
 - ✅ Sign up page works
 - ✅ Login page works

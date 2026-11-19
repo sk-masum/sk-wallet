@@ -20,7 +20,7 @@ This guide walks you through deploying the SK Wallet application to Vercel with 
 
 1. In Turso dashboard, go to **Tokens**
 2. Create a new token with read/write access
-3. Format your DATABASE_URL:
+3. Format your NEXT_PUBLIC_DATABASE_URL:
    ```
    libsql://your-db-name-username.aws-ap-northeast-1.turso.io?authToken=YOUR_TOKEN
    ```
@@ -33,24 +33,28 @@ This guide walks you through deploying the SK Wallet application to Vercel with 
 2. Add the following variables:
 
 #### Database Configuration
+
 ```
-DATABASE_URL=libsql://your-db-name-username.aws-ap-northeast-1.turso.io?authToken=YOUR_AUTH_TOKEN
+NEXT_PUBLIC_DATABASE_URL=libsql://your-db-name-username.aws-ap-northeast-1.turso.io?authToken=YOUR_AUTH_TOKEN
 ```
 
 #### NextAuth Configuration
+
 ```
 NEXTAUTH_SECRET=generate-with: openssl rand -base64 32
 NEXTAUTH_URL=https://your-domain.vercel.app
 ```
 
 Generate a secure `NEXTAUTH_SECRET`:
+
 ```bash
 openssl rand -base64 32
 ```
 
 #### Application Secrets
+
 ```
-CARD_TOKEN_SECRET=your-long-random-secret-key-min-32-chars
+NEXT_PUBLIC_CARD_TOKEN_SECRET=your-long-random-secret-key-min-32-chars
 ```
 
 ### Environment Variables by Stage
@@ -58,16 +62,19 @@ CARD_TOKEN_SECRET=your-long-random-secret-key-min-32-chars
 Create environment-specific variables:
 
 **Production**
+
 - `NEXTAUTH_URL=https://your-production-domain.com`
-- `DATABASE_URL=libsql://your-prod-db...`
+- `NEXT_PUBLIC_DATABASE_URL=libsql://your-prod-db...`
 - `NODE_ENV=production`
 
 **Preview (Staging)**
+
 - `NEXTAUTH_URL=https://your-preview-domain.vercel.app`
-- `DATABASE_URL=libsql://your-staging-db...` (optional, can use same as prod)
+- `NEXT_PUBLIC_DATABASE_URL=libsql://your-staging-db...` (optional, can use same as prod)
 - `NODE_ENV=production`
 
 **Development**
+
 - Keep local `.env.local` with localhost settings
 
 ## Step 3: Database Migration on Deploy
@@ -106,6 +113,7 @@ The `vercel.json` is already configured:
 ```
 
 **Build commands in package.json:**
+
 - `vercel-build`: `next build web` (Builds Next.js app)
 - `vercel-dev`: `next dev web` (Dev server)
 - `start`: `nx start web` (Production server)
@@ -127,12 +135,15 @@ Your `vercel.json` is correctly configured. The key settings are:
 ## Step 6: Deploy
 
 ### Via Git Push
+
 ```bash
 git push origin main
 ```
+
 Vercel will automatically build and deploy.
 
 ### Via Vercel CLI
+
 ```bash
 npm install -g vercel
 vercel --prod
@@ -144,8 +155,8 @@ vercel --prod
 - [ ] All environment variables added to Vercel
 - [ ] `NEXTAUTH_URL` updated to production domain
 - [ ] `NEXTAUTH_SECRET` generated and set
-- [ ] `DATABASE_URL` configured with Turso credentials
-- [ ] `CARD_TOKEN_SECRET` set to a secure value
+- [ ] `NEXT_PUBLIC_DATABASE_URL` configured with Turso credentials
+- [ ] `NEXT_PUBLIC_CARD_TOKEN_SECRET` set to a secure value
 - [ ] Database schema pushed with `npm run db:push`
 - [ ] Git repository connected to Vercel
 - [ ] Build command verified: `npm run vercel-build`
@@ -155,10 +166,11 @@ vercel --prod
 
 ### Database Connection Errors
 
-**Error**: `DATABASE_URL is not configured`
+**Error**: `NEXT_PUBLIC_DATABASE_URL is not configured`
 
-**Solution**: 
-- Verify `DATABASE_URL` is set in Vercel environment variables
+**Solution**:
+
+- Verify `NEXT_PUBLIC_DATABASE_URL` is set in Vercel environment variables
 - Check it includes the auth token: `?authToken=YOUR_TOKEN`
 - Restart deployment: `vercel redeploy`
 
@@ -167,6 +179,7 @@ vercel --prod
 **Error**: `NEXTAUTH_SECRET is not configured`
 
 **Solution**:
+
 - Set `NEXTAUTH_SECRET` in Vercel environment variables
 - Must be a long random string (32+ characters)
 - Generate with: `openssl rand -base64 32`
@@ -174,6 +187,7 @@ vercel --prod
 **Error**: `NEXTAUTH_URL does not match`
 
 **Solution**:
+
 - Set `NEXTAUTH_URL` to your Vercel domain
 - For example: `https://sk-wallet.vercel.app`
 - Match the actual domain your app is deployed to
@@ -183,6 +197,7 @@ vercel --prod
 **Error**: `Command "npm run vercel-build" exited with 1`
 
 **Solution**:
+
 - Check build logs in Vercel dashboard
 - Verify all dependencies are installed: `npm install`
 - Ensure TypeScript compiles locally: `npm run build`
@@ -193,6 +208,7 @@ vercel --prod
 **Error**: `Table not found` or schema mismatch
 
 **Solution**:
+
 - Run locally: `npm run db:push`
 - This syncs your schema with Turso database
 - Then deploy to Vercel
@@ -208,6 +224,7 @@ vercel logs --prod
 ### Monitor Database
 
 Turso dashboard shows:
+
 - Database usage
 - Query statistics
 - Connection metrics
@@ -215,6 +232,7 @@ Turso dashboard shows:
 ### Monitor Application
 
 Vercel dashboard shows:
+
 - Build history
 - Deployment status
 - Edge function performance
@@ -252,6 +270,7 @@ Turso handles connection pooling automatically. No additional configuration need
 ### Edge Functions
 
 Vercel Edge Functions can be used for:
+
 - Authentication middleware
 - Rate limiting
 - Request filtering
@@ -278,6 +297,7 @@ export const dynamic = 'force-dynamic'; // For real-time data
 ### Database Backups
 
 Turso provides:
+
 - Automatic backups
 - Point-in-time recovery (check Turso pricing)
 
@@ -298,6 +318,7 @@ Turso provides:
 ## Support
 
 For issues:
+
 1. Check Vercel build logs
 2. Check application logs: `vercel logs --prod`
 3. Check Turso status page

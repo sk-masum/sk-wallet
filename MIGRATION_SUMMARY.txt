@@ -196,7 +196,7 @@ If you encounter issues:
    $ npm run db:generate  # Regenerate types
 
 2. Database Connection Issues:
-   - Check DATABASE_URL environment variable
+   - Check NEXT_PUBLIC_DATABASE_URL environment variable
    - For Turso: format is libsql://your-db.turso.io
    - For local: format is file:./dev.db
 

@@ -1,27 +1,32 @@
 # Prisma to Drizzle ORM Migration Guide
 
 ## Overview
+
 This project has been successfully migrated from Prisma ORM to Drizzle ORM. This guide explains what changed and how to work with the new setup.
 
 ## What's Changed
 
 ### Database ORM
+
 - **Before**: Prisma ORM with client generation
 - **After**: Drizzle ORM with direct schema definition
 
 ### Key Files
 
 #### New Files
+
 - `web/src/db/schema/index.ts` - Drizzle schema definition
 - `web/src/db/client.ts` - Drizzle client singleton
 - `drizzle.config.ts` - Drizzle Kit configuration
 
 #### Updated Files
+
 - All API routes in `web/src/app/api/**/*.ts`
 - Authentication setup in `web/src/lib/auth/`
 - Shared utilities updated to use Drizzle
 
 #### Deprecated Files
+
 - `web/src/lib/prisma.ts` - No longer used (can be deleted)
 - `prisma/` directory - Original Prisma files (can be archived/deleted)
 
@@ -30,6 +35,7 @@ This project has been successfully migrated from Prisma ORM to Drizzle ORM. This
 ### Database Queries
 
 #### Select
+
 ```typescript
 import { db } from '@/db/client';
 import { User } from '@/db/schema';
@@ -49,29 +55,26 @@ const cards = await db
 ```
 
 #### Insert
+
 ```typescript
 import { db } from '@/db/client';
 import { User } from '@/db/schema';
 
-const newUser = await db
-  .insert(User)
-  .values({ id: '123', email: 'user@example.com' })
-  .returning();
+const newUser = await db.insert(User).values({ id: '123', email: 'user@example.com' }).returning();
 ```
 
 #### Update
+
 ```typescript
 import { db } from '@/db/client';
 import { card } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-await db
-  .update(card)
-  .set({ card_name: 'New Name' })
-  .where(eq(card.id, 1));
+await db.update(card).set({ card_name: 'New Name' }).where(eq(card.id, 1));
 ```
 
 #### Delete
+
 ```typescript
 import { db } from '@/db/client';
 import { card } from '@/db/schema';
@@ -102,6 +105,7 @@ export const card = sqliteTable(
 ## Development Workflow
 
 ### Initialize Database
+
 ```bash
 # Generate TypeScript types from schema
 npm run db:generate
@@ -116,34 +120,40 @@ npm run db:studio
 ### Common Tasks
 
 #### Add a new table
+
 1. Add table definition to `web/src/db/schema/index.ts`
 2. Run `npm run db:generate` to create migration
 3. Run `npm run db:push` to apply migration
 
 #### Add a column
+
 1. Update table definition in `web/src/db/schema/index.ts`
 2. Run `npm run db:generate`
 3. Run `npm run db:push`
 
 #### Query data
+
 - Import the schema: `import { card } from '@/db/schema'`
 - Use Drizzle query builder with operators from `drizzle-orm`
 
 ## Important Differences from Prisma
 
 ### No Generated Types
+
 Drizzle generates types automatically from schema definition. No separate type generation step needed.
 
 ### Query Builder Pattern
+
 ```typescript
 // Prisma
-await prisma.card.findMany({ where: { owner_id: userId } })
+await prisma.card.findMany({ where: { owner_id: userId } });
 
 // Drizzle
-await db.select().from(card).where(eq(card.owner_id, userId))
+await db.select().from(card).where(eq(card.owner_id, userId));
 ```
 
 ### Error Handling
+
 Prisma-specific error types (like `PrismaClientKnownRequestError`) are no longer available. Standard error handling should be used:
 
 ```typescript
@@ -157,6 +167,7 @@ try {
 ```
 
 ### Transactions
+
 ```typescript
 // Drizzle transactions
 import { db } from '@/db/client';
@@ -180,6 +191,7 @@ await db.transaction(async (tx) => {
 To verify the migration is working:
 
 1. **Start dev server**:
+
    ```bash
    npm run dev
    ```
@@ -195,28 +207,33 @@ To verify the migration is working:
 ## Troubleshooting
 
 ### "Module not found" errors
+
 - Ensure `npm install` has been run
 - Check that all imports point to `@/db/schema` for schema types
 - Check that imports use `@/db/client` for the database client
 
 ### Database connection errors
-- Verify `DATABASE_URL` environment variable is set
+
+- Verify `NEXT_PUBLIC_DATABASE_URL` environment variable is set
 - For Turso: Use format `libsql://your-db.turso.io`
 - For local SQLite: Use `file:./dev.db`
 
 ### Type errors
+
 - Run `npm run db:generate` to regenerate types
 - Check that schema matches your database structure
 
 ## Next Steps
 
 1. ✅ Remove old Prisma files after verification:
+
    ```bash
    rm -rf prisma/
    rm web/src/lib/prisma.ts
    ```
 
 2. ✅ Run tests to ensure all functionality works:
+
    ```bash
    npm test
    ```

@@ -5,6 +5,7 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 ## Pre-Deployment (Local Setup)
 
 ### Environment & Dependencies
+
 - [ ] Node.js 18+ installed (`node -v`)
 - [ ] npm 8+ installed (`npm -v`)
 - [ ] All dependencies installed (`npm install`)
@@ -12,6 +13,7 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 - [ ] GitHub account with repository access
 
 ### Configuration Files
+
 - [ ] `vercel.json` exists and configured
 - [ ] `drizzle.config.ts` exists
 - [ ] `tsconfig.base.json` has path aliases
@@ -19,6 +21,7 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 - [ ] `package.json` has `vercel-build` and `vercel-dev` scripts
 
 ### Code Quality
+
 - [ ] No TypeScript errors: `npm run build`
 - [ ] Linting passes: `npm run lint`
 - [ ] No hardcoded secrets in code
@@ -26,6 +29,7 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 - [ ] No console.error or warnings in critical paths
 
 ### Database Setup (Turso)
+
 - [ ] Turso account created
 - [ ] Database created in Turso
 - [ ] Connection string copied (libsql://...)
@@ -35,12 +39,14 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 - [ ] Test connection works locally
 
 ### Secrets Generation
+
 - [ ] `NEXTAUTH_SECRET` generated: `openssl rand -base64 32`
-- [ ] `CARD_TOKEN_SECRET` generated: `openssl rand -base64 32`
+- [ ] `NEXT_PUBLIC_CARD_TOKEN_SECRET` generated: `openssl rand -base64 32`
 - [ ] Both secrets saved securely (password manager or similar)
 - [ ] Secrets NOT committed to git
 
 ### Local Testing
+
 - [ ] App builds locally: `npm run build`
 - [ ] Dev server starts: `npm run dev`
 - [ ] Can register new user
@@ -51,6 +57,7 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 - [ ] NextAuth flow works
 
 ### Readiness Check
+
 - [ ] Run: `bash check-vercel-ready.sh`
 - [ ] All checks pass (green ✓)
 - [ ] No critical issues (red ✗)
@@ -59,12 +66,14 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 ## Vercel Setup
 
 ### Vercel Account
+
 - [ ] Vercel account created
 - [ ] GitHub connected to Vercel
 - [ ] Team created (optional)
 - [ ] Billing set up
 
 ### Project Connection
+
 - [ ] Repository imported to Vercel
 - [ ] Framework detected as Next.js
 - [ ] Project name set
@@ -76,7 +85,8 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 **Set in Vercel Dashboard → Settings → Environment Variables:**
 
 #### Production Environment
-- [ ] `DATABASE_URL=libsql://your-db.turso.io?authToken=token`
+
+- [ ] `NEXT_PUBLIC_DATABASE_URL=libsql://your-db.turso.io?authToken=token`
   - Includes `?authToken=` parameter
   - Correct region selected
 - [ ] `NEXTAUTH_SECRET=<generated-secret>`
@@ -86,27 +96,30 @@ Complete this checklist to ensure a smooth deployment to Vercel.
   - HTTPS only
   - No trailing slash
   - Matches actual domain
-- [ ] `CARD_TOKEN_SECRET=<generated-secret>`
+- [ ] `NEXT_PUBLIC_CARD_TOKEN_SECRET=<generated-secret>`
   - 32+ characters
   - Random string
 
 #### Preview Environment
-- [ ] `DATABASE_URL=` (can be same as prod or separate staging db)
+
+- [ ] `NEXT_PUBLIC_DATABASE_URL=` (can be same as prod or separate staging db)
 - [ ] `NEXTAUTH_SECRET=` (can be same as prod)
 - [ ] `NEXTAUTH_URL=https://your-project-git-branch.vercel.app`
   - Use Vercel preview domain
   - Matches the deployment URL
-- [ ] `CARD_TOKEN_SECRET=` (can be same as prod)
+- [ ] `NEXT_PUBLIC_CARD_TOKEN_SECRET=` (can be same as prod)
 
 #### Development Environment
-- [ ] `DATABASE_URL=file:./dev.db` (local SQLite)
+
+- [ ] `NEXT_PUBLIC_DATABASE_URL=file:./dev.db` (local SQLite)
 - [ ] `NEXTAUTH_SECRET=` (can be same as prod)
 - [ ] `NEXTAUTH_URL=http://localhost:3000`
   - HTTP for local
   - Port 3000
-- [ ] `CARD_TOKEN_SECRET=` (can be same as prod)
+- [ ] `NEXT_PUBLIC_CARD_TOKEN_SECRET=` (can be same as prod)
 
 ### Domain Configuration
+
 - [ ] Custom domain added (if applicable)
 - [ ] DNS records updated
 - [ ] HTTPS certificate active
@@ -116,6 +129,7 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 ## Deployment
 
 ### Pre-Deployment Tasks
+
 - [ ] Database schema is current: `npm run db:push`
 - [ ] No uncommitted changes in git
 - [ ] Latest code pushed to main branch
@@ -124,6 +138,7 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 - [ ] No secrets in environment (use Vercel env vars)
 
 ### Initial Deployment
+
 - [ ] Push to main: `git push origin main`
 - [ ] Watch Vercel dashboard for build status
 - [ ] Build completes without errors
@@ -132,6 +147,7 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 - [ ] Check live URL loads successfully
 
 ### Monitor Deployment
+
 - [ ] View logs: `vercel logs --prod`
 - [ ] No error messages
 - [ ] No 5xx errors
@@ -141,6 +157,7 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 ## Post-Deployment Testing
 
 ### Application Functionality
+
 - [ ] App loads without errors
 - [ ] All pages accessible
 - [ ] Navigation works
@@ -148,6 +165,7 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 - [ ] No console errors (F12)
 
 ### Authentication
+
 - [ ] Sign up page loads
 - [ ] Can register new account
 - [ ] Email field validates
@@ -161,6 +179,7 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 - [ ] Protected routes require auth
 
 ### Cards Feature
+
 - [ ] Can navigate to create card
 - [ ] Form validates inputs
 - [ ] Can submit card creation
@@ -172,6 +191,7 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 - [ ] New provider creation works
 
 ### API Endpoints
+
 - [ ] `POST /api/card` creates card
 - [ ] `GET /api/card` lists cards
 - [ ] `GET /api/card/[id]` gets single card
@@ -181,18 +201,21 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 - [ ] No 500 errors
 
 ### Database
+
 - [ ] Data persists across refreshes
 - [ ] Can query in Turso console
 - [ ] No connection errors
 - [ ] Response times acceptable
 
 ### Performance
+
 - [ ] Page load time <3s
 - [ ] API response time <1s
 - [ ] No timeout errors
 - [ ] Check Vercel analytics
 
 ### Security
+
 - [ ] Cookies set with secure flag
 - [ ] Sensitive data not in logs
 - [ ] CORS headers correct
@@ -202,6 +225,7 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 ## Monitoring & Maintenance
 
 ### Vercel Dashboard
+
 - [ ] Set up error tracking (optional)
 - [ ] Monitor deployments
 - [ ] Check analytics
@@ -209,12 +233,14 @@ Complete this checklist to ensure a smooth deployment to Vercel.
 - [ ] Review deployment history
 
 ### Turso Dashboard
+
 - [ ] Monitor database usage
 - [ ] Check query performance
 - [ ] Review connection count
 - [ ] Set up alerts (optional)
 
 ### Ongoing Tasks
+
 - [ ] Check logs weekly
 - [ ] Review error tracking
 - [ ] Update dependencies monthly
@@ -245,19 +271,19 @@ If you encounter issues:
 
 ## Sign-Off
 
-**Deployment Date**: _____________
+**Deployment Date**: **\*\***\_**\*\***
 
-**Deployed By**: _____________
+**Deployed By**: **\*\***\_**\*\***
 
-**Verified By**: _____________
+**Verified By**: **\*\***\_**\*\***
 
-**Production URL**: _____________
+**Production URL**: **\*\***\_**\*\***
 
-**Notes**: 
+**Notes**:
 
-_________________________________________________________________
+---
 
-_________________________________________________________________
+---
 
 ## Post-Launch Monitoring (First Week)
 

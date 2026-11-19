@@ -36,7 +36,7 @@ echo ""
 # Generate secrets
 echo "Generating secure secrets..."
 NEXTAUTH_SECRET=$(openssl rand -base64 32)
-CARD_TOKEN_SECRET=$(openssl rand -base64 32)
+NEXT_PUBLIC_CARD_TOKEN_SECRET=$(openssl rand -base64 32)
 
 echo ""
 echo "================================"
@@ -46,8 +46,8 @@ echo ""
 echo -e "${YELLOW}NEXTAUTH_SECRET:${NC}"
 echo "$NEXTAUTH_SECRET"
 echo ""
-echo -e "${YELLOW}CARD_TOKEN_SECRET:${NC}"
-echo "$CARD_TOKEN_SECRET"
+echo -e "${YELLOW}NEXT_PUBLIC_CARD_TOKEN_SECRET:${NC}"
+echo "$NEXT_PUBLIC_CARD_TOKEN_SECRET"
 echo ""
 
 # User inputs
@@ -56,15 +56,15 @@ echo "Required Configuration"
 echo "================================"
 echo ""
 
-read -p "Enter your Turso Database URL (with authToken parameter): " DATABASE_URL
+read -p "Enter your Turso Database URL (with authToken parameter): " NEXT_PUBLIC_DATABASE_URL
 
-if [[ ! "$DATABASE_URL" =~ "libsql://" ]]; then
+if [[ ! "$NEXT_PUBLIC_DATABASE_URL" =~ "libsql://" ]]; then
     echo -e "${RED}Error: Invalid database URL. Must start with 'libsql://'${NC}"
     exit 1
 fi
 
-if [[ ! "$DATABASE_URL" =~ "authToken=" ]]; then
-    echo -e "${YELLOW}Warning: No authToken found in DATABASE_URL${NC}"
+if [[ ! "$NEXT_PUBLIC_DATABASE_URL" =~ "authToken=" ]]; then
+    echo -e "${YELLOW}Warning: No authToken found in NEXT_PUBLIC_DATABASE_URL${NC}"
     echo "Format should be: libsql://your-db.turso.io?authToken=YOUR_TOKEN"
 fi
 
@@ -76,10 +76,10 @@ echo "================================"
 echo "Environment Variables Summary"
 echo "================================"
 echo ""
-echo "DATABASE_URL: (hidden for security)"
+echo "NEXT_PUBLIC_DATABASE_URL: (hidden for security)"
 echo "NEXTAUTH_SECRET: (generated)"
 echo "NEXTAUTH_URL: $NEXTAUTH_URL"
-echo "CARD_TOKEN_SECRET: (generated)"
+echo "NEXT_PUBLIC_CARD_TOKEN_SECRET: (generated)"
 echo ""
 
 read -p "Continue with Vercel setup? (y/n) " -n 1 -r
@@ -108,8 +108,8 @@ echo "Setting environment variables in Vercel..."
 echo ""
 
 # Set environment variables for all environments
-echo "Setting DATABASE_URL..."
-echo "$DATABASE_URL" | npx vercel env add DATABASE_URL --yes 2>/dev/null || echo "$DATABASE_URL" | vercel env add DATABASE_URL --yes
+echo "Setting NEXT_PUBLIC_DATABASE_URL..."
+echo "$NEXT_PUBLIC_DATABASE_URL" | npx vercel env add NEXT_PUBLIC_DATABASE_URL --yes 2>/dev/null || echo "$NEXT_PUBLIC_DATABASE_URL" | vercel env add NEXT_PUBLIC_DATABASE_URL --yes
 
 echo "Setting NEXTAUTH_SECRET..."
 echo "$NEXTAUTH_SECRET" | npx vercel env add NEXTAUTH_SECRET --yes 2>/dev/null || echo "$NEXTAUTH_SECRET" | vercel env add NEXTAUTH_SECRET --yes
@@ -117,8 +117,8 @@ echo "$NEXTAUTH_SECRET" | npx vercel env add NEXTAUTH_SECRET --yes 2>/dev/null |
 echo "Setting NEXTAUTH_URL..."
 echo "$NEXTAUTH_URL" | npx vercel env add NEXTAUTH_URL --yes 2>/dev/null || echo "$NEXTAUTH_URL" | vercel env add NEXTAUTH_URL --yes
 
-echo "Setting CARD_TOKEN_SECRET..."
-echo "$CARD_TOKEN_SECRET" | npx vercel env add CARD_TOKEN_SECRET --yes 2>/dev/null || echo "$CARD_TOKEN_SECRET" | vercel env add CARD_TOKEN_SECRET --yes
+echo "Setting NEXT_PUBLIC_CARD_TOKEN_SECRET..."
+echo "$NEXT_PUBLIC_CARD_TOKEN_SECRET" | npx vercel env add NEXT_PUBLIC_CARD_TOKEN_SECRET --yes 2>/dev/null || echo "$NEXT_PUBLIC_CARD_TOKEN_SECRET" | vercel env add NEXT_PUBLIC_CARD_TOKEN_SECRET --yes
 
 echo ""
 echo -e "${GREEN}✓ Environment variables set!${NC}"

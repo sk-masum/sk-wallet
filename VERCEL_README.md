@@ -52,6 +52,7 @@ Before deploying, ensure you have:
 5. Generate an auth token and append to connection string
 
 **Result should look like:**
+
 ```
 libsql://your-db-name-username.aws-ap-northeast-1.turso.io?authToken=your-long-token-string
 ```
@@ -82,7 +83,7 @@ This synchronizes your Drizzle schema with Turso database.
 # NEXTAUTH_SECRET - copy the output
 openssl rand -base64 32
 
-# CARD_TOKEN_SECRET - copy the output
+# NEXT_PUBLIC_CARD_TOKEN_SECRET - copy the output
 openssl rand -base64 32
 ```
 
@@ -111,13 +112,14 @@ vercel link
 **In Vercel Dashboard → Settings → Environment Variables:**
 
 ```
-DATABASE_URL=libsql://your-db-name.turso.io?authToken=YOUR_TOKEN
+NEXT_PUBLIC_DATABASE_URL=libsql://your-db-name.turso.io?authToken=YOUR_TOKEN
 NEXTAUTH_SECRET=your-generated-secret-here
 NEXTAUTH_URL=https://your-deployment-url.vercel.app
-CARD_TOKEN_SECRET=your-generated-secret-here
+NEXT_PUBLIC_CARD_TOKEN_SECRET=your-generated-secret-here
 ```
 
 **Add for each environment:**
+
 - Production
 - Preview
 - Development
@@ -139,38 +141,40 @@ vercel deploy --prod
 
 ### Database Configuration
 
-| Variable | Purpose | Example |
-|----------|---------|---------|
-| `DATABASE_URL` | Turso database connection | `libsql://db-name.turso.io?authToken=token` |
+| Variable                   | Purpose                   | Example                                     |
+| -------------------------- | ------------------------- | ------------------------------------------- |
+| `NEXT_PUBLIC_DATABASE_URL` | Turso database connection | `libsql://db-name.turso.io?authToken=token` |
 
 **⚠️ CRITICAL:** Include `?authToken=` in the URL for production!
 
 ### Authentication
 
-| Variable | Purpose | Generate |
-|----------|---------|----------|
-| `NEXTAUTH_SECRET` | Encrypts sessions & tokens | `openssl rand -base64 32` |
-| `NEXTAUTH_URL` | Your app's public URL | `https://yourapp.vercel.app` |
+| Variable          | Purpose                    | Generate                     |
+| ----------------- | -------------------------- | ---------------------------- |
+| `NEXTAUTH_SECRET` | Encrypts sessions & tokens | `openssl rand -base64 32`    |
+| `NEXTAUTH_URL`    | Your app's public URL      | `https://yourapp.vercel.app` |
 
 **⚠️ MUST MATCH:** `NEXTAUTH_URL` must match your actual deployment URL
 
 ### Application
 
-| Variable | Purpose | Generate |
-|----------|---------|----------|
-| `CARD_TOKEN_SECRET` | Encrypts card data | `openssl rand -base64 32` |
+| Variable                        | Purpose            | Generate                  |
+| ------------------------------- | ------------------ | ------------------------- |
+| `NEXT_PUBLIC_CARD_TOKEN_SECRET` | Encrypts card data | `openssl rand -base64 32` |
 
 ### Local vs Production
 
 **Local (.env.local):**
+
 ```
-DATABASE_URL=file:./dev.db
+NEXT_PUBLIC_DATABASE_URL=file:./dev.db
 NEXTAUTH_URL=http://localhost:3000
 ```
 
 **Production (Vercel):**
+
 ```
-DATABASE_URL=libsql://your-prod-db.turso.io?authToken=token
+NEXT_PUBLIC_DATABASE_URL=libsql://your-prod-db.turso.io?authToken=token
 NEXTAUTH_URL=https://your-domain.com
 ```
 
@@ -247,6 +251,7 @@ vercel promote <deployment-url>
 ### First Time
 
 1. **Monitor logs** for first 5 minutes:
+
    ```bash
    vercel logs --prod --follow
    ```
@@ -281,9 +286,10 @@ vercel promote <deployment-url>
 
 ### Database Connection Fails
 
-**Error:** `DATABASE_URL is not configured`
+**Error:** `NEXT_PUBLIC_DATABASE_URL is not configured`
 
 **Solution:**
+
 1. Verify variable is set in Vercel
 2. Check it includes `?authToken=`
 3. Redeploy: `vercel redeploy --prod`
@@ -295,6 +301,7 @@ See [VERCEL_TROUBLESHOOTING.md](./VERCEL_TROUBLESHOOTING.md) for more issues.
 **Error:** `NEXTAUTH_URL does not match`
 
 **Solution:**
+
 1. Update `NEXTAUTH_URL` to match deployment URL
 2. Clear browser cookies
 3. Redeploy: `vercel redeploy --prod`
@@ -304,6 +311,7 @@ See [VERCEL_TROUBLESHOOTING.md](./VERCEL_TROUBLESHOOTING.md) for more issues.
 **Error:** `Command failed: npm run vercel-build`
 
 **Solution:**
+
 1. Check full logs in Vercel dashboard
 2. Test locally: `npm run vercel-build`
 3. Fix errors and redeploy

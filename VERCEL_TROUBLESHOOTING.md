@@ -4,18 +4,18 @@
 
 ### 1. Database Connection Errors
 
-#### Error: `DATABASE_URL is not configured`
+#### Error: `NEXT_PUBLIC_DATABASE_URL is not configured`
 
 **Symptoms:**
 
-- Build fails with "DATABASE_URL is not configured"
+- Build fails with "NEXT_PUBLIC_DATABASE_URL is not configured"
 - Pages won't load in production
 - Error in Vercel logs
 
 **Solutions:**
 
 1. Check Vercel dashboard → Settings → Environment Variables
-2. Verify `DATABASE_URL` is set for the current environment
+2. Verify `NEXT_PUBLIC_DATABASE_URL` is set for the current environment
 3. Ensure it includes the authToken: `libsql://...?authToken=...`
 4. Redeploy after adding variable: `vercel redeploy --prod`
 
@@ -44,7 +44,7 @@
 **Solutions:**
 
 1. Regenerate Turso auth token
-2. Update `DATABASE_URL` with new token
+2. Update `NEXT_PUBLIC_DATABASE_URL` with new token
 3. Set in Vercel environment variables
 4. Redeploy: `vercel redeploy --prod`
 

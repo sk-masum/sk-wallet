@@ -9,6 +9,7 @@ Your SK Wallet application is fully prepared for Vercel deployment with Drizzle 
 ## 📦 What's Included
 
 ### 📚 Documentation (8 Files - 48 KB)
+
 1. **[VERCEL_INDEX.md](./VERCEL_INDEX.md)** - Start here! Navigation guide for all files
 2. **[VERCEL_README.md](./VERCEL_README.md)** - Complete setup guide (7.4 KB)
 3. **[VERCEL_QUICKREF.md](./VERCEL_QUICKREF.md)** - Quick reference card (3.1 KB)
@@ -19,10 +20,12 @@ Your SK Wallet application is fully prepared for Vercel deployment with Drizzle 
 8. **[DEPLOYMENT_READY.md](./DEPLOYMENT_READY.md)** - This file
 
 ### 🛠️ Automation Scripts (2 Files)
+
 1. **[check-vercel-ready.sh](./check-vercel-ready.sh)** - Validation script (validates 12 categories)
 2. **[vercel-setup.sh](./vercel-setup.sh)** - Setup script (auto-generates secrets & configures env)
 
 ### ⚙️ Configuration Files
+
 1. **[vercel.json](./vercel.json)** - Vercel configuration (enhanced)
 2. **[web/.env.example](./web/.env.example)** - Environment template (updated)
 3. **[.env.production.example](./.env.production.example)** - Production template
@@ -32,39 +35,51 @@ Your SK Wallet application is fully prepared for Vercel deployment with Drizzle 
 ## 🎯 Choose Your Deployment Path
 
 ### Path 1: ⚡ FASTEST (5 minutes)
+
 **Best for**: Experienced developers
+
 ```bash
 bash check-vercel-ready.sh      # 1. Validate
 bash vercel-setup.sh            # 2. Setup
 git push origin main            # 3. Deploy
 ```
+
 **Guide**: [VERCEL_QUICKREF.md](./VERCEL_QUICKREF.md)
 
 ### Path 2: 🛡️ SAFE (10 minutes)
+
 **Best for**: Most users
+
 ```bash
 bash check-vercel-ready.sh      # 1. Validate
 # Then follow manual setup in Vercel dashboard
 git push origin main            # 3. Deploy
 ```
+
 **Guide**: [VERCEL_MANUAL_SETUP.md](./VERCEL_MANUAL_SETUP.md)
 
 ### Path 3: 📖 THOROUGH (20 minutes)
+
 **Best for**: First-time deployers
+
 ```bash
 # 1. Read detailed guide
 # 2. Follow step-by-step with checklist
 # 3. Deploy when checklist complete
 ```
+
 **Guide**: [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md) + [VERCEL_CHECKLIST.md](./VERCEL_CHECKLIST.md)
 
 ### Path 4: 🔧 TROUBLESHOOTING
+
 **For fixing deployment issues**
+
 ```bash
 vercel logs --prod              # View errors
 # Find issue in troubleshooting guide
 # Fix and redeploy
 ```
+
 **Guide**: [VERCEL_TROUBLESHOOTING.md](./VERCEL_TROUBLESHOOTING.md)
 
 ---
@@ -87,14 +102,15 @@ Before you start, make sure you have:
 
 You need to set these in Vercel:
 
-| Variable | Source | Format | Critical |
-|----------|--------|--------|----------|
-| `DATABASE_URL` | Turso | `libsql://your-db.turso.io?authToken=TOKEN` | **Must have authToken!** |
-| `NEXTAUTH_SECRET` | Generate | `openssl rand -base64 32` | **32+ chars required** |
-| `NEXTAUTH_URL` | Your domain | `https://your-domain.vercel.app` | **Must match deployment!** |
-| `CARD_TOKEN_SECRET` | Generate | `openssl rand -base64 32` | **32+ chars required** |
+| Variable                        | Source      | Format                                      | Critical                   |
+| ------------------------------- | ----------- | ------------------------------------------- | -------------------------- |
+| `NEXT_PUBLIC_DATABASE_URL`      | Turso       | `libsql://your-db.turso.io?authToken=TOKEN` | **Must have authToken!**   |
+| `NEXTAUTH_SECRET`               | Generate    | `openssl rand -base64 32`                   | **32+ chars required**     |
+| `NEXTAUTH_URL`                  | Your domain | `https://your-domain.vercel.app`            | **Must match deployment!** |
+| `NEXT_PUBLIC_CARD_TOKEN_SECRET` | Generate    | `openssl rand -base64 32`                   | **32+ chars required**     |
 
 **Generate secrets locally:**
+
 ```bash
 openssl rand -base64 32  # Run twice, save both
 ```
@@ -104,12 +120,14 @@ openssl rand -base64 32  # Run twice, save both
 ## 🚀 Quick Start (10 Minutes)
 
 ### Step 1: Verify Setup (1 min)
+
 ```bash
 bash check-vercel-ready.sh
 # Should show: "All checks passed! Ready for Vercel deployment."
 ```
 
 ### Step 2: Sync Database (1 min)
+
 ```bash
 npm run db:push
 # Syncs schema to Turso database
@@ -118,6 +136,7 @@ npm run db:push
 ### Step 3: Choose Setup Method
 
 **Option A: Automated** (If Vercel CLI works)
+
 ```bash
 bash vercel-setup.sh
 # Interactive script - follow prompts
@@ -125,16 +144,19 @@ bash vercel-setup.sh
 
 **Option B: Manual** (Recommended)
 Follow: [VERCEL_MANUAL_SETUP.md](./VERCEL_MANUAL_SETUP.md)
+
 - Use Vercel dashboard
 - More control, easier to verify
 
 ### Step 4: Deploy (1 min)
+
 ```bash
 git push origin main
 # Vercel automatically deploys
 ```
 
 ### Step 5: Verify (1 min)
+
 ```bash
 vercel logs --prod
 # Watch for successful deployment
@@ -150,7 +172,7 @@ Day of deployment:
 BEFORE STARTING:
 ☐ All 4 environment variables added to Vercel
 ☐ NEXTAUTH_URL set to your deployment domain
-☐ DATABASE_URL includes ?authToken parameter
+☐ NEXT_PUBLIC_DATABASE_URL includes ?authToken parameter
 ☐ bash check-vercel-ready.sh passes all checks
 ☐ npm run db:push completed successfully
 
@@ -172,6 +194,7 @@ AFTER DEPLOYMENT:
 ## 🔧 Useful Commands
 
 ### Pre-Deployment
+
 ```bash
 bash check-vercel-ready.sh      # Validate setup
 npm run db:push                 # Sync schema to Turso
@@ -180,12 +203,14 @@ npm run dev                     # Test locally
 ```
 
 ### During Deployment
+
 ```bash
 git push origin main            # Deploy to Vercel
 vercel deploy --prod            # Manual deploy
 ```
 
 ### Post-Deployment
+
 ```bash
 vercel logs --prod              # View production logs
 vercel env ls --prod            # List env variables
@@ -198,12 +223,15 @@ vercel status                   # Check status
 ## 🐛 If Something Goes Wrong
 
 ### Step 1: Check Logs
+
 ```bash
 vercel logs --prod
 ```
 
 ### Step 2: Find Your Issue
+
 Search in [VERCEL_TROUBLESHOOTING.md](./VERCEL_TROUBLESHOOTING.md):
+
 - Database connection errors
 - NextAuth configuration issues
 - Build failures
@@ -211,11 +239,13 @@ Search in [VERCEL_TROUBLESHOOTING.md](./VERCEL_TROUBLESHOOTING.md):
 - Performance issues
 
 ### Step 3: Validate Setup
+
 ```bash
 bash check-vercel-ready.sh
 ```
 
 ### Step 4: Try Redeploy
+
 ```bash
 vercel redeploy --prod
 ```
@@ -226,39 +256,43 @@ vercel redeploy --prod
 
 **Choose based on your needs:**
 
-| Need | File | Time |
-|------|------|------|
-| Quick reference | [VERCEL_QUICKREF.md](./VERCEL_QUICKREF.md) | 5 min |
-| Complete guide | [VERCEL_README.md](./VERCEL_README.md) | 15 min |
-| Manual dashboard | [VERCEL_MANUAL_SETUP.md](./VERCEL_MANUAL_SETUP.md) | 10 min |
-| Detailed setup | [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md) | 20 min |
-| Verification | [VERCEL_CHECKLIST.md](./VERCEL_CHECKLIST.md) | 15 min |
-| Troubleshooting | [VERCEL_TROUBLESHOOTING.md](./VERCEL_TROUBLESHOOTING.md) | As needed |
-| Navigation | [VERCEL_INDEX.md](./VERCEL_INDEX.md) | 5 min |
+| Need             | File                                                     | Time      |
+| ---------------- | -------------------------------------------------------- | --------- |
+| Quick reference  | [VERCEL_QUICKREF.md](./VERCEL_QUICKREF.md)               | 5 min     |
+| Complete guide   | [VERCEL_README.md](./VERCEL_README.md)                   | 15 min    |
+| Manual dashboard | [VERCEL_MANUAL_SETUP.md](./VERCEL_MANUAL_SETUP.md)       | 10 min    |
+| Detailed setup   | [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)           | 20 min    |
+| Verification     | [VERCEL_CHECKLIST.md](./VERCEL_CHECKLIST.md)             | 15 min    |
+| Troubleshooting  | [VERCEL_TROUBLESHOOTING.md](./VERCEL_TROUBLESHOOTING.md) | As needed |
+| Navigation       | [VERCEL_INDEX.md](./VERCEL_INDEX.md)                     | 5 min     |
 
 ---
 
 ## ✨ What You're Getting
 
 ✅ **Comprehensive Documentation**
+
 - 48 KB of detailed guides
 - Multiple entry points for different skill levels
 - Troubleshooting for 10+ issue categories
 - Step-by-step checklists
 
 ✅ **Automation & Validation**
+
 - Pre-deployment validation script
 - Automated environment setup
 - Clear error messages
 - Next steps after each step
 
 ✅ **Production-Ready Configuration**
+
 - vercel.json with optimized settings
 - Environment templates
 - Security best practices
 - Database connection pooling
 
 ✅ **Support Materials**
+
 - Quick reference card
 - Common mistakes to avoid
 - Deployment checklist
@@ -296,15 +330,18 @@ Your deployment includes:
 ## 📞 Getting Help
 
 ### If Deployment Succeeds
+
 ✨ Congratulations! Your app is live!
 
 ### If Deployment Fails
+
 1. Run: `bash check-vercel-ready.sh`
 2. Check: `vercel logs --prod`
 3. Read: [VERCEL_TROUBLESHOOTING.md](./VERCEL_TROUBLESHOOTING.md)
 4. Try: `vercel redeploy --prod`
 
 ### Additional Resources
+
 - [Vercel Docs](https://vercel.com/docs)
 - [Next.js Docs](https://nextjs.org/docs)
 - [Turso Docs](https://docs.turso.io)
@@ -354,13 +391,13 @@ Your deployment is successful when:
 
 ## Version Information
 
-| Item | Details |
-|------|---------|
-| Package Version | 1.0.0 |
-| Created | November 2024 |
-| Status | ✨ Production Ready |
-| Last Updated | November 2024 |
-| Support Level | Complete |
+| Item            | Details             |
+| --------------- | ------------------- |
+| Package Version | 1.0.0               |
+| Created         | November 2024       |
+| Status          | ✨ Production Ready |
+| Last Updated    | November 2024       |
+| Support Level   | Complete            |
 
 ---
 

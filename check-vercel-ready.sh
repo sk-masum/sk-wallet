@@ -78,10 +78,10 @@ echo ""
 # Check 4: Environment Variables
 echo -e "${BLUE}4. Environment Variables Setup${NC}"
 if [ -f "web/.env.local" ]; then
-    if grep -q "DATABASE_URL" web/.env.local; then
-        check_pass "DATABASE_URL is configured in .env.local"
+    if grep -q "NEXT_PUBLIC_DATABASE_URL" web/.env.local; then
+        check_pass "NEXT_PUBLIC_DATABASE_URL is configured in .env.local"
     else
-        check_warn "DATABASE_URL not found in .env.local"
+        check_warn "NEXT_PUBLIC_DATABASE_URL not found in .env.local"
     fi
     
     if grep -q "NEXTAUTH_SECRET" web/.env.local; then
