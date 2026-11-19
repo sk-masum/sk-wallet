@@ -1,25 +1,9 @@
 //@ts-check
 
 const path = require('path');
-/** @type {(config: import('next').NextConfig) => import('next').NextConfig} */
-let withSerwist = (config) => config;
-
-try {
-  const dynamicRequire = eval('require');
-  const withSerwistInit = dynamicRequire('@serwist/next').default;
-  withSerwist = withSerwistInit({
-    swSrc: 'src/app/sw.js',
-    swDest: 'public/sw.js',
-    register: false,
-    reloadOnOnline: true,
-    disable: process.env.NODE_ENV === 'development',
-  });
-} catch {
-  // Serwist package is not installed yet; keep base Next config usable.
-}
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const baseConfig = {
   turbopack: {
     root: path.resolve(__dirname, '..'),
   },
@@ -42,4 +26,16 @@ const nextConfig = {
   },
 };
 
-module.exports = withSerwist(nextConfig);
+// Apply @serwist/turbopack wrapper for native Turbopack support (experimental)
+let nextConfig = baseConfig;
+try {
+  const { withSerwist } = require('@serwist/turbopack');
+  nextConfig = withSerwist(baseConfig);
+} catch (error) {
+  console.warn('[@serwist/turbopack] Warning: Failed to initialize, using base config');
+  if (error instanceof Error) {
+    console.warn('Error:', error.message);
+  }
+}
+
+module.exports = nextConfig;
