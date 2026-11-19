@@ -7,11 +7,13 @@
 #### Error: `DATABASE_URL is not configured`
 
 **Symptoms:**
+
 - Build fails with "DATABASE_URL is not configured"
 - Pages won't load in production
 - Error in Vercel logs
 
 **Solutions:**
+
 1. Check Vercel dashboard → Settings → Environment Variables
 2. Verify `DATABASE_URL` is set for the current environment
 3. Ensure it includes the authToken: `libsql://...?authToken=...`
@@ -20,10 +22,12 @@
 #### Error: `unable to open database file`
 
 **Symptoms:**
+
 - "unable to open database file" in logs
 - Database queries return empty results
 
 **Solutions:**
+
 1. Verify Turso database is running
 2. Check Turso status: https://status.turso.io/
 3. Test connection locally: `npm run db:push`
@@ -33,10 +37,12 @@
 #### Error: `Unauthorized: invalid token`
 
 **Symptoms:**
+
 - "Unauthorized: invalid token" in Turso errors
 - 401 response from database
 
 **Solutions:**
+
 1. Regenerate Turso auth token
 2. Update `DATABASE_URL` with new token
 3. Set in Vercel environment variables
@@ -49,11 +55,13 @@
 #### Error: `NEXTAUTH_SECRET is not configured`
 
 **Symptoms:**
+
 - "Session not found" errors
 - Cannot log in
 - JWT errors in console
 
 **Solutions:**
+
 1. Generate a new secret: `openssl rand -base64 32`
 2. Add to Vercel environment variables: `NEXTAUTH_SECRET`
 3. Must be 32+ characters
@@ -62,11 +70,13 @@
 #### Error: `NEXTAUTH_URL does not match request URL`
 
 **Symptoms:**
+
 - NextAuth callback errors
 - Redirect loops
 - 401 Unauthorized after login
 
 **Solutions:**
+
 1. Check your Vercel domain
 2. Update `NEXTAUTH_URL` to match:
    - For Vercel preview: `https://your-project-git-branch.vercel.app`
@@ -77,11 +87,13 @@
 #### Error: Credentials provider not working
 
 **Symptoms:**
+
 - Login page shows but credentials are rejected
 - "No user found with this email" error
 - Registration works but login doesn't
 
 **Solutions:**
+
 1. Verify user was created: Check database manually
    ```bash
    sqlite3 dev.db "SELECT * FROM User LIMIT 1;"
@@ -97,11 +109,13 @@
 #### Error: `Command "npm run vercel-build" exited with 1`
 
 **Symptoms:**
+
 - Build fails in Vercel
 - Works locally with `npm run build`
 - TypeScript or ESLint errors
 
 **Solutions:**
+
 1. Check full error logs in Vercel dashboard
 2. Run locally: `npm run vercel-build` (builds exactly as Vercel would)
 3. Fix any TypeScript errors: `npm run build`
@@ -110,10 +124,12 @@
 #### Error: Module not found errors
 
 **Symptoms:**
+
 - "Cannot find module '@/db/client'"
 - "Cannot resolve import"
 
 **Solutions:**
+
 1. Verify import paths are correct
 2. Check `tsconfig.base.json` has correct path aliases
 3. Run locally: `npm install`
@@ -122,10 +138,12 @@
 #### Error: `ENOSPC: no space left on device`
 
 **Symptoms:**
+
 - Seemingly random build failures
 - Disk space errors in logs
 
 **Solutions:**
+
 1. Clear Vercel cache: Visit project settings → Deployments → {latest} → More → Clear Cache
 2. Reduce node_modules size
 3. Remove unused dependencies
@@ -137,10 +155,12 @@
 #### Variables not loading in production
 
 **Symptoms:**
+
 - Works in preview but not in production
 - Environment variables are undefined
 
 **Solutions:**
+
 1. Verify variables are added for Production environment
 2. Set for all environments (Development, Preview, Production)
 3. Redeploy: `vercel redeploy --prod`
@@ -149,10 +169,12 @@
 #### Secrets exposed in logs
 
 **Symptoms:**
+
 - API keys visible in Vercel logs
 - Tokens in error messages
 
 **Solutions:**
+
 1. Never log sensitive variables
 2. Use `.env.local` for local development (in `.gitignore`)
 3. Use Vercel environment variables for secrets
@@ -165,10 +187,12 @@
 #### Error: `Table 'card' does not exist`
 
 **Symptoms:**
+
 - API endpoints return "table not found"
 - 500 errors on data operations
 
 **Solutions:**
+
 1. Push schema to production Turso:
    ```bash
    npm run db:push
@@ -180,10 +204,12 @@
 #### Schema mismatch after update
 
 **Symptoms:**
+
 - Changes work locally but fail in production
 - Column not found errors after deployment
 
 **Solutions:**
+
 1. Test schema changes locally first
 2. Push schema before deploying code: `npm run db:push`
 3. Wait for schema migration to complete
@@ -196,11 +222,13 @@
 #### Slow database queries
 
 **Symptoms:**
+
 - API endpoints take 10+ seconds
 - Timeouts in browser
 - High database latency
 
 **Solutions:**
+
 1. Check Turso region matches deployment region
 2. Add database indexes for frequently queried columns
 3. Use pagination for large data sets
@@ -209,11 +237,13 @@
 #### High memory usage
 
 **Symptoms:**
+
 - Functions timeout
 - Memory limit exceeded errors
 - Slow response times
 
 **Solutions:**
+
 1. Optimize database queries
 2. Reduce data fetching scope
 3. Use streaming for large responses
@@ -226,10 +256,12 @@
 #### CORS errors from browser
 
 **Symptoms:**
+
 - "Access to XMLHttpRequest blocked by CORS policy"
 - API calls fail from frontend
 
 **Solutions:**
+
 1. Ensure API routes are in `/api` directory
 2. Set proper CORS headers if needed
 3. Use NextAuth for authentication (handles CORS)
@@ -238,10 +270,12 @@
 #### Session cookies not persisting
 
 **Symptoms:**
+
 - User logged out after refresh
 - Cookies not set properly
 
 **Solutions:**
+
 1. Verify `NEXTAUTH_SECRET` is set
 2. Ensure `NEXTAUTH_URL` matches your domain
 3. Check browser cookie settings (not in private/incognito)
@@ -252,11 +286,13 @@
 ## Debugging Steps
 
 ### 1. Check Vercel Logs
+
 ```bash
 vercel logs --prod
 ```
 
 ### 2. Local Reproduction
+
 ```bash
 # Pull production environment
 vercel env pull
@@ -267,6 +303,7 @@ npm start
 ```
 
 ### 3. Database Inspection
+
 ```bash
 # Using Turso CLI
 turso db shell sk-wallet-prod
@@ -275,6 +312,7 @@ turso db shell sk-wallet-prod
 ```
 
 ### 4. Check NextAuth
+
 ```bash
 # Test auth endpoint
 curl -v https://your-domain/api/auth/signin
@@ -285,6 +323,7 @@ curl -v https://your-domain/api/auth/signin
 ## Prevention
 
 1. **Test before deploying:**
+
    ```bash
    npm run build
    npm run test
