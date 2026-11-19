@@ -17,6 +17,7 @@ interface CardTypeButtonGroupProps {
   };
   onSelect?: (type: CardType) => void;
   className?: string;
+  showAllOption?: boolean;
 }
 
 export function CardTypeButtonGroup({
@@ -24,6 +25,7 @@ export function CardTypeButtonGroup({
   hrefs,
   onSelect,
   className,
+  showAllOption = true,
 }: CardTypeButtonGroupProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -51,15 +53,17 @@ export function CardTypeButtonGroup({
   };
 
   const options: Array<{ key: CardType; label: string; icon: typeof Layers3 }> = [
-    { key: 'all', label: 'All', icon: Layers3 },
+    ...(showAllOption ? ([{ key: 'all' as const, label: 'All', icon: Layers3 }] as Array<{ key: CardType; label: string; icon: typeof Layers3 }>) : []),
     { key: 'credit', label: 'Credit', icon: CreditCard },
     { key: 'debit', label: 'Debit', icon: Landmark },
   ];
 
+  const colsClass = showAllOption ? 'grid-cols-3' : 'grid-cols-2';
+
   return (
     <div
       className={cn(
-        'relative isolate grid h-10 w-full max-w-sm grid-cols-3 rounded-xl border border-glass-border bg-glass p-1 shadow-neu-inset backdrop-blur-md ',
+        `relative isolate grid h-10 w-full max-w-sm ${colsClass} rounded-xl border border-glass-border bg-glass p-1 shadow-neu-inset backdrop-blur-md `,
         className,
       )}
       aria-busy={isPending}

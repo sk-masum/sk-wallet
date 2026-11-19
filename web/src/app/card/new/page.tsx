@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-import { CardForm } from '@/components/card/card-form';
+import { CardWizard } from '@/components/card/wizard/card-wizard';
 import { withCardFormPage } from '@/hoc/with-card-form-page';
 import { serverApiPost } from '@/lib/api/server';
 import { getAuthenticatedUser } from '@/lib/auth/server';
@@ -14,7 +14,7 @@ type NewCardPageProps = {
 async function createCard(formData: FormData) {
   'use server';
 
-  console.log('\n=== Card Form Submission ===');
+  console.log('\n=== Card Wizard Submission ===');
 
   const user = await getAuthenticatedUser();
   console.log('Authenticated user:', user ? `${user.email} (${user.id})` : 'NOT AUTHENTICATED');
@@ -126,10 +126,10 @@ export default withCardFormPage<NewCardPageProps>(async function NewCardPage() {
 
   return {
     pageTitle: 'Add Card',
-    cardTitle: 'Card Details',
-    cardDescription: 'Fill the form below to create a new card.',
+    cardTitle: 'Card Setup Wizard',
+    cardDescription: 'Create your card step by step',
     backHref: '/card',
     backButtonLabel: 'Back to cards',
-    children: <CardForm action={createCard} submitLabel='Submit' showReset />,
+    children: <CardWizard action={createCard} showPreview={true} />,
   };
 });

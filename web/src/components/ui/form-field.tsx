@@ -30,7 +30,7 @@ function FormField({
         {label}
       </label>
       {children}
-      {hint ? <p className='text-xs text-text-subtle'>{hint}</p> : null}
+      {hint ? <div className='text-xs text-text-subtle'>{hint}</div> : null}
       {error ? <p className='text-xs text-destructive'>{error}</p> : null}
     </div>
   );
