@@ -92,7 +92,10 @@ export function WorkspaceMenuRight({ isOpen, onClose, user, onAddClick }: Worksp
       {/* Menu Slide from Right - SiteLedger Template Style */}
       <div className='fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-background shadow-2xl transition-transform duration-300 ease-out flex flex-col'>
         {/* Header with Logo and Close */}
-        <div className='border-b border-white/14 bg-background px-6 py-6 flex items-center justify-between'>
+        <div
+          className='border-b border-white/14 bg-background px-6 pb-6 flex items-center justify-between'
+          style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top))' }}
+        >
           <div>
             <h1 className='text-2xl font-bold tracking-tight text-foreground'>
               Sk Wallet<span className='text-primary'>.</span>
@@ -187,29 +190,6 @@ export function WorkspaceMenuRight({ isOpen, onClose, user, onAddClick }: Worksp
             <LogOut className='h-5 w-5 text-rose-400' />
           </button>
         </div>
-      </div>
-
-      {/* Bottom Bar - Plus Button (Beneath Overlay, z-45) */}
-      <div className='fixed bottom-6 right-6 z-45'>
-        <button
-          onClick={() => {
-            onAddClick?.();
-            onClose();
-          }}
-          className={cn(
-            'inline-flex items-center justify-center',
-            'h-14 w-14 rounded-full',
-            'bg-primary hover:bg-primary/90 active:bg-primary/80',
-            'text-primary-foreground',
-            'shadow-lg hover:shadow-xl',
-            'transition-all duration-200 ease-out',
-            'focus-visible:outline-2 outline-offset-2 outline-primary',
-            'cursor-pointer'
-          )}
-          aria-label='Add new item'
-        >
-          <Plus className='h-6 w-6' />
-        </button>
       </div>
 
       <style>{`
