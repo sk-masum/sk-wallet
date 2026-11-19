@@ -51,7 +51,7 @@ export function ListingPageHeader({
         <div className={cn('listing-mobile-sticky-shell sm:mb-4', mobileFilters ? 'mb-4' : 'mb-0')}>
           <PageHeader
             title={title}
-            showBackButton={showBackButton}
+            // showBackButton={showBackButton}
             backHref={backHref}
             backButtonLabel={backButtonLabel}
             backButtonIcon='dashboard'
@@ -69,7 +69,7 @@ export function ListingPageHeader({
         <>
           <PageHeader
             title={title}
-            showBackButton={showBackButton}
+            // showBackButton={showBackButton}
             backHref={backHref}
             backButtonLabel={backButtonLabel}
             backButtonIcon='dashboard'
