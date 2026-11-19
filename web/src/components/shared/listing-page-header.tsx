@@ -1,6 +1,11 @@
+'use client';
+
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 
 import { PageHeader } from '@/components/ui/page-header';
+import { WorkspaceMenuRight } from '@/components/layout/workspace-menu-right';
+import { useSession } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 
 type ListingPageHeaderProps = {
@@ -32,6 +37,14 @@ export function ListingPageHeader({
   activeFilters,
   mobileStickyHeader = false,
 }: ListingPageHeaderProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { data: session } = useSession();
+
+  const user = session?.user ? {
+    email: session.user.email || '',
+    name: session.user.name || undefined,
+  } : undefined;
+
   return (
     <>
       {mobileStickyHeader ? (
@@ -46,6 +59,8 @@ export function ListingPageHeader({
             showAddButton
             addButtonLabel={addLabel}
             addButtonClassName={sharedDesktopAddButtonClass}
+            showMenuButton={true}
+            onMenuClick={() => setMenuOpen(true)}
             className={cn('mb-3 sm:mb-4', className)}
           />
           {mobileFilters}
@@ -62,11 +77,19 @@ export function ListingPageHeader({
             showAddButton
             addButtonLabel={addLabel}
             addButtonClassName={sharedDesktopAddButtonClass}
+            showMenuButton={true}
+            onMenuClick={() => setMenuOpen(true)}
             className={cn('mb-3 sm:mb-8', className)}
           />
           {mobileFilters}
         </>
       )}
+
+      <WorkspaceMenuRight
+        isOpen={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        user={user}
+      />
 
       {desktopFilters}
       {activeFilters}

@@ -1,5 +1,7 @@
+'use client';
+
 import Link from 'next/link';
-import { ArrowLeft, LayoutDashboard } from 'lucide-react';
+import { ArrowLeft, LayoutDashboard, Menu } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { buttonVariants } from '@/components/ui/button';
@@ -19,6 +21,8 @@ type PageHeaderProps = {
   rightSlot?: ReactNode;
   showAddButton?: boolean;
   addButtonLabel?: string;
+  showMenuButton?: boolean;
+  onMenuClick?: () => void;
 };
 
 export function PageHeader({
@@ -30,6 +34,8 @@ export function PageHeader({
   backButtonIcon = 'arrow',
   backButtonAlign = 'left',
   rightSlot,
+  showMenuButton = false,
+  onMenuClick,
 }: PageHeaderProps) {
   const backButton = showBackButton ? (
     <Link
@@ -46,6 +52,17 @@ export function PageHeader({
     </Link>
   ) : null;
 
+  const menuButton = showMenuButton ? (
+    <button
+      onClick={onMenuClick}
+      className={buttonVariants({ variant: 'headerIcon', size: 'headerIcon' })}
+      aria-label='Open menu'
+      title='Open menu'
+    >
+      <Menu className={responsiveIconSizes.header} />
+    </button>
+  ) : null;
+
   return (
     <header className={cn('mb-12 flex items-center justify-between gap-3', className)}>
       <div className='flex items-center gap-3'>
@@ -58,7 +75,10 @@ export function PageHeader({
         </div>
       </div>
 
-      {rightSlot ?? (backButtonAlign === 'right' ? backButton : null)}
+      <div className='flex items-center gap-2'>
+        {menuButton}
+        {rightSlot ?? (backButtonAlign === 'right' ? backButton : null)}
+      </div>
     </header>
   );
 }

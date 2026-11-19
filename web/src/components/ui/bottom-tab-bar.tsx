@@ -18,10 +18,10 @@ export function BottomTabBar({ addHref, addLabel = 'Add' }: BottomTabBarProps) {
   return (
     <nav
       aria-label='Primary'
-      className='pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4'
+      className='pointer-events-none fixed inset-x-0 bottom-4 z-40 flex justify-center px-4'
     >
       <div className='pointer-events-auto flex items-center'>
-        <div className='relative flex w-fit max-w-full items-center justify-center gap-1.5  p-1.5  '>
+        {/* <div className='relative flex w-fit max-w-full items-center justify-center gap-1.5  p-1.5  '>
           <div className='pointer-events-none absolute inset-0 rounded-4xl' />
 
           {BOTTOM_TABS.map((tab) => {
@@ -47,12 +47,12 @@ export function BottomTabBar({ addHref, addLabel = 'Add' }: BottomTabBarProps) {
               </Link>
             );
           })}
-        </div>
+        </div> */}
 
         {addHref ? (
           <Link
             href={addHref}
-            className='group relative ml-3 inline-flex h-12 w-12 border border-glass-border-strong bg-glass p-0.5 shadow-neu-raised-sm backdrop-blur-lg items-center justify-center overflow-hidden rounded-4xl transition-all duration-200 hover:-translate-y-0.5 hover:from-primary/95 hover:to-primary hover:shadow-fab-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70'
+            className='group relative ml-3 inline-flex h-15 w-15 border text-lime-300 border-glass-border-strong bg-glass p-0.5 shadow-neu-raised-sm backdrop-blur-lg items-center justify-center overflow-hidden rounded-4xl transition-all duration-200 hover:-translate-y-0.5 hover:from-primary/95 hover:to-primary hover:shadow-fab-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70'
             aria-label={addLabel}
             title={addLabel}
           >
