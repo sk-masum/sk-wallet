@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { desc, eq } from 'drizzle-orm';
+import { card, credential_record, document_record, dashboard_favorite } from '@/db/schema';
 
 import {
   buildRecentBillingCards,
@@ -27,59 +29,58 @@ function toMaskedNumber(value: string) {
 }
 
 export async function GET() {
-  return withUserRouteContext(async ({ userId, prisma }) => {
+  return withUserRouteContext(async ({ userId, db }) => {
     const now = new Date();
     const soonCutoff = new Date(now);
     soonCutoff.setDate(soonCutoff.getDate() + 45);
 
-    const [cards, credentials, documents] = await Promise.all([
-      prisma.card.findMany({
-        where: { owner_id: userId },
-        select: {
-          id: true,
-          card_name: true,
-          number: true,
-          color_name: true,
-          network: true,
-          credit_limit: true,
-          billing_date: true,
-          expiry_month: true,
-          expiry_year: true,
-        },
-        orderBy: { id: 'desc' },
-      }),
-      prisma.credential_record.findMany({
-        where: { user_id: userId },
-        select: {
-          id: true,
-          identifier: true,
-          service_name: true,
-        },
-        orderBy: { id: 'desc' },
-      }),
-      prisma.document_record.findMany({
-        where: { user_id: userId },
-        select: {
-          id: true,
-          expires_at: true,
-          masked_number: true,
-          name_on_document: true,
-          document_type: true,
-          metadata: true,
-        },
-        orderBy: { id: 'desc' },
-      }),
+    const [cards, credentials, documents, favoriteRows] = await Promise.all([
+      db
+        .select({
+          id: card.id,
+          card_name: card.card_name,
+          number: card.number,
+          color_name: card.color_name,
+          network: card.network,
+          credit_limit: card.credit_limit,
+          billing_date: card.billing_date,
+          expiry_month: card.expiry_month,
+          expiry_year: card.expiry_year,
+        })
+        .from(card)
+        .where(eq(card.owner_id, userId))
+        .orderBy(desc(card.id)),
+      db
+        .select({
+          id: credential_record.id,
+          identifier: credential_record.identifier,
+          service_name: credential_record.service_name,
+        })
+        .from(credential_record)
+        .where(eq(credential_record.user_id, userId))
+        .orderBy(desc(credential_record.id)),
+      db
+        .select({
+          id: document_record.id,
+          expires_at: document_record.expires_at,
+          masked_number: document_record.masked_number,
+          name_on_document: document_record.name_on_document,
+          document_type: document_record.document_type,
+          metadata: document_record.metadata,
+        })
+        .from(document_record)
+        .where(eq(document_record.user_id, userId))
+        .orderBy(desc(document_record.id)),
+      db
+        .select({ feature_key: dashboard_favorite.feature_key })
+        .from(dashboard_favorite)
+        .where(eq(dashboard_favorite.user_id, userId)),
     ]);
 
     const expiringDocumentsSoon = documents.filter(
       (doc) => doc.expires_at && doc.expires_at >= now && doc.expires_at <= soonCutoff,
     );
 
-    const favoriteRows = await prisma.$queryRaw<FavoriteRow[]>`
-      select feature_key
-      from public.dashboard_favorite
-      where user_id = ${userId}::uuid
-    `;
     const favoriteKeys = createFavoriteKeySet(favoriteRows);
 
     const expiringCardsSoon = cards.filter((card) => {

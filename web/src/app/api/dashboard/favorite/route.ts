@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { desc, eq, and } from 'drizzle-orm';
 
 import {
   apiErrorResponse,
@@ -7,16 +8,16 @@ import {
   withUserRouteContext,
 } from '@/app/api/shared/owned-route';
 import { normalizeFavoriteKey, type FavoriteRow } from '@/app/api/dashboard/shared';
+import { dashboard_favorite } from '@/db/schema';
 
 export async function GET() {
-  return withUserRouteContext(async ({ userId, prisma }) => {
+  return withUserRouteContext(async ({ userId, db }) => {
     try {
-      const rows = await prisma.$queryRaw<FavoriteRow[]>`
-        select feature_key
-        from public.dashboard_favorite
-        where user_id = ${userId}::uuid
-        order by updated_at desc
-      `;
+      const rows = await db
+        .select({ feature_key: dashboard_favorite.feature_key })
+        .from(dashboard_favorite)
+        .where(eq(dashboard_favorite.user_id, userId))
+        .orderBy(desc(dashboard_favorite.updated_at));
 
       return NextResponse.json({ data: rows.map((row) => row.feature_key) });
     } catch {
@@ -27,7 +28,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  return withUserRouteContext(async ({ userId, prisma }) => {
+  return withUserRouteContext(async ({ userId, db }) => {
     const payloadOrResponse = await parseJsonBody<{
       key?: string;
       active?: boolean;
@@ -46,18 +47,22 @@ export async function POST(request: Request) {
 
     try {
       if (active) {
-        await prisma.$executeRaw`
-          insert into public.dashboard_favorite (user_id, feature_key)
-          values (${userId}::uuid, ${key})
-          on conflict (user_id, feature_key)
-          do update set updated_at = timezone('utc'::text, now())
-        `;
+        // Upsert: insert or update if exists
+        await db
+          .insert(dashboard_favorite)
+          .values({
+            user_id: userId,
+            feature_key: key,
+            updated_at: new Date(),
+          })
+          .onConflictDoUpdate({
+            target: [dashboard_favorite.user_id, dashboard_favorite.feature_key],
+            set: { updated_at: new Date() },
+          });
       } else {
-        await prisma.$executeRaw`
-          delete from public.dashboard_favorite
-          where user_id = ${userId}::uuid
-            and feature_key = ${key}
-        `;
+        await db
+          .delete(dashboard_favorite)
+          .where(and(eq(dashboard_favorite.user_id, userId), eq(dashboard_favorite.feature_key, key)));
       }
 
       return NextResponse.json({ success: true });

@@ -3,11 +3,11 @@ import { redirect } from 'next/navigation';
 import { DashboardOverview } from '@/components/dashboard/dashboard-overview';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { serverApiGet } from '@/lib/api/server';
-import { getServerSupabaseUser } from '@/lib/supabase/server-auth';
+import { getAuthenticatedUser } from '@/lib/auth/server';
 import type { DashboardData } from '@/models/dashboard';
 
 export default async function Page() {
-  const { user } = await getServerSupabaseUser();
+  const user = await getAuthenticatedUser();
 
   if (!user) {
     redirect('/auth');

@@ -96,7 +96,7 @@ export function CardVault({ initialCards, initialError }: CardVaultProps) {
     return (
       <CardVaultEmptyState
         title='No cards found'
-        description='Add rows in Supabase and ensure your SELECT policy allows access.'
+        description='Add a card using the Add button to get started.'
         footerText='Your wallet is empty. Tap Add card to create your first card.'
       />
     );

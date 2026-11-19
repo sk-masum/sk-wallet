@@ -90,7 +90,7 @@ export function CardNumberInput({
         autoComplete='cc-number'
         minLength={13}
         maxLength={maxLength}
-        pattern='[0-9\\s-]{13,39}'
+        pattern='[0-9 \-]{13,39}'
         value={displayValue}
         onChange={(event) => {
           const formattedValue = formatCardNumber(event.target.value, network);

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { Prisma } from '@/generated/prisma';
+import { randomUUID } from 'crypto';
+import { eq } from 'drizzle-orm';
+import { document_record } from '@/db/schema';
 
 import {
   apiErrorResponse,
@@ -26,29 +28,37 @@ import {
   validateDocumentFormFields,
 } from '@/utils/document/validation';
 
-function getDocumentWriteErrorMessage(error: { code?: string; message: string }) {
-  if (error.code === 'P2002') {
+function getDocumentWriteErrorMessage(error: Error | { message: string }) {
+  const message = error.message || String(error);
+  if (message.includes('UNIQUE constraint failed')) {
     return 'This document number is already registered.';
   }
 
-  return error.message;
+  return message;
 }
 
 export async function GET() {
-  return withUserRouteContext(async ({ userId, prisma }) => {
-    const data = await prisma.document_record.findMany({
-      where: {
-        user_id: userId,
-      },
-      select: documentListSelect,
-    });
+  return withUserRouteContext(async ({ userId, db }) => {
+    const data = await db
+      .select({
+        id: document_record.id,
+        user_id: document_record.user_id,
+        document_type: document_record.document_type,
+        masked_number: document_record.masked_number,
+        name_on_document: document_record.name_on_document,
+        category: document_record.category,
+        created_at: document_record.created_at,
+        updated_at: document_record.updated_at,
+      })
+      .from(document_record)
+      .where(eq(document_record.user_id, userId));
 
     return NextResponse.json({ data: data ?? [] });
   });
 }
 
 export async function POST(request: Request) {
-  return withUserRouteContext(async ({ userId, prisma }) => {
+  return withUserRouteContext(async ({ userId, db }) => {
     const payloadOrResponse = await parseJsonBody<DocumentFormPayload>(request);
     if (payloadOrResponse instanceof NextResponse) {
       return payloadOrResponse;
@@ -105,8 +115,11 @@ export async function POST(request: Request) {
     const metadata = buildDocumentMetadataForCreate(payload.metadata, normalizedInput);
 
     try {
-      const data = await prisma.document_record.create({
-        data: {
+      const documentId = randomUUID();
+      const data = await db
+        .insert(document_record)
+        .values({
+          id: documentId,
           user_id: userId,
           document_type: storedType,
           document_number_token: tokenizedNumber,
@@ -117,21 +130,20 @@ export async function POST(request: Request) {
           category: storedCategory,
           metadata:
             Object.keys(metadata).length > 0
-              ? (metadata as Prisma.InputJsonValue)
-              : Prisma.JsonNull,
-        },
-        select: {
-          id: true,
-          document_type: true,
-          masked_number: true,
-          category: true,
-          updated_at: true,
-        },
-      });
+              ? JSON.stringify(metadata)
+              : null,
+        })
+        .returning({
+          id: document_record.id,
+          document_type: document_record.document_type,
+          masked_number: document_record.masked_number,
+          category: document_record.category,
+          updated_at: document_record.updated_at,
+        });
 
-      return NextResponse.json({ success: true, data });
+      return NextResponse.json({ success: true, data: data[0] });
     } catch (error) {
-      const message = getDocumentWriteErrorMessage(error as { code?: string; message: string });
+      const message = getDocumentWriteErrorMessage(error as Error);
       return apiErrorResponse(message, 500);
     }
   });

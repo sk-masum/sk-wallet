@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
+import { eq, and } from 'drizzle-orm';
+import { credential_record } from '@/db/schema';
 
-import { isCredentialTypeCode } from '@/constants/credential/types';
 import {
   apiErrorResponse,
   badRequestResponse,
@@ -19,36 +20,52 @@ import {
 } from '@/app/api/credential/shared';
 import type { CredentialFormPayload, CredentialTypeCode } from '@/models/credential';
 import { validateCredentialFormFields } from '@/utils/credential/validation';
+import { isCredentialTypeCode } from '@/constants/credential/types';
 
-function getCredentialWriteErrorMessage(error: { code?: string; message: string }) {
-  if (error.code === 'P2025') {
+function getCredentialWriteErrorMessage(error: Error | { message: string }) {
+  const message = error.message || String(error);
+  if (message.includes('no rows') || message.includes('not found')) {
     return 'Credential not found';
   }
 
-  if (error.code === 'P2002') {
+  if (message.includes('UNIQUE constraint failed')) {
     return 'A credential with the same type, service, and identifier already exists.';
   }
 
-  return error.message;
+  return message;
 }
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
-  return withOwnedRouteContext(context.params, async ({ id, userId, prisma }) => {
-    const data = await prisma.credential_record.findFirst({
-      where: { id, user_id: userId },
-      select: credentialPublicSelect,
-    });
+  return withOwnedRouteContext(context.params, async ({ id, userId, db }) => {
+    const data = await db
+      .select({
+        id: credential_record.id,
+        user_id: credential_record.user_id,
+        credential_type: credential_record.credential_type,
+        service_name: credential_record.service_name,
+        identifier: credential_record.identifier,
+        masked_secret: credential_record.masked_secret,
+        secret_last4: credential_record.secret_last4,
+        url: credential_record.url,
+        notes: credential_record.notes,
+        metadata: credential_record.metadata,
+        created_at: credential_record.created_at,
+        updated_at: credential_record.updated_at,
+      })
+      .from(credential_record)
+      .where(and(eq(credential_record.id, id), eq(credential_record.user_id, userId)))
+      .limit(1);
 
-    if (!data) {
+    if (!data || data.length === 0) {
       return ownedEntityNotFoundResponse('Credential');
     }
 
-    return NextResponse.json({ data });
+    return NextResponse.json({ data: data[0] });
   });
 }
 
 async function updateCredential(request: Request, context: { params: Promise<{ id: string }> }) {
-  return withOwnedRouteContext(context.params, async ({ id, userId, prisma }) => {
+  return withOwnedRouteContext(context.params, async ({ id, userId, db }) => {
     const payloadOrResponse = await parseJsonBody<CredentialFormPayload>(request);
     if (payloadOrResponse instanceof NextResponse) {
       return payloadOrResponse;
@@ -66,18 +83,20 @@ async function updateCredential(request: Request, context: { params: Promise<{ i
       return badRequestResponse('Unsupported credential type');
     }
 
-    const existing = await prisma.credential_record.findFirst({
-      where: { id, user_id: userId },
-      select: {
-        id: true,
-        secret_token: true,
-        secret_hash: true,
-        secret_last4: true,
-        masked_secret: true,
-      },
-    });
+    const existing = await db
+      .select({
+        id: credential_record.id,
+        secret_token: credential_record.secret_token,
+        secret_hash: credential_record.secret_hash,
+        secret_last4: credential_record.secret_last4,
+        masked_secret: credential_record.masked_secret,
+        user_id: credential_record.user_id,
+      })
+      .from(credential_record)
+      .where(and(eq(credential_record.id, id), eq(credential_record.user_id, userId)))
+      .limit(1);
 
-    if (!existing) {
+    if (!existing || existing.length === 0) {
       return ownedEntityNotFoundResponse('Credential');
     }
 
@@ -85,10 +104,10 @@ async function updateCredential(request: Request, context: { params: Promise<{ i
       normalizedInput,
       normalizedInput.type as CredentialTypeCode,
       {
-        secretToken: existing.secret_token,
-        secretHash: existing.secret_hash,
-        secretLast4: existing.secret_last4,
-        maskedSecret: existing.masked_secret,
+        secretToken: existing[0].secret_token,
+        secretHash: existing[0].secret_hash,
+        secretLast4: existing[0].secret_last4,
+        maskedSecret: existing[0].masked_secret,
       },
     );
     if (!secretPreparation.ok) {
@@ -96,26 +115,43 @@ async function updateCredential(request: Request, context: { params: Promise<{ i
     }
 
     try {
-      const data = await prisma.credential_record.update({
-        where: { id },
-        data: {
+      const data = await db
+        .update(credential_record)
+        .set({
           ...buildCredentialCommonWriteData(normalizedInput),
           secret_token: secretPreparation.data.secretToken,
           secret_hash: secretPreparation.data.secretHash,
           secret_last4: secretPreparation.data.secretLast4,
           masked_secret: secretPreparation.data.maskedSecret,
-        },
-        select: credentialPublicSelect,
-      });
+        })
+        .where(eq(credential_record.id, id))
+        .returning({
+          id: credential_record.id,
+          user_id: credential_record.user_id,
+          credential_type: credential_record.credential_type,
+          service_name: credential_record.service_name,
+          identifier: credential_record.identifier,
+          masked_secret: credential_record.masked_secret,
+          secret_last4: credential_record.secret_last4,
+          url: credential_record.url,
+          notes: credential_record.notes,
+          metadata: credential_record.metadata,
+          created_at: credential_record.created_at,
+          updated_at: credential_record.updated_at,
+        });
 
-      if (data.user_id !== userId) {
+      if (!data || data.length === 0) {
         return ownedEntityNotFoundResponse('Credential');
       }
 
-      return NextResponse.json({ success: true, data });
+      if (data[0].user_id !== userId) {
+        return ownedEntityNotFoundResponse('Credential');
+      }
+
+      return NextResponse.json({ success: true, data: data[0] });
     } catch (error) {
-      const message = getCredentialWriteErrorMessage(error as { code?: string; message: string });
-      const status = (error as { code?: string }).code === 'P2025' ? 404 : 500;
+      const message = getCredentialWriteErrorMessage(error as Error);
+      const status = message.includes('not found') ? 404 : 500;
       return apiErrorResponse(message, status);
     }
   });
@@ -130,18 +166,23 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 }
 
 export async function DELETE(_request: Request, context: { params: Promise<{ id: string }> }) {
-  return withOwnedRouteContext(context.params, async ({ id, userId, prisma }) => {
+  return withOwnedRouteContext(context.params, async ({ id, userId, db }) => {
     return deleteOwnedEntityById({
       id,
       userId,
       entityLabel: 'Credential',
       findOwnedById: (recordId, ownerId) =>
-        prisma.credential_record.findFirst({
-          where: { id: recordId, user_id: ownerId },
-          select: { id: true },
-        }),
+        db
+          .select({ id: credential_record.id })
+          .from(credential_record)
+          .where(and(eq(credential_record.id, recordId), eq(credential_record.user_id, ownerId)))
+          .limit(1)
+          .then((data) => (data.length > 0 ? data[0] : null)),
       deleteById: (recordId) =>
-        prisma.credential_record.delete({ where: { id: recordId } }).then(() => undefined),
+        db
+          .delete(credential_record)
+          .where(eq(credential_record.id, recordId))
+          .then(() => undefined),
     });
   });
 }

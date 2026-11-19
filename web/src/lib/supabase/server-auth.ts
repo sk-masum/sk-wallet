@@ -1,16 +1,12 @@
-import { cookies } from 'next/headers';
-
-import { createClient } from '@/lib/supabase/server';
+import { getSession } from '@/lib/auth/server';
 
 export async function getServerSupabaseUser() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const session = await getSession();
+  const user = session?.user && session.user.id
+    ? { id: session.user.id, email: session.user.email, name: session.user.name }
+    : null;
 
   return {
-    supabase,
-    user: user ?? null,
+    user,
   };
 }

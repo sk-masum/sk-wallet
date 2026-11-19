@@ -6,16 +6,6 @@ declare global {
 }
 
 function createPrismaClient() {
-  const databaseUrl = process.env.DATABASE_URL ?? '';
-  const isSupabaseDirect =
-    databaseUrl.includes('.supabase.co:5432') && !databaseUrl.includes('.pooler.supabase.com:6543');
-
-  if (isSupabaseDirect) {
-    console.warn(
-      '[prisma] DATABASE_URL appears to be a direct Supabase host (:5432). In serverless, use Supavisor pooler (:6543) with ?pgbouncer=true&connection_limit=1 to avoid connection exhaustion.',
-    );
-  }
-
   return new PrismaClient();
 }
 

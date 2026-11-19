@@ -32,7 +32,7 @@ export default function AuthPage() {
       const { error: signInError } = await signInWithEmailPassword(email, password);
 
       if (signInError) {
-        setError(signInError.message);
+        setError(signInError as string);
         return;
       }
 
@@ -137,12 +137,23 @@ export default function AuthPage() {
               </p>
             </div>
 
-            <Link
-              href='/'
-              className='inline-flex text-xs font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline'
-            >
-              Back to home
-            </Link>
+            <div className='space-y-2 text-center text-sm text-muted-foreground'>
+              <p>
+                Don't have an account?{' '}
+                <Link
+                  href='/signup'
+                  className='font-medium text-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline'
+                >
+                  Sign up
+                </Link>
+              </p>
+              <Link
+                href='/'
+                className='inline-flex text-xs font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline'
+              >
+                Back to home
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </div>

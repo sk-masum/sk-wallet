@@ -1,31 +1,39 @@
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { signIn, signOut, useSession } from 'next-auth/react';
 
-function getBrowserAuth() {
-  return createSupabaseBrowserClient().auth;
-}
-
-export async function getBrowserUser() {
-  const {
-    data: { user },
-  } = await getBrowserAuth().getUser();
-
-  return user ?? null;
+export function useBrowserUser() {
+  const { data: session, status } = useSession();
+  return {
+    user: session?.user ?? null,
+    isLoading: status === 'loading',
+  };
 }
 
 export function signInWithEmailPassword(email: string, password: string) {
-  return getBrowserAuth().signInWithPassword({ email, password });
+  return signIn('credentials', { email, password, redirect: false });
 }
 
 export function signUpWithEmailPassword(email: string, password: string) {
-  return getBrowserAuth().signUp({ email, password });
+  // For sign up, you'll need a dedicated endpoint
+  return fetch('/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  }).then((res) => res.json());
 }
 
-export function updateBrowserUser(
-  attributes: Parameters<ReturnType<typeof getBrowserAuth>['updateUser']>[0],
-) {
-  return getBrowserAuth().updateUser(attributes);
+export function updateBrowserUser(attributes: { email?: string; password?: string }) {
+  // NextAuth doesn't have built-in user update via browser
+  // You'll need a dedicated endpoint
+  if (attributes.email || attributes.password) {
+    return fetch('/api/user/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(attributes),
+    }).then((res) => res.json());
+  }
+  return Promise.resolve({});
 }
 
 export function signOutBrowserSession() {
-  return getBrowserAuth().signOut({ scope: 'local' });
+  return signOut({ redirect: false });
 }

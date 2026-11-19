@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { Prisma } from '@/generated/prisma';
+import { eq, and } from 'drizzle-orm';
+import { document_record } from '@/db/schema';
 
 import {
   apiErrorResponse,
@@ -37,35 +38,51 @@ type DocumentUpdatePayload = {
   }>;
 };
 
-function getDocumentWriteErrorMessage(error: { code?: string; message: string }) {
-  if (error.code === 'P2025') {
+function getDocumentWriteErrorMessage(error: Error | { message: string }) {
+  const message = error.message || String(error);
+  if (message.includes('no rows') || message.includes('not found')) {
     return 'Document not found';
   }
 
-  return error.message;
+  return message;
 }
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
-  return withOwnedRouteContext(context.params, async ({ id, userId, prisma }) => {
-    const data = await prisma.document_record.findFirst({
-      where: { id, user_id: userId },
-      select: documentDetailSelectWithToken,
-    });
+  return withOwnedRouteContext(context.params, async ({ id, userId, db }) => {
+    const data = await db
+      .select({
+        id: document_record.id,
+        user_id: document_record.user_id,
+        document_type: document_record.document_type,
+        masked_number: document_record.masked_number,
+        document_number_last4: document_record.document_number_last4,
+        name_on_document: document_record.name_on_document,
+        category: document_record.category,
+        metadata: document_record.metadata,
+        verified_at: document_record.verified_at,
+        expires_at: document_record.expires_at,
+        created_at: document_record.created_at,
+        updated_at: document_record.updated_at,
+        document_number_token: document_record.document_number_token,
+      })
+      .from(document_record)
+      .where(and(eq(document_record.id, id), eq(document_record.user_id, userId)))
+      .limit(1);
 
-    if (!data) {
+    if (!data || data.length === 0) {
       return ownedEntityNotFoundResponse('Document');
     }
 
     let documentNumber = '';
     try {
-      documentNumber = detokenizeDocumentNumber(data.document_number_token);
+      documentNumber = detokenizeDocumentNumber(data[0].document_number_token);
     } catch {
       return serverErrorResponse('Failed to decode document number');
     }
 
     return NextResponse.json({
       data: {
-        ...data,
+        ...data[0],
         document_number: documentNumber,
         document_number_token: undefined,
       },
@@ -74,19 +91,24 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
 }
 
 export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
-  return withOwnedRouteContext(context.params, async ({ id, userId, prisma }) => {
+  return withOwnedRouteContext(context.params, async ({ id, userId, db }) => {
     const payloadOrResponse = await parseJsonBody<DocumentUpdatePayload>(request);
     if (payloadOrResponse instanceof NextResponse) {
       return payloadOrResponse;
     }
     const payload = payloadOrResponse;
 
-    const existing = await prisma.document_record.findFirst({
-      where: { id, user_id: userId },
-      select: { id: true, document_type: true, metadata: true },
-    });
+    const existing = await db
+      .select({
+        id: document_record.id,
+        document_type: document_record.document_type,
+        metadata: document_record.metadata,
+      })
+      .from(document_record)
+      .where(and(eq(document_record.id, id), eq(document_record.user_id, userId)))
+      .limit(1);
 
-    if (!existing) {
+    if (!existing || existing.length === 0) {
       return ownedEntityNotFoundResponse('Document');
     }
 
@@ -108,7 +130,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
       return badRequestResponse(invalidDateMessage);
     }
 
-    const existingType = String(existing.document_type ?? '').trim();
+    const existingType = String(existing[0].document_type ?? '').trim();
 
     let nextDocumentType = '';
     let nextCategory = '';
@@ -148,46 +170,68 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
       nextCategory = 'other';
     }
 
-    const metadata = buildDocumentMetadataForUpdate(existing.metadata, normalizedInput);
+    const metadata = buildDocumentMetadataForUpdate(existing[0].metadata, normalizedInput);
 
     try {
-      const data = await prisma.document_record.update({
-        where: { id },
-        data: {
+      const data = await db
+        .update(document_record)
+        .set({
           ...(nextDocumentType ? { document_type: nextDocumentType } : {}),
           name_on_document: normalizedInput.nameOnDocument || null,
           ...(nextCategory ? { category: nextCategory } : {}),
-          metadata: metadata ? (metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
-        },
-        select: documentListSelect,
-      });
+          metadata: metadata ? JSON.stringify(metadata) : null,
+        })
+        .where(eq(document_record.id, id))
+        .returning({
+          id: document_record.id,
+          user_id: document_record.user_id,
+          document_type: document_record.document_type,
+          masked_number: document_record.masked_number,
+          document_number_last4: document_record.document_number_last4,
+          name_on_document: document_record.name_on_document,
+          category: document_record.category,
+          metadata: document_record.metadata,
+          verified_at: document_record.verified_at,
+          expires_at: document_record.expires_at,
+          created_at: document_record.created_at,
+          updated_at: document_record.updated_at,
+        });
 
-      if (data.user_id !== userId) {
+      if (!data || data.length === 0) {
         return ownedEntityNotFoundResponse('Document');
       }
 
-      return NextResponse.json({ success: true, data });
+      if (data[0].user_id !== userId) {
+        return ownedEntityNotFoundResponse('Document');
+      }
+
+      return NextResponse.json({ success: true, data: data[0] });
     } catch (error) {
-      const message = getDocumentWriteErrorMessage(error as { code?: string; message: string });
-      const status = (error as { code?: string }).code === 'P2025' ? 404 : 500;
+      const message = getDocumentWriteErrorMessage(error as Error);
+      const status = message.includes('not found') ? 404 : 500;
       return apiErrorResponse(message, status);
     }
   });
 }
 
 export async function DELETE(_request: Request, context: { params: Promise<{ id: string }> }) {
-  return withOwnedRouteContext(context.params, async ({ id, userId, prisma }) => {
+  return withOwnedRouteContext(context.params, async ({ id, userId, db }) => {
     return deleteOwnedEntityById({
       id,
       userId,
       entityLabel: 'Document',
       findOwnedById: (recordId, ownerId) =>
-        prisma.document_record.findFirst({
-          where: { id: recordId, user_id: ownerId },
-          select: { id: true },
-        }),
+        db
+          .select({ id: document_record.id })
+          .from(document_record)
+          .where(and(eq(document_record.id, recordId), eq(document_record.user_id, ownerId)))
+          .limit(1)
+          .then((data) => (data.length > 0 ? data[0] : null)),
       deleteById: (recordId) =>
-        prisma.document_record.delete({ where: { id: recordId } }).then(() => undefined),
+        db
+          .delete(document_record)
+          .where(eq(document_record.id, recordId))
+          .then(() => undefined),
     });
   });
 }

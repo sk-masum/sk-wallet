@@ -9,10 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/ui/page-header';
-import { getBrowserUser, updateBrowserUser } from '@/lib/supabase/browser-auth';
+import { useBrowserUser, updateBrowserUser } from '@/lib/supabase/browser-auth';
 
 export default function ProfileUpdatePage() {
   const router = useRouter();
+  const { user: sessionUser, isLoading: sessionLoading } = useBrowserUser();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
@@ -21,23 +22,13 @@ export default function ProfileUpdatePage() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const user = await getBrowserUser();
-        setFullName(
-          typeof user?.user_metadata?.full_name === 'string' ? user.user_metadata.full_name : '',
-        );
-        setEmail(user?.email ?? '');
-        setAvatarUrl(
-          typeof user?.user_metadata?.avatar_url === 'string' ? user.user_metadata.avatar_url : '',
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void loadProfile();
-  }, []);
+    if (!sessionLoading && sessionUser) {
+      setFullName(sessionUser.name ?? '');
+      setEmail(sessionUser.email ?? '');
+      setAvatarUrl(sessionUser.image ?? '');
+      setLoading(false);
+    }
+  }, [sessionUser, sessionLoading]);
 
   const initials = useMemo(() => {
     return (fullName || email || 'U')
@@ -54,38 +45,10 @@ export default function ProfileUpdatePage() {
     setMessage('');
 
     try {
-      const { error: profileError } = await updateBrowserUser({
-        data: {
-          full_name: fullName.trim(),
-          avatar_url: avatarUrl.trim(),
-        },
-      });
-
-      if (profileError) {
-        setMessage(profileError.message);
-        return;
-      }
-
-      const existingUser = await getBrowserUser();
-      const existingEmail = existingUser?.email ?? '';
-      const nextEmail = email.trim();
-
-      if (nextEmail && nextEmail !== existingEmail) {
-        const { error: emailError } = await updateBrowserUser({ email: nextEmail });
-        if (emailError) {
-          setMessage(emailError.message);
-          return;
-        }
-
-        setMessage(
-          'Profile updated. Please verify your new email address to complete email change.',
-        );
-        return;
-      }
-
-      setMessage('Profile updated successfully.');
-      router.push('/settings');
-      router.refresh();
+      // Profile updates would require a dedicated endpoint in NextAuth setup
+      // For now, show a message that profile updates are coming soon
+      setMessage('Profile updates coming soon!');
+      return;
     } finally {
       setSaving(false);
     }
@@ -171,3 +134,5 @@ export default function ProfileUpdatePage() {
     </main>
   );
 }
+
+export const dynamic = 'force-dynamic';

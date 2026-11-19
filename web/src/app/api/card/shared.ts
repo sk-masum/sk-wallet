@@ -6,6 +6,8 @@ import {
   tokenizeCardCvv,
   tokenizeCardNumber,
 } from '@/lib/security/card-token';
+import { card_provider } from '@/db/schema';
+import { eq, ilike } from 'drizzle-orm';
 
 export type CardWritePayload = {
   color_name?: string;
@@ -27,9 +29,9 @@ export type CardWritePayload = {
 
 export type CardWriteData = {
   color_name: string | null;
-  tags: string[];
+  tags: string;
   card_name: string | null;
-  provider_id: bigint | null;
+  provider_id: number | null;
   credit_limit: number | null;
   billing_date: number | null;
   payment_date: number | null;
@@ -76,9 +78,9 @@ export function decodeCvvFieldOrEmpty(value: string) {
 }
 
 type CardResponseSource = {
-  id: bigint | number;
-  provider_id: bigint | number | null;
-  credit_limit: { toNumber: () => number } | null;
+  id: number | bigint;
+  provider_id: number | bigint | null;
+  credit_limit: number | null;
   number: string;
   cvv: string;
   card_provider?: { name: string } | null;
@@ -91,7 +93,7 @@ export function mapCardForResponse(card: CardResponseSource) {
     id: toSafeNumber(card.id),
     provider_id: toSafeNumber(card.provider_id),
     provider: card.card_provider?.name ?? null,
-    credit_limit: card.credit_limit ? card.credit_limit.toNumber() : null,
+    credit_limit: card.credit_limit,
     number: decodeCardFieldOrEmpty(card.number),
     cvv: decodeCvvFieldOrEmpty(card.cvv),
     card_provider: undefined,
@@ -99,7 +101,7 @@ export function mapCardForResponse(card: CardResponseSource) {
 }
 
 export async function resolveOrCreateProvider(
-  prisma: UserRouteContext['prisma'],
+  db: UserRouteContext['db'],
   rawProvider?: string | null,
 ) {
   const provider = String(rawProvider ?? '')
@@ -109,63 +111,88 @@ export async function resolveOrCreateProvider(
   if (!provider) {
     return {
       provider,
-      providerId: null as bigint | null,
+      providerId: null as number | null,
       error: null as string | null,
     };
   }
 
-  const existingProvider = await prisma.card_provider.findFirst({
-    where: {
-      name: {
-        equals: provider,
-        mode: 'insensitive',
-      },
-    },
-    select: { id: true, name: true },
-  });
-
-  if (existingProvider) {
-    return {
-      provider: existingProvider.name,
-      providerId: existingProvider.id,
-      error: null,
-    };
-  }
-
   try {
-    const createdProvider = await prisma.card_provider.create({
-      data: { name: provider },
-      select: { id: true, name: true },
-    });
+    // For SQLite compatibility, search all providers and do case-insensitive comparison in memory
+    const allProviders = await db.select({ id: card_provider.id, name: card_provider.name }).from(card_provider);
 
-    return {
-      provider: createdProvider.name,
-      providerId: createdProvider.id,
-      error: null,
-    };
-  } catch {
-    const resolvedProvider = await prisma.card_provider.findFirst({
-      where: {
-        name: {
-          equals: provider,
-          mode: 'insensitive',
-        },
-      },
-      select: { id: true, name: true },
-    });
+    const existingProvider = allProviders.find(
+      (p) => p.name && p.name.toLowerCase() === provider.toLowerCase(),
+    );
 
-    if (!resolvedProvider) {
+    if (existingProvider) {
+      console.log('Found existing provider:', existingProvider);
       return {
-        provider,
-        providerId: null,
-        error: 'Failed to resolve provider after create',
+        provider: existingProvider.name,
+        providerId: existingProvider.id,
+        error: null,
       };
     }
 
+    // Provider doesn't exist, try to create it
+    console.log('Creating new provider:', provider);
+    
+    try {
+      await db
+        .insert(card_provider)
+        .values({ name: provider });
+      
+      console.log('Provider inserted, now retrieving it');
+      
+      // After insertion, fetch it back to get the ID
+      const insertedProviders = await db
+        .select({ id: card_provider.id, name: card_provider.name })
+        .from(card_provider)
+        .where(eq(card_provider.name, provider));
+      
+      if (insertedProviders.length === 0) {
+        throw new Error(`Provider "${provider}" was inserted but could not be retrieved`);
+      }
+      
+      const createdProvider = insertedProviders[0];
+      console.log('Successfully created and retrieved provider:', createdProvider);
+      return {
+        provider: createdProvider.name,
+        providerId: createdProvider.id,
+        error: null,
+      };
+    } catch (insertError) {
+      console.error('Error inserting provider:', insertError);
+      throw insertError;
+    }
+  } catch (error) {
+    console.error('Error during provider creation/lookup:', error);
+    
+    // Try finding again after race condition or failed insertion
+    try {
+      const retryProviders = await db.select({ id: card_provider.id, name: card_provider.name }).from(card_provider);
+
+      const retryProvider = retryProviders.find(
+        (p) => p.name && p.name.toLowerCase() === provider.toLowerCase(),
+      );
+
+      if (retryProvider) {
+        console.log('Found provider after retry:', retryProvider);
+        return {
+          provider: retryProvider.name,
+          providerId: retryProvider.id,
+          error: null,
+        };
+      }
+      
+      console.error('Could not find provider after retry. Available providers:', retryProviders.map(p => p.name));
+    } catch (retryError) {
+      console.error('Error during provider retry lookup:', retryError);
+    }
+
     return {
-      provider: resolvedProvider.name,
-      providerId: resolvedProvider.id,
-      error: null,
+      provider,
+      providerId: null,
+      error: 'Failed to resolve provider after create',
     };
   }
 }
@@ -189,7 +216,7 @@ function normalizeDatePart(value: number | null | undefined) {
 
 export function buildCardWriteData(
   payload: CardWritePayload,
-  providerId: bigint | null,
+  providerId: number | null,
   tokenizedNumber: string,
   tokenizedCvv: string,
   mode: 'create' | 'update',
@@ -200,7 +227,7 @@ export function buildCardWriteData(
 
   const data: CardWriteData = {
     color_name: payload.color_name?.trim() || null,
-    tags: sanitizeTags(payload.tags),
+    tags: JSON.stringify(sanitizeTags(payload.tags)),
     card_name: payload.card_name?.trim() || null,
     provider_id: providerId,
     credit_limit:
@@ -230,7 +257,7 @@ export function buildCardWriteData(
 }
 
 export async function prepareCardWriteData(
-  prisma: UserRouteContext['prisma'],
+  db: UserRouteContext['db'],
   payload: CardWritePayload,
   mode: 'create' | 'update',
 ): Promise<CardWritePreparationResult> {
@@ -249,7 +276,7 @@ export async function prepareCardWriteData(
   }
 
   const { providerId, error: providerError } = await resolveOrCreateProvider(
-    prisma,
+    db,
     payload.provider,
   );
 

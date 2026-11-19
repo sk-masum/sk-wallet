@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { and, eq } from 'drizzle-orm';
+import { card } from '@/db/schema';
+import type { Db } from '@/db/client';
 
 import {
   apiErrorResponse,
@@ -6,7 +9,6 @@ import {
   ownedEntityNotFoundResponse,
   parseJsonBody,
   serverErrorResponse,
-  type UserRouteContext,
   withOwnedRouteContext,
 } from '@/app/api/shared/owned-route';
 import { isCardStatus } from '@/constants/card/status';
@@ -21,9 +23,9 @@ type Params = {
 };
 
 type OwnedCardRouteContext = {
-  cardId: bigint;
+  cardId: number;
   userId: string;
-  prisma: UserRouteContext['prisma'];
+  db: Db;
 };
 
 function cardNotFoundResponse() {
@@ -32,52 +34,52 @@ function cardNotFoundResponse() {
 
 function toCardIdOrNull(value: string) {
   try {
-    return BigInt(value);
+    return Number(value);
   } catch {
     return null;
   }
 }
 
 function findOwnedCardById(
-  prisma: OwnedCardRouteContext['prisma'],
-  cardId: bigint,
+  db: Db,
+  cardId: number,
   userId: string,
 ) {
-  return prisma.card.findFirst({
-    where: { id: cardId, owner_id: userId },
-    select: { id: true },
-  });
+  return db
+    .select({ id: card.id })
+    .from(card)
+    .where(and(eq(card.id, cardId), eq(card.owner_id, userId)))
+    .limit(1)
+    .then((data) => (data.length > 0 ? data[0] : null));
 }
 
 async function withOwnedCardRouteContext(
   paramsPromise: Promise<{ id: string }>,
   handler: (context: OwnedCardRouteContext) => Promise<Response> | Response,
 ) {
-  return withOwnedRouteContext(paramsPromise, async ({ id, userId, prisma }) => {
+  return withOwnedRouteContext(paramsPromise, async ({ id, userId, db }) => {
     const cardId = toCardIdOrNull(id);
     if (cardId === null) {
       return cardNotFoundResponse();
     }
 
-    return handler({ cardId, userId, prisma });
+    return handler({ cardId, userId, db });
   });
 }
 
-async function ensureOwnedCardExists({ cardId, userId, prisma }: OwnedCardRouteContext) {
-  const existing = await findOwnedCardById(prisma, cardId, userId);
+async function ensureOwnedCardExists({ cardId, userId, db }: OwnedCardRouteContext) {
+  const existing = await findOwnedCardById(db, cardId, userId);
   return Boolean(existing);
 }
 
 export async function GET(_request: Request, { params }: Params) {
-  return withOwnedCardRouteContext(params, async ({ cardId, userId, prisma }) => {
-    const data = await prisma.card.findFirst({
-      where: { id: cardId, owner_id: userId },
-      include: {
-        card_provider: {
-          select: { name: true },
-        },
-      },
-    });
+  return withOwnedCardRouteContext(params, async ({ cardId, userId, db }) => {
+    const data = await db
+      .select()
+      .from(card)
+      .where(and(eq(card.id, cardId), eq(card.owner_id, userId)))
+      .limit(1)
+      .then((result) => (result.length > 0 ? result[0] : null));
 
     if (!data) {
       return cardNotFoundResponse();
@@ -88,8 +90,8 @@ export async function GET(_request: Request, { params }: Params) {
 }
 
 export async function PUT(request: Request, { params }: Params) {
-  return withOwnedCardRouteContext(params, async ({ cardId, userId, prisma }) => {
-    if (!(await ensureOwnedCardExists({ cardId, userId, prisma }))) {
+  return withOwnedCardRouteContext(params, async ({ cardId, userId, db }) => {
+    if (!(await ensureOwnedCardExists({ cardId, userId, db }))) {
       return cardNotFoundResponse();
     }
 
@@ -99,7 +101,7 @@ export async function PUT(request: Request, { params }: Params) {
     }
     const payload = payloadOrResponse;
 
-    const writePreparation = await prepareCardWriteData(prisma, payload, 'update');
+    const writePreparation = await prepareCardWriteData(db, payload, 'update');
     if (!writePreparation.ok) {
       if (writePreparation.errorCode === 'TOKENIZATION') {
         return serverErrorResponse(writePreparation.message);
@@ -107,17 +109,17 @@ export async function PUT(request: Request, { params }: Params) {
       return apiErrorResponse(writePreparation.message, 500);
     }
 
-    await prisma.card.update({
-      where: { id: cardId },
-      data: writePreparation.writeData,
-    });
+    await db
+      .update(card)
+      .set(writePreparation.writeData)
+      .where(eq(card.id, cardId));
 
     return NextResponse.json({ success: true });
   });
 }
 
 export async function PATCH(request: Request, { params }: Params) {
-  return withOwnedCardRouteContext(params, async ({ cardId, userId, prisma }) => {
+  return withOwnedCardRouteContext(params, async ({ cardId, userId, db }) => {
     const payloadOrResponse = await parseJsonBody<{
       status?: string;
     }>(request);
@@ -134,26 +136,29 @@ export async function PATCH(request: Request, { params }: Params) {
       return badRequestResponse('Invalid card status');
     }
 
-    if (!(await ensureOwnedCardExists({ cardId, userId, prisma }))) {
+    if (!(await ensureOwnedCardExists({ cardId, userId, db }))) {
       return cardNotFoundResponse();
     }
 
-    await prisma.card.update({
-      where: { id: cardId },
-      data: { status: normalizedStatus },
-    });
+    await db
+      .update(card)
+      .set({ status: normalizedStatus })
+      .where(eq(card.id, cardId));
 
     return NextResponse.json({ success: true });
   });
 }
 
 export async function DELETE(_request: Request, { params }: Params) {
-  return withOwnedCardRouteContext(params, async ({ cardId, userId, prisma }) => {
-    if (!(await ensureOwnedCardExists({ cardId, userId, prisma }))) {
+  return withOwnedCardRouteContext(params, async ({ cardId, userId, db }) => {
+    if (!(await ensureOwnedCardExists({ cardId, userId, db }))) {
       return cardNotFoundResponse();
     }
 
-    await prisma.card.update({ where: { id: cardId }, data: { status: 'replaced' } });
+    await db
+      .update(card)
+      .set({ status: 'replaced' })
+      .where(eq(card.id, cardId));
 
     return NextResponse.json({ success: true });
   });

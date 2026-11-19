@@ -1,17 +1,18 @@
 import { NextResponse } from 'next/server';
 
-import { getRequiredPrismaClient } from '@/lib/prisma';
+import { getRequiredDb } from '@/db/client';
+import type { Db } from '@/db/client';
 import { getRouteSupabaseContext } from '@/lib/supabase/route-auth';
 
 export type OwnedRouteContext = {
   id: string;
   userId: string;
-  prisma: ReturnType<typeof getRequiredPrismaClient>;
+  db: Db;
 };
 
 export type UserRouteContext = {
   userId: string;
-  prisma: ReturnType<typeof getRequiredPrismaClient>;
+  db: Db;
 };
 
 type RouteResult = NextResponse | Response;
@@ -102,7 +103,7 @@ export async function resolveUserRouteContext(): Promise<UserRouteContext | Next
 
   return {
     userId: user.id,
-    prisma: getRequiredPrismaClient(),
+    db: getRequiredDb(),
   };
 }
 
@@ -119,7 +120,7 @@ export async function resolveOwnedRouteContext(
   return {
     id,
     userId: user.id,
-    prisma: getRequiredPrismaClient(),
+    db: getRequiredDb(),
   };
 }
 

@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import type { User } from '@supabase/supabase-js';
 
 import { BottomTabBar } from '@/components/ui/bottom-tab-bar';
 import { Button } from '@/components/ui/button';
@@ -32,12 +31,12 @@ import {
   registerBiometricCredential,
   unlockBiometricVault,
 } from '@/lib/biometric';
-import { getBrowserUser, signOutBrowserSession } from '@/lib/supabase/browser-auth';
+import { useBrowserUser, signOutBrowserSession } from '@/lib/supabase/browser-auth';
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [profile, setProfile] = useState<User | null>(null);
-  const [isProfileLoading, setIsProfileLoading] = useState(true);
+  const { user, isLoading: isProfileLoading } = useBrowserUser();
+  const [profile, setProfile] = useState<{ email?: string | null; name?: string | null } | null>(null);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [biometricSupported, setBiometricSupported] = useState(false);
   const [isBiometricBusy, setIsBiometricBusy] = useState(false);
@@ -46,17 +45,12 @@ export default function SettingsPage() {
   const [signOutError, setSignOutError] = useState<string>('');
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const user = await getBrowserUser();
-        setProfile(user);
-      } finally {
-        setIsProfileLoading(false);
-      }
-    };
+    if (!isProfileLoading && user) {
+      setProfile({ email: user.email, name: user.name });
+    }
+  }, [user, isProfileLoading]);
 
-    void fetchProfile();
-
+  useEffect(() => {
     const stored = localStorage.getItem(BIOMETRIC_STORAGE_KEY);
     setBiometricEnabled(stored === 'true');
 
@@ -72,17 +66,9 @@ export default function SettingsPage() {
     void checkSupport();
   }, []);
 
-  const fullName =
-    typeof profile?.user_metadata?.full_name === 'string' &&
-    profile.user_metadata.full_name.trim().length > 0
-      ? profile.user_metadata.full_name
-      : null;
+  const fullName = profile?.name ?? null;
   const email = profile?.email ?? null;
-  const avatarUrl =
-    typeof profile?.user_metadata?.avatar_url === 'string' &&
-    profile.user_metadata.avatar_url.trim().length > 0
-      ? profile.user_metadata.avatar_url
-      : null;
+  const avatarUrl = null;
   const initials = (fullName ?? email ?? 'U')
     .trim()
     .split(/\s+/)
@@ -187,16 +173,11 @@ export default function SettingsPage() {
     try {
       lockBiometricVault();
       sessionStorage.removeItem(BIOMETRIC_SESSION_UNLOCK_KEY);
-      const { error } = await signOutBrowserSession();
-
-      if (error) {
-        setSignOutError(error.message);
-        return;
-      }
+      await signOutBrowserSession();
 
       router.replace('/auth');
       router.refresh();
-    } catch {
+    } catch (err) {
       setSignOutError('Unable to sign out right now. Please try again.');
     } finally {
       setIsSigningOut(false);
@@ -406,3 +387,5 @@ export default function SettingsPage() {
     </main>
   );
 }
+
+export const dynamic = 'force-dynamic';

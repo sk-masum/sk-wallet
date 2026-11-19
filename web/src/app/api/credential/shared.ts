@@ -3,26 +3,27 @@ import { hashCredentialSecret } from '@/lib/security/credential-hash';
 import { tokenizeCredentialSecret } from '@/lib/security/credential-token';
 import type { CredentialFormPayload, CredentialTypeCode } from '@/models/credential';
 import { maskCredentialSecret, normalizeCredentialSecret } from '@/utils/credential/validation';
+import { credential_record } from '@/db/schema';
 
 export const credentialPublicSelect = {
-  id: true,
-  user_id: true,
-  credential_type: true,
-  service_name: true,
-  identifier: true,
-  masked_secret: true,
-  secret_last4: true,
-  url: true,
-  notes: true,
-  metadata: true,
-  created_at: true,
-  updated_at: true,
-} as const;
+  id: credential_record.id,
+  user_id: credential_record.user_id,
+  credential_type: credential_record.credential_type,
+  service_name: credential_record.service_name,
+  identifier: credential_record.identifier,
+  masked_secret: credential_record.masked_secret,
+  secret_last4: credential_record.secret_last4,
+  url: credential_record.url,
+  notes: credential_record.notes,
+  metadata: credential_record.metadata,
+  created_at: credential_record.created_at,
+  updated_at: credential_record.updated_at,
+};
 
 export const credentialSecretTokenSelect = {
-  id: true,
-  secret_token: true,
-} as const;
+  id: credential_record.id,
+  secret_token: credential_record.secret_token,
+};
 
 export type CredentialNormalizedWriteInput = {
   type: string;

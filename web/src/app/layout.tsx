@@ -1,5 +1,6 @@
 import './global.css';
 import { ThemeProvider } from '@/components/theme-provider';
+import { Providers } from '@/components/providers';
 import type { Metadata, Viewport } from 'next';
 import { Suspense } from 'react';
 import { ServiceWorkerRegister } from '@/components/pwa/sw-register';
@@ -209,15 +210,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className='ios-pwa-body'>
         <div className='ios-pwa-statusbar-bg' aria-hidden='true' />
         <ServiceWorkerRegister />
-        <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
-          <Suspense fallback={null}>
-            <QueryToastBridge />
-          </Suspense>
-          <AppToaster />
-          <BiometricGuard>
-            <div className='min-h-screen app-aurora-shell'>{children}</div>
-          </BiometricGuard>
-        </ThemeProvider>
+        <Providers>
+          <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
+            <Suspense fallback={null}>
+              <QueryToastBridge />
+            </Suspense>
+            <AppToaster />
+            <BiometricGuard>
+              <div className='min-h-screen app-aurora-shell'>{children}</div>
+            </BiometricGuard>
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
