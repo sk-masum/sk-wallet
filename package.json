@@ -69,6 +69,8 @@
     "@radix-ui/react-dialog": "^1.1.19",
     "@radix-ui/react-popover": "^1.1.19",
     "@radix-ui/react-select": "^2.2.6",
+    "@seakh/ui-core": "^0.0.3",
+    "@seakh/ui-react": "^0.0.0",
     "@serwist/next": "^9.0.9",
     "@serwist/turbopack": "^9.5.15",
     "bcryptjs": "^2.4.3",

@@ -7,6 +7,7 @@ import { ServiceWorkerRegister } from '@/components/pwa/sw-register';
 import { BiometricGuard } from '@/components/security/biometric-guard';
 import { AppToaster } from '@/components/ui/app-toaster';
 import { QueryToastBridge } from '@/components/ui/query-toast-bridge';
+import '@seakh/ui-core/styles.css';
 
 type IosSplashAsset = {
   media: string;
